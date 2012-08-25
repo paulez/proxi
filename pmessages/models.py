@@ -9,6 +9,7 @@ class ProxyMessage(models.Model):
     address = models.GenericIPAddressField()
     location = models.PointField()
     objects = models.GeoManager()
+    ref = models.ForeignKey('self', null=True)
     
     def __unicode__(self):
         return self.message
