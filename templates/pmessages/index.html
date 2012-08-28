@@ -1,0 +1,11 @@
+{% load url from future %}
+
+{% if all_messages %}
+    <ul>
+    {% for message in all_messages %}
+        <li><a href="{% url 'pmessages.views.detail' message.id %}">{{ message.message }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No message.</p>
+{% endif %}
