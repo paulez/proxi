@@ -8,7 +8,7 @@ class ProxyMessage(models.Model):
     # message content
     message = models.TextField()
     # creation date of the message
-    date = models.DateField(auto_now_add=True)
+    date = models.DateTimeField(auto_now_add=True)
     # ip address of the message sender
     address = models.GenericIPAddressField()
     # location of the message sender
