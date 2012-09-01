@@ -1,1 +1,2 @@
-{{ message.username }} - {{ message.date }} : {{ message.message }}
+{{ message.username }} - {{ message.date|date:"DATETIME_FORMAT" }} : {{ message.message }}
+
