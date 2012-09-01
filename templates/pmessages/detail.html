@@ -1,2 +1,6 @@
 {{ message.username }} - {{ message.date|date:"DATETIME_FORMAT" }} : {{ message.message }}
 
+<form action="{% url pmessages.views.add message.id %}" method="post">
+{% csrf_token %}
+{{ message_form.as_p }}
+<input type="submit" value="Reply">

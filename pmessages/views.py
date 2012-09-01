@@ -17,10 +17,11 @@ def index(request):
     return render_to_response('pmessages/index.html', {'all_messages': all_messages, 'message_form' : message_form}, context_instance=RequestContext(request))
     
 def detail(request, message_id):
-    m = get_object_or_404(ProxyMessage, pk=message_id) 
-    return render_to_response('pmessages/detail.html', {'message': m})
+    m = get_object_or_404(ProxyMessage, pk=message_id)
+    message_form = MessageForm()
+    return render_to_response('pmessages/detail.html', {'message': m, 'message_form' : message_form}, context_instance=RequestContext(request))
     
-def add(request):
+def add(request, message_id = None):
     if request.method == 'POST':
         form = MessageForm(request.POST)
         if form.is_valid():
@@ -29,6 +30,8 @@ def add(request):
             address = request.META['REMOTE_ADDR']
             g = GeoIP(city="/usr/share/GeoIP/GeoLiteCity.dat")
             location = g.geos(address)
-            m = ProxyMessage(username = username, message = message, address = address, location = location)
+            if message_id:
+                ref = get_object_or_404(ProxyMessage, pk=message_id)
+            m = ProxyMessage(username = username, message = message, address = address, location = location, ref = ref)
             m.save()
     return HttpResponseRedirect(reverse('pmessages.views.index'))
