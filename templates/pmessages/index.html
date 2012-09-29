@@ -1,6 +1,7 @@
 {% extends "pmessages/base.html" %}
 
 {% load url from future %}
+{% load humanize %}
 
 {% block content %}
 
@@ -19,7 +20,7 @@
     
     {% for message in all_messages %}
         <div>
-        {{ message.username }} - {{ message.date|date:"SHORT_DATETIME_FORMAT" }} : <a href="{% url 'pmessages.views.detail' message.id %}">{{ message.message }}</a>
+        {{ message.username }} - {{ message.date|naturaltime }} : <a href="{% url 'pmessages.views.detail' message.id %}">{{ message.message }}</a>
         </div>
     {% endfor %}
 {% else %}

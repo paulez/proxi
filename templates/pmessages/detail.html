@@ -1,8 +1,10 @@
 {% extends "pmessages/base.html" %}
 
+{% load humanize %}
+
 {% block content %}
 
-{{ message.username }} - {{ message.date|date:"DATETIME_FORMAT" }} : {{ message.message }}
+{{ message.username }} - {{ message.date|naturaltime }} : {{ message.message }}
 
 <form action="{% url pmessages.views.add message.id %}" method="post">
 {% csrf_token %}
