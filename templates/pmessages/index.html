@@ -1,16 +1,31 @@
+{% extends "pmessages/base.html" %}
+
 {% load url from future %}
 
+{% block content %}
+
+<div class="row-fluid">
+    <div class="span8 offset3">
+        <div>
+            <form action="{% url 'pmessages.views.add' %}" method="post">
+                {% csrf_token %}
+                {{ message_form.non_field_errors }}
+                <input id="id_username" type="text" name="username" maxlength="20" class="input-small" placeholder="Username"/>
+                <textarea id="id_message" rows="1" cols="80" name="message" placeholder="Your message..."></textarea>
+                <input type="submit" class="btn" value="Post">
+            </form>
+        </div>
 {% if all_messages %}
-    <ul>
+    
     {% for message in all_messages %}
-        <li>{{ message.username }} - {{ message.date|date:"SHORT_DATETIME_FORMAT" }} : <a href="{% url 'pmessages.views.detail' message.id %}">{{ message.message }}</a></li>
+        <div>
+        {{ message.username }} - {{ message.date|date:"SHORT_DATETIME_FORMAT" }} : <a href="{% url 'pmessages.views.detail' message.id %}">{{ message.message }}</a>
+        </div>
     {% endfor %}
-    </ul>
 {% else %}
     <p>No message.</p>
 {% endif %}
+    </div>
+</div>
 
-<form action="{% url 'pmessages.views.add' %}" method="post">
-{% csrf_token %}
-{{ message_form.as_p }}
-<input type="submit" value="Add">
+{% endblock %}
