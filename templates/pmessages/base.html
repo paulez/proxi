@@ -4,30 +4,30 @@
 <!DOCTYPE html>
 <html lang="fr">
   <head>
+    <meta charset="utf-8" />
     <title>Proxy</title>
     {% block css %}
     <link rel="stylesheet" type="text/css" media="all" href="{% static "bootstrap/css/bootstrap.css" %}" />
+    <link rel="stylesheet" type="text/css" media="all" href="{%static "css/base.css" %}" />
     {% endblock %}
     {% block js %}
     <script src="{% static "jquery/jquery-1.8.2.min.js" %}"></script>
     {% endblock %}
   </head>
   <body>
-    <div id="container" class="container">
-      <div id="header">
-        {% block header %}
-        {% include "pmessages/header.html" %}
-        {% endblock %}
-      </div>
-      <div id="content">
-        {% block content %}
-        {% endblock %}
-      </div>
-      <div id="footer">
-        {% block footer %}
-        {% include "pmessages/footer.html" %}
-        {% endblock %}
-      </div>
+    <div class="container">
+        <div class="row">
+            {% block header %}
+            {% include "pmessages/header.html" %}
+            {% endblock %}
+              <div id="content">
+                {% block content %}
+                {% endblock %}
+              </div>
+            {% block footer %}
+            {% include "pmessages/footer.html" %}
+            {% endblock %}
+        </div>
     </div>
   </body>
 </html>

@@ -4,29 +4,39 @@
 {% load humanize %}
 
 {% block content %}
-
-<div class="row-fluid">
-    <div class="span8 offset3">
-        <div>
+    <section>
+    <div class="span3">
             <form action="{% url 'pmessages.views.add' %}" method="post">
                 {% csrf_token %}
                 {{ message_form.non_field_errors }}
-                <input id="id_username" type="text" name="username" maxlength="20" class="input-small" placeholder="Username"/>
-                <textarea id="id_message" rows="1" cols="80" name="message" placeholder="Your message..."></textarea>
-                <input type="submit" class="btn" value="Post">
+                <legend>Post a new proxy message !</legend>
+                <input id="id_username" type="text" name="username" maxlength="20" placeholder="Username">
+                <textarea id="id_message" rows="3" cols="120" name="message" placeholder="Your message..."></textarea>
+                <button type="submit" class="btn">Post</button>
             </form>
         </div>
+    <div class="span8">
+        <article>
 {% if all_messages %}
-    
     {% for message in all_messages %}
-        <div>
-        {{ message.username }} - {{ message.date|naturaltime }} : <a href="{% url 'pmessages.views.detail' message.id %}">{{ message.message }}</a>
+        <div class="well well-small">
+            <div class="message-text">
+                <a href="{% url 'pmessages.views.detail' message.id %}">{{ message.message }}</a>
+            </div>
+            <div class=message-info>
+                <span class="message-author">
+                    Par {{ message.username }}
+                </span>
+                <span class="message-date">
+                    {{ message.date|naturaltime }}
+                </span>
+            </div>
         </div>
     {% endfor %}
 {% else %}
     <p>No message.</p>
 {% endif %}
+    </article>
     </div>
-</div>
-
+    </section>
 {% endblock %}
