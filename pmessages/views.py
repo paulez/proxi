@@ -5,6 +5,7 @@ from django.forms import ModelForm
 from django.template import RequestContext
 from pmessages.models import ProxyMessage
 from django.contrib.gis.utils import GeoIP
+from django.db.models import Q
 
 class MessageForm(ModelForm):
     class Meta:
@@ -12,9 +13,18 @@ class MessageForm(ModelForm):
         fields = ('username', 'message')
 
 def index(request):
+    return message_list(request)
+    
+def search(request, search_request):
+    return message_list(request, search_request)
+
+def message_list(request, search_request = None):
     g = GeoUtils()
     location = g.get_user_location(request)
-    all_messages = ProxyMessage.near_messages(location).order_by('-date')
+    if search_request:
+        all_messages = ProxyMessage.near_messages(location).filter(Q(message__icontains=search_request) | Q(username__icontains=search_request)).order_by('-date')[:30]
+    else:
+        all_messages = ProxyMessage.near_messages(location).order_by('-date')[:30]
     message_form = MessageForm()
     return render_to_response('pmessages/index.html', {'all_messages': all_messages, 'message_form' : message_form}, context_instance=RequestContext(request))
     
