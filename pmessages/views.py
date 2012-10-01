@@ -53,5 +53,8 @@ class GeoUtils:
         
     def get_user_address(self, request):
         # get user ip address from request
-        return request.META['REMOTE_ADDR']
-   
+        try:
+            ip = request.META['HTTP_X_FORWARDED_FOR']
+            return ip.split(",")[0].strip()
+        except KeyError:
+            return request.META['REMOTE_ADDR']
