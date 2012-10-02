@@ -20,11 +20,14 @@ def search(request, search_request):
 
 def message_list(request, search_request = None):
     g = GeoUtils()
-    location = g.get_user_location(request)
-    if search_request:
-        all_messages = ProxyMessage.near_messages(location).filter(Q(message__icontains=search_request) | Q(username__icontains=search_request)).order_by('-date')[:30]
+    location = g.get_user_location_address(request)[0]
+    if location:
+        if search_request:
+            all_messages = ProxyMessage.near_messages(location).filter(Q(message__icontains=search_request) | Q(username__icontains=search_request)).order_by('-date')[:30]
+        else:
+            all_messages = ProxyMessage.near_messages(location).order_by('-date')[:30]
     else:
-        all_messages = ProxyMessage.near_messages(location).order_by('-date')[:30]
+        all_messages = None
     message_form = MessageForm()
     return render_to_response('pmessages/index.html', {'all_messages': all_messages, 'message_form' : message_form}, context_instance=RequestContext(request))
     
@@ -40,11 +43,11 @@ def add(request, message_id = None):
             username = form.cleaned_data['username']
             message = form.cleaned_data['message']
             g = GeoUtils()
-            location = g.get_user_location(request)
+            (location, address) = g.get_user_location_address(request)
             ref = None
             if message_id:
                 ref = get_object_or_404(ProxyMessage, pk=message_id)
-            m = ProxyMessage(username = username, message = message, address = g.get_user_address(request), location = location, ref = ref)
+            m = ProxyMessage(username = username, message = message, address = address, location = location, ref = ref)
             m.save()
     return HttpResponseRedirect(reverse('pmessages.views.index'))
     
@@ -56,15 +59,21 @@ class GeoUtils:
         # Return geo point corresponding to ip
         return self.g.geos(ip)
 
-    def get_user_location(self, request):
-        # get user ip address and return associated location
-        address = self.get_user_address(request)
-        return self.get_point_from_ip(address)
+    def get_user_location_address(self, request):
+        # get user possible ip address list and return first associated location found and associated address
+        address = self.get_user_address_list(request)
+        for ip in address:
+            loc = self.get_point_from_ip(ip)
+            if loc:
+                return (loc, ip)
+        return None
         
-    def get_user_address(self, request):
-        # get user ip address from request
+    def get_user_address_list(self, request):
+        # get a list of possible user ip address from request
         try:
             ip = request.META['HTTP_X_FORWARDED_FOR']
-            return ip.split(",")[0].strip()
+            ip = ip.split(",")
+            return [x.strip() for x in ip]
+            
         except KeyError:
-            return request.META['REMOTE_ADDR']
+            return [request.META['REMOTE_ADDR']]
