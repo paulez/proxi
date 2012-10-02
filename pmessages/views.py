@@ -1,7 +1,7 @@
 from django.shortcuts import render_to_response, get_object_or_404
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
-from django.forms import ModelForm
+from django.forms import ModelForm, Form, CharField
 from django.template import RequestContext
 from pmessages.models import ProxyMessage
 from django.contrib.gis.utils import GeoIP
@@ -11,12 +11,26 @@ class MessageForm(ModelForm):
     class Meta:
         model = ProxyMessage
         fields = ('username', 'message')
-
+        
+class SearchForm(Form):
+    query = CharField(max_length=100)
+        
 def index(request):
     return message_list(request)
     
-def search(request, search_request):
-    return message_list(request, search_request)
+def search(request, search_request = None):
+    if request.method == 'POST':
+        form = SearchForm(request.POST)
+        if form.is_valid():
+            query = form.cleaned_data['query']
+            return HttpResponseRedirect(reverse('pmessages.views.search', args = [query]))
+        else:
+            return HttpResponseRedirect(reverse('pmessages.views.index'))
+    else:
+        if request:
+            return message_list(request, search_request)
+        else:
+            return HttpResponseRedirect(reverse('pmessages.views.index'))
 
 def message_list(request, search_request = None):
     g = GeoUtils()
