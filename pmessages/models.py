@@ -36,7 +36,6 @@ class ProxyMessage(models.Model):
         # Determining minimal distance to get less than level messages during on day
         while nb > threshold and radius > radius_min:
             i = i + 1
-            print("iter %s." % i)
             radius = radius / 2
             nb = ProxyMessage.objects.filter(location__distance_lte=(pos, D(km=radius)), date__gt=yesterday).count()
         radius = radius * 2
@@ -45,12 +44,11 @@ class ProxyMessage(models.Model):
     @staticmethod    
     def near_messages(pos, threshold = 10, radius_min = 2, update_interval = timedelta(minutes=1)):
         """Return messages which are near pos."""
-        nearest_index = ProxyIndex.objects.distance(pos).order_by('-distance')[0]
+        nearest_index = ProxyIndex.objects.distance(pos).order_by('distance')[0]
         if nearest_index.update < timezone.now() - update_interval:
             radius = ProxyMessage.near_radius(pos, threshold, radius_min)
             d1 = ProxyIndex.objects.filter(pk=nearest_index.id).distance(pos)[0].distance
             d2 = D(km=radius)
-            print("distance index : %s, rayon : %s." % (d1,d2))
             if  d1 > d2:
                 new_index = ProxyIndex(location = pos, update = timezone.now(), radius = radius)
                 new_index.save()
