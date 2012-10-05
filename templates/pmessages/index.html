@@ -4,19 +4,18 @@
 {% load humanize %}
 
 {% block content %}
-    <section>
-    <div class="span3">
+<div class="row">
+    <div class="span4">
             <form action="{% url 'pmessages.views.add' %}" method="post">
                 {% csrf_token %}
                 {{ message_form.non_field_errors }}
                 <legend>Post a new proxy message !</legend>
                 <input id="id_username" type="text" name="username" maxlength="20" placeholder="Username">
-                <textarea id="id_message" rows="3" cols="120" name="message" placeholder="Your message..."></textarea>
+                <textarea id="id_message" autofocus="autofocus" rows="4" name="message" placeholder="Your message..."></textarea>
                 <button type="submit" class="btn">Post</button>
             </form>
         </div>
     <div class="span8">
-        <article>
 {% if all_messages %}
     {% for message in all_messages %}
         <div class="well well-small">
@@ -36,7 +35,6 @@
 {% else %}
     <p>No message.</p>
 {% endif %}
-    </article>
     </div>
-    </section>
+</div>
 {% endblock %}
