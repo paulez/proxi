@@ -3,6 +3,7 @@ from django.contrib.gis.measure import D
 from django.contrib.gis.geos import *
 from datetime import timedelta
 from django.utils import timezone
+from django.conf import settings
 
 class ProxyMessage(models.Model):
     """A ProxyMessage is a simple text message with location information, username, originated ip and date.
@@ -27,8 +28,10 @@ class ProxyMessage(models.Model):
         return self.message
 
     @staticmethod
-    def near_radius(pos, threshold, radius_min):
+    def near_radius(pos):
         """Return radius in which there are less than threshold messages posted in one day."""
+        threshold = settings.PROXY_THRESHOLD
+        radius_min = settings.PROXY_RADIUS_MIN
         radius = 50000
         nb = threshold + 1
         yesterday = timezone.now() - timedelta(days=1)
@@ -42,22 +45,9 @@ class ProxyMessage(models.Model):
         return radius
     
     @staticmethod    
-    def near_messages(pos, threshold = 10, radius_min = 2, update_interval = timedelta(minutes=1)):
+    def near_messages(pos):
         """Return messages which are near pos."""
-        nearest_index = ProxyIndex.objects.distance(pos).order_by('distance')[0]
-        if nearest_index.update < timezone.now() - update_interval:
-            radius = ProxyMessage.near_radius(pos, threshold, radius_min)
-            d1 = ProxyIndex.objects.filter(pk=nearest_index.id).distance(pos)[0].distance
-            d2 = D(km=radius)
-            if  d1 > d2:
-                new_index = ProxyIndex(location = pos, update = timezone.now(), radius = radius)
-                new_index.save()
-            else:
-                nearest_index.radius = radius
-                nearest_index.update = timezone.now()
-                nearest_index.save()
-        else:
-            radius = nearest_index.radius
+        radius = ProxyIndex.indexed_radius(pos)
         result = ProxyMessage.objects.filter(location__distance_lte=(pos, D(km=radius)))
         return result
         
@@ -69,3 +59,23 @@ class ProxyIndex(models.Model):
     
     def __unicode__(self):
         return "Index at %s." % self.location
+        
+    @staticmethod
+    def indexed_radius(pos):
+        """Return index radius for pos location."""
+        update_interval = timedelta(minutes=settings.PROXY_INDEX_EXPIRATION)
+        nearest_index = ProxyIndex.objects.distance(pos).order_by('distance')[0]
+        if nearest_index.update < timezone.now() - update_interval:
+            radius = ProxyMessage.near_radius(pos)
+            d1 = ProxyIndex.objects.filter(pk=nearest_index.id).distance(pos)[0].distance
+            d2 = D(km=radius)
+            if  d1 > d2:
+                new_index = ProxyIndex(location = pos, update = timezone.now(), radius = radius)
+                new_index.save()
+            else:
+                nearest_index.radius = radius
+                nearest_index.update = timezone.now()
+                nearest_index.save()
+        else:
+            radius = nearest_index.radius
+        return radius
