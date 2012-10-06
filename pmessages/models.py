@@ -79,3 +79,28 @@ class ProxyIndex(models.Model):
         else:
             radius = nearest_index.radius
         return radius
+        
+class ProxyUser(models.Model):
+    location = models.PointField()
+    last_use = models.DateTimeField()
+    username = models.CharField(max_length=20)
+    objects = models.GeoManager()
+    
+    @staticmethod
+    def register_user(username, pos):
+        """Register user with its location and a creation date. 
+        If a non expired user already exists in the effect area around location,
+        return False."""
+        radius = ProxyIndex.indexed_radius(pos)
+        user = ProxyUser.objects.filter(location__distance_lte=(pos, D(km=radius)), username = username).distance(pos).order_by('distance')[0]
+        age = timezone.now() - user.last_use
+        if not user:
+            new_user = ProxyUser(location = pos, last_use = timezone.now(), username = username)
+            new_user.save()
+            return new_user.id
+        elif age > datetime(minutes=settings.PROXY_USER_EXPIRATION):
+            user.last_use = timezone.now()
+            user.save()
+            return user.id
+        else:
+            return False

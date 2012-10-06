@@ -2,19 +2,21 @@ from django.shortcuts import render_to_response, get_object_or_404
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.forms import ModelForm, Form, CharField
+from django.forms.widgets import Textarea
 from django.template import RequestContext
-from pmessages.models import ProxyMessage
+from pmessages.models import ProxyMessage, ProxyUser
 from django.contrib.gis.utils import GeoIP
 from django.db.models import Q
 
-class MessageForm(ModelForm):
-    class Meta:
-        model = ProxyMessage
-        fields = ('username', 'message')
+class MessageForm(Form):
+    message = CharField(widget=Textarea)
+    
+class UserForm(Form):
+    username = CharField(max_length=20)
         
 class SearchForm(Form):
     query = CharField(max_length=100)
-        
+
 def index(request):
     return message_list(request)
     
@@ -90,4 +92,4 @@ class GeoUtils:
             return [x.strip() for x in ip]
             
         except KeyError:
-            return [request.META['REMOTE_ADDR']]
+            return [request.META['REMOTE_ADDR']]    
