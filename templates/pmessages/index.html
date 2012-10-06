@@ -6,15 +6,24 @@
 {% block content %}
 <div class="row">
     <div class="span4">
+        {% if username %}
             <form action="{% url 'pmessages.views.add' %}" method="post">
                 {% csrf_token %}
                 {{ message_form.non_field_errors }}
                 <legend>Post a new proxy message !</legend>
-                <input id="id_username" type="text" name="username" maxlength="20" placeholder="Username">
                 <textarea id="id_message" autofocus="autofocus" rows="4" name="message" placeholder="Your message..."></textarea>
                 <button type="submit" class="btn">Post</button>
             </form>
-        </div>
+        {% else %}
+            <form action="{% url 'pmessages.views.login' %}" method="post">
+                {% csrf_token %}
+                {{ user_form.non_field_errors }}
+                <legend>Chose your pseudo !</legend>
+                <input id="id_username" autofocus="autofocus" type="text" name="username" maxlength="20" placeholder="Username">
+                <button type="submit" class="btn">Use</button>
+            </form>
+        {% endif %}
+    </div>
     <div class="span8">
 {% if all_messages %}
     {% for message in all_messages %}

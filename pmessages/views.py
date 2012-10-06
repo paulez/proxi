@@ -45,7 +45,8 @@ def message_list(request, search_request = None):
     else:
         all_messages = None
     message_form = MessageForm()
-    return render_to_response('pmessages/index.html', {'all_messages': all_messages, 'message_form' : message_form}, context_instance=RequestContext(request))
+    username = request.session.get('username', None)
+    return render_to_response('pmessages/index.html', {'all_messages': all_messages, 'message_form' : message_form, 'username': username}, context_instance=RequestContext(request))
     
 def detail(request, message_id):
     m = get_object_or_404(ProxyMessage, pk=message_id)
@@ -56,7 +57,7 @@ def add(request, message_id = None):
     if request.method == 'POST':
         form = MessageForm(request.POST)
         if form.is_valid():
-            username = form.cleaned_data['username']
+            username = request.session['username']
             message = form.cleaned_data['message']
             g = GeoUtils()
             (location, address) = g.get_user_location_address(request)
@@ -66,6 +67,25 @@ def add(request, message_id = None):
             m = ProxyMessage(username = username, message = message, address = address, location = location, ref = ref)
             m.save()
     return HttpResponseRedirect(reverse('pmessages.views.index'))
+    
+def login(request):
+    if request.method == 'POST':
+        form = UserForm(request.POST)
+        if form.is_valid():
+            print('form valid')
+            username = form.cleaned_data['username']
+            g = GeoUtils()
+            location = g.get_user_location_address(request)[0]
+            user_id = ProxyUser.register_user(username, location)
+            if user_id:
+                print('user registered')
+                request.session['username'] = username
+                request.session['user_id'] = user_id
+            else:
+                print('user already used')
+        else:
+            print('form not valid')
+    return HttpResponseRedirect(reverse('pmessages.views.index'))  
     
 class GeoUtils:
     def __init__(self):

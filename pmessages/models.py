@@ -92,13 +92,14 @@ class ProxyUser(models.Model):
         If a non expired user already exists in the effect area around location,
         return False."""
         radius = ProxyIndex.indexed_radius(pos)
-        user = ProxyUser.objects.filter(location__distance_lte=(pos, D(km=radius)), username = username).distance(pos).order_by('distance')[0]
-        age = timezone.now() - user.last_use
-        if not user:
+        try:
+            user = ProxyUser.objects.filter(location__distance_lte=(pos, D(km=radius)), username = username).distance(pos).order_by('distance')[0]
+        except IndexError:
             new_user = ProxyUser(location = pos, last_use = timezone.now(), username = username)
             new_user.save()
             return new_user.id
-        elif age > datetime(minutes=settings.PROXY_USER_EXPIRATION):
+        age = timezone.now() - user.last_use
+        if age > timedelta(minutes=settings.PROXY_USER_EXPIRATION):
             user.last_use = timezone.now()
             user.save()
             return user.id

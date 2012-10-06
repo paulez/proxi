@@ -1,5 +1,5 @@
 from django.contrib.gis import admin
-from pmessages.models import ProxyMessage, ProxyIndex
+from pmessages.models import ProxyMessage, ProxyIndex, ProxyUser
 
 class ProxyMessageAdmin(admin.OSMGeoAdmin):
     fieldsets = [
@@ -12,6 +12,10 @@ class ProxyMessageAdmin(admin.OSMGeoAdmin):
     
 class ProxyIndexAdmin(admin.OSMGeoAdmin):
     pass
+    
+class ProxyUserAdmin(admin.OSMGeoAdmin):
+    pass
 
 admin.site.register(ProxyMessage, ProxyMessageAdmin)
 admin.site.register(ProxyIndex, ProxyIndexAdmin)
+admin.site.register(ProxyUser, ProxyUserAdmin)
