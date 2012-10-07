@@ -86,6 +86,9 @@ class ProxyUser(models.Model):
     username = models.CharField(max_length=20)
     objects = models.GeoManager()
     
+    def __unicode__(self):
+        return self.username
+    
     @staticmethod
     def register_user(username, pos):
         """Register user with its location and a creation date. 
