@@ -14,7 +14,7 @@ class ProxyIndexAdmin(admin.OSMGeoAdmin):
     pass
     
 class ProxyUserAdmin(admin.OSMGeoAdmin):
-    pass
+    list_display = ('username', 'last_use')
 
 admin.site.register(ProxyMessage, ProxyMessageAdmin)
 admin.site.register(ProxyIndex, ProxyIndexAdmin)
