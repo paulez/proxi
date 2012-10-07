@@ -8,4 +8,5 @@ urlpatterns = patterns('pmessages.views',
     url(r'^s/$', 'search'),
     url(r'^s/(?P<search_request>.+)/$', 'search'),
     url(r'^login/$', 'login'),
+    url(r'^logout/$', 'logout'),
 )

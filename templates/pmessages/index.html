@@ -23,6 +23,12 @@
                 <button type="submit" class="btn">Use</button>
             </form>
         {% endif %}
+    {% if username %}
+        Currently logged as {{ username }}.
+        <form action="{% url 'pmessages.views.logout' %}">
+            <button type=submit" class="btn-inverse">Logout</button>
+        </form>
+    {% endif %}
     </div>
     <div class="span8">
 {% if all_messages %}
@@ -33,7 +39,7 @@
             </div>
             <div class=message-info>
                 <span class="message-author">
-                    Par {{ message.username }}
+                    Par <a href="{% url 'pmessages.views.search' message.username %}">{{ message.username }}</a>
                 </span>
                 <span class="message-date">
                     {{ message.date|naturaltime }}

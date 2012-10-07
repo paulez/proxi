@@ -85,7 +85,15 @@ def login(request):
                 print('user already used')
         else:
             print('form not valid')
-    return HttpResponseRedirect(reverse('pmessages.views.index'))  
+    return HttpResponseRedirect(reverse('pmessages.views.index'))
+
+def logout(request):
+    user_id = request.session['user_id']
+    user = ProxyUser.objects.filter(pk=user_id)
+    user.delete()
+    del request.session['username']
+    del request.session['user_id']
+    return HttpResponseRedirect(reverse('pmessages.views.index'))
     
 class GeoUtils:
     def __init__(self):
