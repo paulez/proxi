@@ -11,7 +11,7 @@
                 {% csrf_token %}
                 {{ message_form.non_field_errors }}
                 <legend>Post a new proxy message !</legend>
-                <textarea id="id_message" autofocus="autofocus" rows="4" name="message" placeholder="Your message..."></textarea>
+                {{ message_form.message }}
                 <button type="submit" class="btn">Post</button>
             </form>
         {% else %}
@@ -19,14 +19,14 @@
                 {% csrf_token %}
                 {{ user_form.non_field_errors }}
                 <legend>Chose your pseudo !</legend>
-                <input id="id_username" autofocus="autofocus" type="text" name="username" maxlength="20" placeholder="Username">
+                {{ user_form.username }}
                 <button type="submit" class="btn">Use</button>
             </form>
         {% endif %}
     {% if username %}
         Currently logged as {{ username }}.
         <form action="{% url 'pmessages.views.logout' %}">
-            <button type=submit" class="btn-inverse">Logout</button>
+            <button type="submit" class="btn-inverse">Logout</button>
         </form>
     {% endif %}
     </div>

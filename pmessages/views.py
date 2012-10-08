@@ -2,17 +2,17 @@ from django.shortcuts import render_to_response, get_object_or_404
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.forms import ModelForm, Form, CharField
-from django.forms.widgets import Textarea
+from django.forms.widgets import Textarea, TextInput
 from django.template import RequestContext
 from pmessages.models import ProxyMessage, ProxyUser
 from django.contrib.gis.utils import GeoIP
 from django.db.models import Q
 
 class MessageForm(Form):
-    message = CharField(widget=Textarea)
+    message = CharField(widget=Textarea(attrs={'placeholder': 'Your message...', 'autofocus': 'autofocus', 'rows': '4'}))
     
 class UserForm(Form):
-    username = CharField(max_length=20)
+    username = CharField(widget=TextInput(attrs={'placeholder': 'Username', 'autofocus': 'autofocus'}), max_length=20)
         
 class SearchForm(Form):
     query = CharField(max_length=100)
@@ -34,7 +34,7 @@ def search(request, search_request = None):
         else:
             return HttpResponseRedirect(reverse('pmessages.views.index'))
 
-def message_list(request, search_request = None):
+def message_list(request, search_request = None, message_form = None, user_form = None):
     g = GeoUtils()
     location = g.get_user_location_address(request)[0]
     if location:
@@ -44,14 +44,18 @@ def message_list(request, search_request = None):
             all_messages = ProxyMessage.near_messages(location).order_by('-date')[:30]
     else:
         all_messages = None
-    message_form = MessageForm()
+    if not message_form:
+        message_form = MessageForm()
+    if not user_form:
+        user_form = UserForm()
     username = request.session.get('username', None)
-    return render_to_response('pmessages/index.html', {'all_messages': all_messages, 'message_form' : message_form, 'username': username}, context_instance=RequestContext(request))
+    return render_to_response('pmessages/index.html', {'all_messages': all_messages, 'message_form': message_form, 'user_form': user_form, 'username': username}, context_instance=RequestContext(request))
     
 def detail(request, message_id):
     m = get_object_or_404(ProxyMessage, pk=message_id)
     message_form = MessageForm()
-    return render_to_response('pmessages/detail.html', {'message': m, 'message_form' : message_form}, context_instance=RequestContext(request))
+    user_form = UserForm()
+    return render_to_response('pmessages/detail.html', {'message': m, 'message_form': message_form, 'user_form': user_form}, context_instance=RequestContext(request))
     
 def add(request, message_id = None):
     if request.method == 'POST':
@@ -72,19 +76,17 @@ def login(request):
     if request.method == 'POST':
         form = UserForm(request.POST)
         if form.is_valid():
-            print('form valid')
             username = form.cleaned_data['username']
             g = GeoUtils()
             location = g.get_user_location_address(request)[0]
             user_id = ProxyUser.register_user(username, location)
             if user_id:
-                print('user registered')
                 request.session['username'] = username
                 request.session['user_id'] = user_id
             else:
-                print('user already used')
+                pass
         else:
-            print('form not valid')
+            pass
     return HttpResponseRedirect(reverse('pmessages.views.index'))
 
 def logout(request):
