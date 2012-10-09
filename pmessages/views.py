@@ -15,28 +15,48 @@ class UserForm(Form):
     username = CharField(widget=TextInput(attrs={'placeholder': 'Username', 'autofocus': 'autofocus'}), max_length=20)
         
 class SearchForm(Form):
-    query = CharField(max_length=100)
+    user_query = CharField(widget=TextInput(attrs={'placeholder': 'Search', 'class': 'search-query'}),max_length=100)
 
-def index(request):
-    return message_list(request)
-    
-def search(request, search_request = None):
-    if request.method == 'POST':
-        form = SearchForm(request.POST)
-        if form.is_valid():
-            query = form.cleaned_data['query']
-            return HttpResponseRedirect(reverse('pmessages.views.search', args = [query]))
-        else:
-            return HttpResponseRedirect(reverse('pmessages.views.index'))
-    else:
-        if request:
-            return message_list(request, search_request)
-        else:
-            return HttpResponseRedirect(reverse('pmessages.views.index'))
-
-def message_list(request, search_request = None, message_form = None, user_form = None):
+def index(request, search_request = None):
     g = GeoUtils()
-    location = g.get_user_location_address(request)[0]
+    (location, address) = g.get_user_location_address(request)
+    if "post_message" in request.POST:
+        message_form = MessageForm(data=request.POST)
+        if message_form.is_valid():
+            username = request.session['username']
+            message = message_form.cleaned_data['message']
+            ref = None
+            m = ProxyMessage(username = username, message = message, address = address, location = location, ref = ref)
+            m.save()
+    else:
+        message_form = MessageForm()
+    if "use_pseudo" in request.POST:
+        print("user form submitted")
+        user_form = UserForm(data=request.POST)
+        if user_form.is_valid():
+            username = user_form.cleaned_data['username']
+            user_id = ProxyUser.register_user(username, location)
+            if user_id:
+                request.session['username'] = username
+                request.session['user_id'] = user_id
+            else:
+                user_form['username'].errors.append('Pseudo already used, please choose another one.')
+    else:
+        user_form = UserForm()
+    if "logout" in request.POST:
+        logout_form = Form(data=request.POST)
+        if logout_form.is_valid():
+            user_id = request.session['user_id']
+            user = ProxyUser.objects.filter(pk=user_id)
+            user.delete()
+            del request.session['username']
+            del request.session['user_id']
+    if "user_query" in request.POST:
+        search_form = SearchForm(data=request.POST)
+        if search_form.is_valid():
+            search_request = search_form.cleaned_data['user_query']
+    else:
+        search_form = SearchForm()
     if location:
         if search_request:
             all_messages = ProxyMessage.near_messages(location).filter(Q(message__icontains=search_request) | Q(username__icontains=search_request)).order_by('-date')[:30]
@@ -44,59 +64,9 @@ def message_list(request, search_request = None, message_form = None, user_form 
             all_messages = ProxyMessage.near_messages(location).order_by('-date')[:30]
     else:
         all_messages = None
-    if not message_form:
-        message_form = MessageForm()
-    if not user_form:
-        user_form = UserForm()
     username = request.session.get('username', None)
-    return render_to_response('pmessages/index.html', {'all_messages': all_messages, 'message_form': message_form, 'user_form': user_form, 'username': username}, context_instance=RequestContext(request))
-    
-def detail(request, message_id):
-    m = get_object_or_404(ProxyMessage, pk=message_id)
-    message_form = MessageForm()
-    user_form = UserForm()
-    return render_to_response('pmessages/detail.html', {'message': m, 'message_form': message_form, 'user_form': user_form}, context_instance=RequestContext(request))
-    
-def add(request, message_id = None):
-    if request.method == 'POST':
-        form = MessageForm(request.POST)
-        if form.is_valid():
-            username = request.session['username']
-            message = form.cleaned_data['message']
-            g = GeoUtils()
-            (location, address) = g.get_user_location_address(request)
-            ref = None
-            if message_id:
-                ref = get_object_or_404(ProxyMessage, pk=message_id)
-            m = ProxyMessage(username = username, message = message, address = address, location = location, ref = ref)
-            m.save()
-    return HttpResponseRedirect(reverse('pmessages.views.index'))
-    
-def login(request):
-    if request.method == 'POST':
-        form = UserForm(request.POST)
-        if form.is_valid():
-            username = form.cleaned_data['username']
-            g = GeoUtils()
-            location = g.get_user_location_address(request)[0]
-            user_id = ProxyUser.register_user(username, location)
-            if user_id:
-                request.session['username'] = username
-                request.session['user_id'] = user_id
-            else:
-                pass
-        else:
-            pass
-    return HttpResponseRedirect(reverse('pmessages.views.index'))
+    return render_to_response('pmessages/index.html', {'all_messages': all_messages, 'message_form': message_form, 'user_form': user_form, 'search_form': search_form, 'username': username}, context_instance=RequestContext(request))
 
-def logout(request):
-    user_id = request.session['user_id']
-    user = ProxyUser.objects.filter(pk=user_id)
-    user.delete()
-    del request.session['username']
-    del request.session['user_id']
-    return HttpResponseRedirect(reverse('pmessages.views.index'))
-    
 class GeoUtils:
     def __init__(self):
         self.g = GeoIP(city="/usr/share/GeoIP/GeoLiteCity.dat")
