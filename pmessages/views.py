@@ -41,7 +41,7 @@ def index(request, search_request = None):
             user.last_use = timezone.now()
             user.save()
     # User form processing
-    if not username or "use_pseudo" in request.POST:
+    if (not username) and ("use_pseudo" in request.POST):
         user_form = UserForm(data=request.POST)
         if user_form.is_valid():
             username = user_form.cleaned_data['username']
