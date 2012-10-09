@@ -1,12 +1,11 @@
 from django.conf.urls import patterns, include, url
 
+# Uncomment the next two lines to enable the admin:
+from django.contrib.gis import admin
+admin.autodiscover()
+
 urlpatterns = patterns('pmessages.views',
     url(r'^$', 'index'),
-    url(r'^(?P<message_id>\d+)/$', 'detail'),
-    url(r'^add/$', 'add'),
-    url(r'^add/(?P<message_id>\d+)/$', 'add'),
-    url(r'^s/$', 'search'),
-    url(r'^s/(?P<search_request>.+)/$', 'search'),
-    url(r'^login/$', 'login'),
-    url(r'^logout/$', 'logout'),
+    url(r'^(?P<search_request>.+)/$', 'index'),
+    url(r'^admin/', include(admin.site.urls)),
 )
