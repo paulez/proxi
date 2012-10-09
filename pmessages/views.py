@@ -3,6 +3,7 @@ from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.forms import ModelForm, Form, CharField
 from django.forms.widgets import Textarea, TextInput
+from django.forms.forms import NON_FIELD_ERRORS
 from django.template import RequestContext
 from pmessages.models import ProxyMessage, ProxyUser
 from django.contrib.gis.utils import GeoIP
@@ -28,10 +29,10 @@ def index(request, search_request = None):
             ref = None
             m = ProxyMessage(username = username, message = message, address = address, location = location, ref = ref)
             m.save()
+            message_form = MessageForm
     else:
         message_form = MessageForm()
     if "use_pseudo" in request.POST:
-        print("user form submitted")
         user_form = UserForm(data=request.POST)
         if user_form.is_valid():
             username = user_form.cleaned_data['username']
@@ -40,7 +41,8 @@ def index(request, search_request = None):
                 request.session['username'] = username
                 request.session['user_id'] = user_id
             else:
-                user_form['username'].errors.append('Pseudo already used, please choose another one.')
+                user_form.full_clean()
+                user_form._errors['username'] = user_form.error_class(['Pseudo already used, please choose another one.'])
     else:
         user_form = UserForm()
     if "logout" in request.POST:
