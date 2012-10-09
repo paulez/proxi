@@ -8,6 +8,9 @@ from django.template import RequestContext
 from pmessages.models import ProxyMessage, ProxyUser
 from django.contrib.gis.utils import GeoIP
 from django.db.models import Q
+from datetime import timedelta
+from django.utils import timezone
+from django.conf import settings
 
 class MessageForm(Form):
     message = CharField(widget=Textarea(attrs={'placeholder': 'Your message...', 'autofocus': 'autofocus', 'rows': '4'}))
@@ -21,18 +24,24 @@ class SearchForm(Form):
 def index(request, search_request = None):
     g = GeoUtils()
     (location, address) = g.get_user_location_address(request)
-    if "post_message" in request.POST:
-        message_form = MessageForm(data=request.POST)
-        if message_form.is_valid():
-            username = request.session['username']
-            message = message_form.cleaned_data['message']
-            ref = None
-            m = ProxyMessage(username = username, message = message, address = address, location = location, ref = ref)
-            m.save()
-            message_form = MessageForm
-    else:
-        message_form = MessageForm()
-    if "use_pseudo" in request.POST:
+    # initialising session variables
+    username = request.session.get('username', None)
+    user_id = request.session.get('user_id', None)
+    user_expiration = request.session.get('user_expiration', None)
+    # refresh user expiration info
+    if user_expiration and user_id:
+        expiration_interval = timedelta(minutes=settings.PROXY_USER_REFRESH)
+        expiration_max = timedelta(minutes=settings.PROXY_USER_EXPIRATION)
+        delta = timezone.now() - user_expiration
+        if delta > expiration_max:
+            logout(session, user_id, delete=False)
+            (username, user_id, user_expiration) = (None, None, None)
+        elif delta > expiration_interval:
+            user = ProxyUser.objects.get(pk=user_id)
+            user.last_use = timezone.now()
+            user.save()
+    # User form processing
+    if not username or "use_pseudo" in request.POST:
         user_form = UserForm(data=request.POST)
         if user_form.is_valid():
             username = user_form.cleaned_data['username']
@@ -40,19 +49,34 @@ def index(request, search_request = None):
             if user_id:
                 request.session['username'] = username
                 request.session['user_id'] = user_id
+                request.session['user_expiration'] = timezone.now()
             else:
                 user_form.full_clean()
                 user_form._errors['username'] = user_form.error_class(['Pseudo already used, please choose another one.'])
     else:
         user_form = UserForm()
+    # Message from processing
+    if "post_message" in request.POST:
+        message_form = MessageForm(data=request.POST)
+        if message_form.is_valid():
+            if username:
+                message = message_form.cleaned_data['message']
+                ref = None
+                m = ProxyMessage(username = username, message = message, address = address, location = location, ref = ref)
+                m.save()
+                message_form = MessageForm()
+            else:
+                user_form._errors['username'] = user_form.error_class(['Please choose a pseudo before posting a message.'])
+    else:
+        message_form = MessageForm()
+    # Logout form processing
     if "logout" in request.POST:
         logout_form = Form(data=request.POST)
         if logout_form.is_valid():
-            user_id = request.session['user_id']
-            user = ProxyUser.objects.filter(pk=user_id)
-            user.delete()
-            del request.session['username']
-            del request.session['user_id']
+            if user_id:
+                logout(request, user_id)
+                (username, user_id, user_expiration) = (None, None, None)
+    # Search form processing
     if "user_query" in request.POST:
         search_form = SearchForm(data=request.POST)
         if search_form.is_valid():
@@ -60,14 +84,23 @@ def index(request, search_request = None):
     else:
         search_form = SearchForm()
     if location:
+        # Getting messages near location
         if search_request:
+            # Filter messages using search_request
             all_messages = ProxyMessage.near_messages(location).filter(Q(message__icontains=search_request) | Q(username__icontains=search_request)).order_by('-date')[:30]
         else:
             all_messages = ProxyMessage.near_messages(location).order_by('-date')[:30]
     else:
         all_messages = None
-    username = request.session.get('username', None)
     return render_to_response('pmessages/index.html', {'all_messages': all_messages, 'message_form': message_form, 'user_form': user_form, 'search_form': search_form, 'username': username}, context_instance=RequestContext(request))
+    
+def logout(request, user_id, delete=True):
+    if delete:
+        user = ProxyUser.objects.get(pk=user_id)
+        user.delete()
+    del request.session['username']
+    del request.session['user_id']
+    del request.session['user_expiration']
 
 class GeoUtils:
     def __init__(self):

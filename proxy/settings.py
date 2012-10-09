@@ -172,5 +172,7 @@ PROXY_RADIUS_MIN = 2
 PROXY_THRESHOLD = 10
 # Proxy user expiration time, in minutes.
 PROXY_USER_EXPIRATION = 300
+# Proxy user expiration refresh, in minutes
+PROXY_USER_REFRESH = 60
 # Proxy index update expiration in minutes.
 PROXY_INDEX_EXPIRATION = 1
