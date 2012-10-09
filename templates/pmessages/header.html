@@ -1,7 +1,7 @@
 {% load url from future %}
 
-<div class="navbar navbar-inverse navbar-fixed-top">
-    <div class="navbar-inner">
+<header class="navbar navbar-inverse navbar-fixed-top">
+    <nav class="navbar-inner">
         <div class="container">
             <a class="brand" href="{% url 'pmessages.views.index' %}">Proxy</a>
                 <ul class="nav">
@@ -12,5 +12,5 @@
                 <input id="id_query" type="text" name="query" maxlength="100" class="search-query" placeholder="Search" >
             </form>
         </div>
-    </div>
-</div>
+    </nav>
+</header>
