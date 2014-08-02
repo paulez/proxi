@@ -1,3 +1,5 @@
+from logging import error
+
 from django.shortcuts import render_to_response, get_object_or_404
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
@@ -117,7 +119,8 @@ class GeoUtils:
             loc = self.get_point_from_ip(ip)
             if loc:
                 return (loc, ip)
-        return None
+        error('Cannot locate user from adress %s.', address)
+        return (None, None)
         
     def get_user_address_list(self, request):
         # get a list of possible user ip address from request
