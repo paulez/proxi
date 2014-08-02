@@ -7,12 +7,13 @@ from django.forms import ModelForm, Form, CharField
 from django.forms.widgets import Textarea, TextInput
 from django.forms.forms import NON_FIELD_ERRORS
 from django.template import RequestContext
-from pmessages.models import ProxyMessage, ProxyUser
 from django.contrib.gis.geoip import GeoIP
 from django.db.models import Q
 from datetime import timedelta
 from django.utils import timezone
 from django.conf import settings
+
+from pmessages.models import ProxyMessage, ProxyUser
 
 class MessageForm(Form):
     message = CharField(widget=Textarea(attrs={'placeholder': 'Your message...', 'autofocus': 'autofocus', 'rows': '4'}))
