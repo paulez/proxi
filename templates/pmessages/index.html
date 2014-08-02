@@ -6,6 +6,7 @@
 {% block content %}
 <div class="row">
     <section id="input" class="span4">
+    {% if location %}
         {% if username %}
             <form action="" name="message_form" method="post">
                 {% csrf_token %}
@@ -53,6 +54,7 @@
                 </fieldset>
             </form>
         {% endif %}
+    {% endif %}
     {% if username %}
         Currently logged as {{ username }}.
         <form action="" method="post">
@@ -62,6 +64,12 @@
     {% endif %}
     </section>
     <section id="main" class="span8">
+    {% if location %}
+    {% else %}
+        <div class="alert alert-error">
+            Unable to determine your location.
+        </div>
+    {% endif %}
 {% if all_messages %}
     {% for message in all_messages %}
         <article class="well well-small">

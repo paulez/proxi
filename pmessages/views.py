@@ -95,7 +95,7 @@ def index(request, search_request = None):
             all_messages = ProxyMessage.near_messages(location).order_by('-date')[:30]
     else:
         all_messages = None
-    return render_to_response('pmessages/index.html', {'all_messages': all_messages, 'message_form': message_form, 'user_form': user_form, 'search_form': search_form, 'username': username}, context_instance=RequestContext(request))
+    return render_to_response('pmessages/index.html', {'all_messages': all_messages, 'message_form': message_form, 'user_form': user_form, 'search_form': search_form, 'username': username, 'location': location}, context_instance=RequestContext(request))
     
 def logout(request, user_id, delete=True):
     if delete:
