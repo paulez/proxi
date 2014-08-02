@@ -1,5 +1,8 @@
+import os
+
 # Django settings for proxy project.
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
@@ -176,3 +179,5 @@ PROXY_USER_EXPIRATION = 300
 PROXY_USER_REFRESH = 60
 # Proxy index update expiration in minutes.
 PROXY_INDEX_EXPIRATION = 1
+# GeoIP
+GEOIP_PATH = os.path.join(BASE_DIR, 'data/geoip')

@@ -6,7 +6,7 @@ from django.forms.widgets import Textarea, TextInput
 from django.forms.forms import NON_FIELD_ERRORS
 from django.template import RequestContext
 from pmessages.models import ProxyMessage, ProxyUser
-from django.contrib.gis.utils import GeoIP
+from django.contrib.gis.geoip import GeoIP
 from django.db.models import Q
 from datetime import timedelta
 from django.utils import timezone
@@ -104,7 +104,7 @@ def logout(request, user_id, delete=True):
 
 class GeoUtils:
     def __init__(self):
-        self.g = GeoIP(city="/usr/share/GeoIP/GeoLiteCity.dat")
+        self.g = GeoIP()
         
     def get_point_from_ip(self, ip):
         # Return geo point corresponding to ip
