@@ -17,7 +17,7 @@ DATABASES = {
         'ENGINE': 'django.contrib.gis.db.backends.postgis', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
         'NAME': 'proxydb',                      # Or path to database file if using sqlite3.
         'USER': 'proxydb',                      # Not used with sqlite3.
-        'PASSWORD': 'Luth1OaC',                  # Not used with sqlite3.
+        'PASSWORD': 'bah9Roof',                  # Not used with sqlite3.
         'HOST': 'proxy-dev.cruvlk9k0aye.eu-west-1.rds.amazonaws.com',                      # Set to empty string for localhost. Not used with sqlite3.
         'PORT': '8200',                      # Set to empty string for default. Not used with sqlite3.
     }
