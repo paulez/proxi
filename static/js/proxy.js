@@ -45,16 +45,13 @@ function cancelButton(){
 }
 
 function geo_success(position){
-    alert("Found you at latitude " + position.coords.latitude +
-          ", longitude " + position.coords.longitude);
-    $.ajax({
-        type: "POST",
-        url: "/set_position",
-        data: {
-            "latitude": position.coords.latitude,
-            "longitude": position.coords.longitude,
-        },
-    });
+    $.post("/set_position/", JSON.stringify({
+        "type": "Point",
+        "coordinates": [
+            position.coords.longitude,
+            position.coords.latitude
+        ]
+    }));
 }
 
 function geo_error(error){

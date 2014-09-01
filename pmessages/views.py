@@ -1,17 +1,19 @@
 import logging
 from django.shortcuts import render_to_response, get_object_or_404
-from django.http import HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseNotAllowed
 from django.core.urlresolvers import reverse
 from django.forms import ModelForm, Form, CharField
 from django.forms.widgets import Textarea, TextInput
 from django.forms.forms import NON_FIELD_ERRORS
 from django.template import RequestContext
 from django.contrib.gis.geoip import GeoIP
+from django.contrib.gis.geos import GEOSGeometry
 from django.db.models import Q
 from datetime import timedelta
 from django.utils import timezone
 from django.conf import settings
 
+from pmessages.utils.geoutils import GeoUtils
 from pmessages.models import ProxyMessage, ProxyUser
 
 # Get an instance of a logger
@@ -108,30 +110,16 @@ def logout(request, user_id, delete=True):
     del request.session['user_id']
     del request.session['user_expiration']
 
-class GeoUtils:
-    def __init__(self):
-        self.g = GeoIP()
-        
-    def get_point_from_ip(self, ip):
-        # Return geo point corresponding to ip
-        return self.g.geos(ip)
-
-    def get_user_location_address(self, request):
-        # get user possible ip address list and return first associated location found and associated address
-        address = self.get_user_address_list(request)
-        for ip in address:
-            loc = self.get_point_from_ip(ip)
-            if loc:
-                return (loc, ip)
-        error('Cannot locate user from adress %s.', address)
-        return (None, None)
-        
-    def get_user_address_list(self, request):
-        # get a list of possible user ip address from request
-        try:
-            ip = request.META['HTTP_X_FORWARDED_FOR']
-            ip = ip.split(",")
-            return [x.strip() for x in ip]
-            
-        except KeyError:
-            return [request.META['REMOTE_ADDR']]    
+def set_position(request):
+    """
+    Process POST request containing position encoded in GeoJSON.
+    It will set the session position attribute to the position
+    given in the request.
+    """
+    # only accepts POST
+    if request.method != 'POST':
+        return HttpResponseNotAllowed(['POST'])
+    position = GEOSGeometry(request.body)
+    logger.debug('The position is: %s', position)
+    request.session['position'] = position
+    return HttpResponse('OK')
