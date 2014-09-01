@@ -63,21 +63,30 @@ class ProxyIndex(models.Model):
     @staticmethod
     def indexed_radius(pos):
         """Return index radius for pos location."""
+        create_index = False
         update_interval = timedelta(minutes=settings.PROXY_INDEX_EXPIRATION)
-        nearest_index = ProxyIndex.objects.distance(pos).order_by('distance')[0]
-        if nearest_index.update < timezone.now() - update_interval:
+        try:
+            nearest_index = ProxyIndex.objects.distance(pos).order_by('distance')[0]
+        except IndexError:
+            # No index found, we need to create one
+            create_index = True
             radius = ProxyMessage.near_radius(pos)
-            d1 = ProxyIndex.objects.filter(pk=nearest_index.id).distance(pos)[0].distance
-            d2 = D(km=radius)
-            if  d1 > d2:
-                new_index = ProxyIndex(location = pos, update = timezone.now(), radius = radius)
-                new_index.save()
-            else:
-                nearest_index.radius = radius
-                nearest_index.update = timezone.now()
-                nearest_index.save()
         else:
-            radius = nearest_index.radius
+            if nearest_index.update < timezone.now() - update_interval:
+                radius = ProxyMessage.near_radius(pos)
+                d1 = ProxyIndex.objects.filter(pk=nearest_index.id).distance(pos)[0].distance
+                d2 = D(km=radius)
+                if  d1 > d2:
+                    create_index = True
+                else:
+                    nearest_index.radius = radius
+                    nearest_index.update = timezone.now()
+                    nearest_index.save()
+            else:
+                radius = nearest_index.radius
+        if create_index:
+            new_index = ProxyIndex(location = pos, update = timezone.now(), radius = radius)
+            new_index.save()
         return radius
         
 class ProxyUser(models.Model):
