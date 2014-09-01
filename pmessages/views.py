@@ -1,5 +1,4 @@
-from logging import error
-
+import logging
 from django.shortcuts import render_to_response, get_object_or_404
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
@@ -14,6 +13,10 @@ from django.utils import timezone
 from django.conf import settings
 
 from pmessages.models import ProxyMessage, ProxyUser
+
+# Get an instance of a logger
+logger = logging.getLogger(__name__)
+print(__name__)
 
 class MessageForm(Form):
     message = CharField(widget=Textarea(attrs={'placeholder': 'Your message...', 'autofocus': 'autofocus', 'rows': '4'}))
