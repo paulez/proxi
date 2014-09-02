@@ -30,8 +30,16 @@ class SearchForm(Form):
     user_query = CharField(widget=TextInput(attrs={'placeholder': 'Search', 'class': 'search-query'}),max_length=100)
 
 def index(request, search_request = None):
-    g = GeoUtils()
-    (location, address) = g.get_user_location_address(request)
+    # get location and address from session
+    location = request.session.get('location', None)
+    address = request.session.get('address', None)
+    # if the session doesn't contain session and address
+    # get it from geotils (so from the ip)
+    if not (location and address):
+        geo = GeoUtils()
+        (location, address) = geo.get_user_location_address(request)
+        request.session['location'] = location
+        request.session['address'] = address
     # initialising session variables
     username = request.session.get('username', None)
     user_id = request.session.get('user_id', None)
