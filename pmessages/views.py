@@ -19,7 +19,6 @@ from pmessages.models import ProxyMessage, ProxyUser
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
-print(__name__)
 
 class MessageForm(Form):
     message = CharField(widget=Textarea(attrs={'placeholder': 'Your message...', 'autofocus': 'autofocus', 'rows': '4'}))
