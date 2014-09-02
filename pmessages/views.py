@@ -1,6 +1,7 @@
 import logging
 from django.shortcuts import render_to_response, get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseNotAllowed
+from django.http import HttpResponseBadRequest
 from django.core.urlresolvers import reverse
 from django.forms import ModelForm, Form, CharField
 from django.forms.widgets import Textarea, TextInput
@@ -119,7 +120,19 @@ def set_position(request):
     # only accepts POST
     if request.method != 'POST':
         return HttpResponseNotAllowed(['POST'])
-    position = GEOSGeometry(request.body)
+    user_id = request.session.get('user_id', None)
+    # get position from POST Geojson data
+    try:
+        position = GEOSGeometry(request.body)
+    except ValueError:
+        return HttpResponseBadRequest('Unknown data format.')
     logger.debug('The position is: %s', position)
     request.session['position'] = position
+    if not user_id:
+        logger.debug('Unknown user.')
+    else:
+        user = ProxyUser.objects.get(pk=user_id)
+        user.position = position
+        user.save()
+        logger.debug('User %s position saved', user)
     return HttpResponse('OK')
