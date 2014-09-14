@@ -30,18 +30,34 @@ $.ajaxSetup({
     }
 });
 
+var geo_options = {
+    enableHighAccuracy: false,
+    // 1 minute
+    maximumAge: 60000,
+};
+
+var low_geo_options = {
+    enableHighAccuracy: false,
+    // 3 minutes
+    maximumAge: 180000,
+    // 20 seconds
+    timeout: 20000,
+}
+
 $(document).ready( function(){
     if(navigator.geolocation){
         navigator.geolocation.getCurrentPosition(
-            geo_success, geo_error, {maximumAge:300000, timeout:2000}
+            first_geo_success, geo_error, low_geo_options
         );
     } else {
-        alert("geolocation not enabled");
+        console.warn('Geolocation not enabled');
     }
 });
 
-function cancelButton(){
-    clearWatch(watchId);
+function first_geo_success(position){
+    geo_success(position);
+    // retry now with high accuracy
+    geo_accurate();
 }
 
 function geo_success(position){
@@ -54,6 +70,13 @@ function geo_success(position){
     }));
 }
 
+function geo_accurate(){
+    //retrying wih high accuracy
+    navigator.geolocation.getCurrentPosition(
+        geo_success, geo_error, geo_options
+    );
+}
+
 function geo_error(error){
-    alert("geo error");
+    console.warn('ERROR(' + error.code + '): ' + error.message);
 }
