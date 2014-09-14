@@ -23,30 +23,39 @@ debug = logger.debug
 info = logger.info
 error = logger.error
 
+SLOCATION = 'location'
+SADDRESS = 'address'
+SUSERNAME = 'username'
+SUSER_ID = 'user_id'
+SUSER_EXPIRATION = 'user_expiration'
+
 class MessageForm(Form):
     message = CharField(widget=Textarea(attrs={'placeholder': 'Your message...', 'autofocus': 'autofocus', 'rows': '4'}))
     
 class UserForm(Form):
     username = CharField(widget=TextInput(attrs={'placeholder': 'Username', 'autofocus': 'autofocus'}), max_length=20)
-        
+
 class SearchForm(Form):
     user_query = CharField(widget=TextInput(attrs={'placeholder': 'Search', 'class': 'search-query'}),max_length=100)
 
 def index(request, search_request = None):
     # get location and address from session
-    location = request.session.get('location', None)
-    address = request.session.get('address', None)
+    location = request.session.get(SLOCATION, None)
+    address = request.session.get(SADDRESS, None)
     # if the session doesn't contain session and address
     # get it from geotils (so from the ip)
     if not (location and address):
+        debug('getting location and address from geoip')
         geo = GeoUtils()
         (location, address) = geo.get_user_location_address(request)
-        request.session['location'] = location
-        request.session['address'] = address
+        request.session[SLOCATION] = location
+        request.session[SADDRESS] = address
+    debug('index location is %s', location)
+    debug('user session is %s', request.session.session_key) 
     # initialising session variables
-    username = request.session.get('username', None)
-    user_id = request.session.get('user_id', None)
-    user_expiration = request.session.get('user_expiration', None)
+    username = request.session.get(SUSERNAME, None)
+    user_id = request.session.get(SUSER_ID, None)
+    user_expiration = request.session.get(SUSER_EXPIRATION, None)
     # refresh user expiration info
     if user_expiration and user_id:
         expiration_interval = timedelta(minutes=settings.PROXY_USER_REFRESH)
@@ -66,9 +75,9 @@ def index(request, search_request = None):
             username = user_form.cleaned_data['username']
             user_id = ProxyUser.register_user(username, location)
             if user_id:
-                request.session['username'] = username
-                request.session['user_id'] = user_id
-                request.session['user_expiration'] = timezone.now()
+                request.session[SUSERNAME] = username
+                request.session[SUSER_ID] = user_id
+                request.session[SUSER_EXPIRATION] = timezone.now()
             else:
                 user_form.full_clean()
                 user_form._errors['username'] = user_form.error_class(['Pseudo already used, please choose another one.'])
@@ -117,9 +126,9 @@ def logout(request, user_id, delete=True):
     if delete:
         user = ProxyUser.objects.get(pk=user_id)
         user.delete()
-    del request.session['username']
-    del request.session['user_id']
-    del request.session['user_expiration']
+    del request.session[SUSERNAME]
+    del request.session[SUSER_ID]
+    del request.session[SUSER_EXPIRATION]
 
 def set_position(request):
     """
@@ -131,7 +140,8 @@ def set_position(request):
     if request.method != 'POST':
         debug('Non POST request')
         return HttpResponseNotAllowed(['POST'])
-    user_id = request.session.get('user_id', None)
+    user_id = request.session.get(SUSER_ID, None)
+    debug('set_position session is %s', request.session.session_key)
     # get position from POST Geojson data
     try:
         position = GEOSGeometry(request.body)
@@ -139,7 +149,7 @@ def set_position(request):
         error('Unknown data format.')
         return HttpResponseBadRequest('Unknown data format.')
     debug('The position is: %s', position)
-    request.session['position'] = position
+    request.session[SLOCATION] = position
     if not user_id:
         debug('Unknown user.')
     else:
