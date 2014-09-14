@@ -19,6 +19,9 @@ from pmessages.models import ProxyMessage, ProxyUser
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
+debug = logger.debug
+info = logger.info
+error = logger.error
 
 class MessageForm(Form):
     message = CharField(widget=Textarea(attrs={'placeholder': 'Your message...', 'autofocus': 'autofocus', 'rows': '4'}))
@@ -126,20 +129,22 @@ def set_position(request):
     """
     # only accepts POST
     if request.method != 'POST':
+        debug('Non POST request')
         return HttpResponseNotAllowed(['POST'])
     user_id = request.session.get('user_id', None)
     # get position from POST Geojson data
     try:
         position = GEOSGeometry(request.body)
     except ValueError:
+        error('Unknown data format.')
         return HttpResponseBadRequest('Unknown data format.')
-    logger.debug('The position is: %s', position)
+    debug('The position is: %s', position)
     request.session['position'] = position
     if not user_id:
-        logger.debug('Unknown user.')
+        debug('Unknown user.')
     else:
         user = ProxyUser.objects.get(pk=user_id)
         user.position = position
         user.save()
-        logger.debug('User %s position saved', user)
+        debug('User %s position saved', user)
     return HttpResponse('OK')
