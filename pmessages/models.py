@@ -4,6 +4,13 @@ from django.contrib.gis.geos import *
 from datetime import timedelta
 from django.utils import timezone
 from django.conf import settings
+import logging
+
+# Get an instance of a logger
+logger = logging.getLogger(__name__)
+debug = logger.debug
+info = logger.info
+error = logger.error
 
 class ProxyMessage(models.Model):
     """A ProxyMessage is a simple text message with location information, username, originated ip and date.
@@ -63,21 +70,27 @@ class ProxyIndex(models.Model):
     @staticmethod
     def indexed_radius(pos):
         """Return index radius for pos location."""
+        debug('Getting index for %s', pos)
         create_index = False
         update_interval = timedelta(minutes=settings.PROXY_INDEX_EXPIRATION)
         try:
             nearest_index = ProxyIndex.objects.distance(pos).order_by('distance')[0]
         except IndexError:
             # No index found, we need to create one
+            debug('no index found, creating a new one')
             create_index = True
             radius = ProxyMessage.near_radius(pos)
         else:
             if nearest_index.update < timezone.now() - update_interval:
+                debug('Outdated index %s', nearest_index)
                 radius = ProxyMessage.near_radius(pos)
                 d1 = ProxyIndex.objects.filter(pk=nearest_index.id).distance(pos)[0].distance
+                debug('nearest index is at %s', d1)
                 d2 = D(km=radius)
+                debug('radius is %s', radius)
                 if  d1 > d2:
                     create_index = True
+                    debug('we need to create a new index')
                 else:
                     nearest_index.radius = radius
                     nearest_index.update = timezone.now()
@@ -85,6 +98,7 @@ class ProxyIndex(models.Model):
             else:
                 radius = nearest_index.radius
         if create_index:
+            debug('creating a new index')
             new_index = ProxyIndex(location = pos, update = timezone.now(), radius = radius)
             new_index.save()
         return radius
