@@ -48,6 +48,7 @@ class ProxyMessage(models.Model):
             i = i + 1
             radius = radius / 2
             nb = ProxyMessage.objects.filter(location__distance_lte=(pos, D(km=radius)), date__gt=yesterday).count()
+            debug('found %s messages in %s radius around %s', nb, radius, pos)
         radius = radius * 2
         return radius
     
