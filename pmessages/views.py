@@ -53,7 +53,7 @@ def index(request, search_request = None):
         expiration_max = timedelta(minutes=settings.PROXY_USER_EXPIRATION)
         delta = timezone.now() - user_expiration
         if delta > expiration_max:
-            logout(session, user_id, delete=False)
+            logout(request, user_id, delete=False)
             (username, user_id, user_expiration) = (None, None, None)
         elif delta > expiration_interval:
             user = ProxyUser.objects.get(pk=user_id)
