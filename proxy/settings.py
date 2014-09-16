@@ -162,7 +162,7 @@ LOGGING = {
             'class': 'django.utils.log.AdminEmailHandler'
         },
         'console': {
-            'level': 'DEBUG',
+            'level': 'ERROR',
             'class': 'logging.StreamHandler',
             'formatter': 'verbose'
             }
@@ -170,12 +170,12 @@ LOGGING = {
     'loggers': {
         'django.request': {
             'handlers': ['console'],
-            'level': 'DEBUG',
+            'level': 'ERROR',
             'propagate': True,
         },
         'pmessages': {
             'handlers': ['console'],
-            'level': 'DEBUG',
+            'level': 'ERROR',
         }
     }
 }
@@ -186,12 +186,12 @@ SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
 # Mininum message display radius
 PROXY_RADIUS_MIN = 2
 # Message display threshold, corresponding to one day
-PROXY_THRESHOLD = 10
+PROXY_THRESHOLD = 40
 # Proxy user expiration time, in minutes.
 PROXY_USER_EXPIRATION = 300
 # Proxy user expiration refresh, in minutes
 PROXY_USER_REFRESH = 60
 # Proxy index update expiration in minutes.
-PROXY_INDEX_EXPIRATION = 1
+PROXY_INDEX_EXPIRATION = 10
 # GeoIP
 GEOIP_PATH = os.path.join(BASE_DIR, 'data/geoip')
