@@ -13,6 +13,7 @@ from django.db.models import Q
 from datetime import timedelta
 from django.utils import timezone
 from django.conf import settings
+from django.views.decorators.cache import cache_page
 
 from pmessages.utils.geoutils import GeoUtils
 from pmessages.models import ProxyMessage, ProxyUser
@@ -158,3 +159,13 @@ def set_position(request):
         user.save()
         debug('User %s position saved', user)
     return HttpResponse('OK')
+
+@cache_page(60 * 60)
+def about(request):
+    """
+    Displays about page.
+    """
+    search_form = SearchForm()
+    return render_to_response('pmessages/about.html', 
+            {'search_form': search_form},
+            context_instance=RequestContext(request))
