@@ -29,6 +29,7 @@ CACHES = {
         'LOCATION': 'memcache.ezvan.fr:11211'
     }
 }
+CACHE_MIDDLEWARE_KEY_PREFIX = 'proxy-dev'
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -38,7 +39,7 @@ TIME_ZONE = 'Europe/Paris'
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
-LANGUAGE_CODE = 'fr-fr'
+LANGUAGE_CODE = 'en-gb'
 
 SITE_ID = 1
 
@@ -162,7 +163,7 @@ LOGGING = {
             'class': 'django.utils.log.AdminEmailHandler'
         },
         'console': {
-            'level': 'ERROR',
+            'level': 'DEBUG',
             'class': 'logging.StreamHandler',
             'formatter': 'verbose'
             }
@@ -175,7 +176,7 @@ LOGGING = {
         },
         'pmessages': {
             'handlers': ['console'],
-            'level': 'ERROR',
+            'level': 'DEBUG',
         }
     }
 }
