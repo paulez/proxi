@@ -1,5 +1,11 @@
 from django.contrib.gis.geoip import GeoIP
 
+# Get an instance of a logger
+logger = logging.getLogger(__name__)
+debug = logger.debug
+info = logger.info
+error = logger.error
+
 class GeoUtils:
     def __init__(self):
         self.g = GeoIP()
