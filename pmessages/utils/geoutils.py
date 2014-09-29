@@ -1,4 +1,5 @@
 from django.contrib.gis.geoip import GeoIP
+import logging
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
