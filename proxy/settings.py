@@ -69,10 +69,6 @@ MEDIA_URL = ''
 # Example: "/home/media/media.lawrence.com/static/"
 STATIC_ROOT = ''
 
-# URL prefix for static files.
-# Example: "http://media.lawrence.com/static/"
-STATIC_URL = '/static/'
-
 # Additional locations of static files
 STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
@@ -136,6 +132,7 @@ INSTALLED_APPS = (
     'pmessages',
     'south',
     'django.contrib.humanize',
+    'storages',
 )
 
 # A sample logging configuration. The only tangible logging
@@ -196,3 +193,16 @@ PROXY_USER_REFRESH = 60
 PROXY_INDEX_EXPIRATION = 10
 # GeoIP
 GEOIP_PATH = os.path.join(BASE_DIR, 'data/geoip')
+# Static files to S3
+AWS_STORAGE_BUCKET_NAME = 'static.dev.proxi.gg'
+STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+S3_URL = 'http://%s/' % AWS_STORAGE_BUCKET_NAME
+AWS_S3_CUSTOM_DOMAIN = AWS_STORAGE_BUCKET_NAME
+AWS_S3_SECURE_URLS = False
+STATIC_URL = S3_URL + 'static/'
+MEDIA_URL = S3_URL + 'media/'
+AWS_ACCESS_KEY_ID = 'AKIAIZ2SRF2XR4HZFDLQ'
+AWS_SECRET_ACCESS_KEY = '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'
+import boto.s3.connection
+AWS_S3_CALLING_FORMAT = boto.s3.connection.SubdomainCallingFormat()
