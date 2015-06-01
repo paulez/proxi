@@ -23,7 +23,7 @@ site.addsitedir('/var/proxy/local/lib/python2.7/site-packages')
 # Add the app's directory to the PYTHONPATH
 sys.path.append('/var/proxy/src/proxy')
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "proxy.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "proxy.settings-prod")
 
 
 # Activate your virtual env
