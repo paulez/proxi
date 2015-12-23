@@ -23,14 +23,6 @@ DATABASES = {
     }
 }
 
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'unique-snowflake',
-    }
-}
-CACHE_MIDDLEWARE_KEY_PREFIX = 'proxy-dev'
-
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
 # although not all choices may be available on all operating systems.
@@ -178,8 +170,8 @@ LOGGING = {
     }
 }
 
-# Using simple cache session engine (no persistency).
-SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+# Required to be able to serialize the session using the DB backend.
+SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
 
 # Mininum message display radius
 PROXY_RADIUS_MIN = 2
