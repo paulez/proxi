@@ -18,15 +18,15 @@ DATABASES = {
         'NAME': 'proxydb',                      # Or path to database file if using sqlite3.
         'USER': 'proxydb',                      # Not used with sqlite3.
         'PASSWORD': 'bah9Roof',                  # Not used with sqlite3.
-        'HOST': 'proxy-dev.cruvlk9k0aye.eu-west-1.rds.amazonaws.com',                      # Set to empty string for localhost. Not used with sqlite3.
-        'PORT': '8200',                      # Set to empty string for default. Not used with sqlite3.
+        'HOST': 'localhost',                      # Set to empty string for localhost. Not used with sqlite3.
+        'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
     }
 }
 
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.memcached.PyLibMCCache',
-        'LOCATION': 'memcache.ezvan.fr:11211'
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
     }
 }
 CACHE_MIDDLEWARE_KEY_PREFIX = 'proxy-dev'
@@ -108,7 +108,7 @@ MIDDLEWARE_CLASSES = (
 ROOT_URLCONF = 'pmessages.urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
-WSGI_APPLICATION = 'proxy.wsgi.application'
+#WSGI_APPLICATION = 'proxy.wsgi.application'
 
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
