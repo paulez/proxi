@@ -42,10 +42,11 @@ class SearchForm(Form):
 def index(request, search_request = None):
     # get location and address from session
     location = request.session.get(SLOCATION, None)
+    debug('session location is %s', location)
     address = request.session.get(SADDRESS, None)
     # if the session doesn't contain session and address
     # get it from geotils (so from the ip)
-    if not (location and address):
+    if not location and address:
         debug('getting location and address from geoip')
         geo = GeoUtils()
         (location, address) = geo.get_user_location_address(request)
