@@ -1,12 +1,14 @@
 from django.conf.urls import patterns, include, url
 
+import pmessages
+
 # Uncomment the next two lines to enable the admin:
 from django.contrib.gis import admin
 admin.autodiscover()
 
-urlpatterns = patterns('',
+urlpatterns = [
     # Examples:
-    # url(r'^$', 'proxy.views.home', name='home'),
+    # url(r'^$', proxy.views.home),
     # url(r'^proxy/', include('proxy.foo.urls')),
 
     # Uncomment the admin/doc line below to enable admin documentation:
@@ -14,6 +16,6 @@ urlpatterns = patterns('',
 
     # Uncomment the next line to enable the admin:
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^$', 'pmessages.views.index'),
+    url(r'^$', pmessages.views.index, name='index'),
     url(r'^m/', include('pmessages.urls')),
-)
+]
