@@ -122,7 +122,6 @@ INSTALLED_APPS = (
     # 'django.contrib.admindocs',
     'django.contrib.gis',
     'pmessages',
-    'south',
     'django.contrib.humanize',
     'storages',
 )
