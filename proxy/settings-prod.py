@@ -18,8 +18,8 @@ DATABASES = {
         'NAME': 'proxydb',                      # Or path to database file if using sqlite3.
         'USER': 'proxydb',                      # Not used with sqlite3.
         'PASSWORD': 'pu3Voo4e',                  # Not used with sqlite3.
-        'HOST': 'proxy-prod.cruvlk9k0aye.eu-west-1.rds.amazonaws.com',                      # Set to empty string for localhost. Not used with sqlite3.
-        'PORT': '3306',                      # Set to empty string for default. Not used with sqlite3.
+        'HOST': 'db2.ezvan.fr',                      # Set to empty string for localhost. Not used with sqlite3.
+        'PORT': '5432',                      # Set to empty string for default. Not used with sqlite3.
     }
 }
 
