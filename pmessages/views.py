@@ -42,17 +42,22 @@ class SearchForm(Form):
 def index(request, search_request = None):
     # get location and address from session
     location = request.session.get(SLOCATION, None)
-    debug('session location is %s', location)
+    debug('user location is %s', location)
     address = request.session.get(SADDRESS, None)
+    debug('user adress is %s', address)
     # if the session doesn't contain session and address
     # get it from geotils (so from the ip)
-    if not location and address:
-        debug('getting location and address from geoip')
+    if not address:
         geo = GeoUtils()
-        (location, address) = geo.get_user_location_address(request)
-        request.session[SLOCATION] = location
+        address = geo.get_user_location_address(request)[1]
         request.session[SADDRESS] = address
-    debug('index location is %s', location)
+        debug('address from geoip set to %s', address)
+    if not location:
+        geo = GeoUtils()
+        location = geo.get_user_location_address(request)[0]
+        request.session[SLOCATION] = location
+        debug('location from geoip set to %s', location)
+    debug('user location is %s', location)
     debug('user session is %s', request.session.session_key) 
     # initialising session variables
     username = request.session.get(SUSERNAME, None)
@@ -64,6 +69,7 @@ def index(request, search_request = None):
         expiration_max = timedelta(minutes=settings.PROXY_USER_EXPIRATION)
         delta = timezone.now() - user_expiration
         if delta > expiration_max:
+            debug('expired user %s', user_id)
             logout(request, user_id, delete=False)
             (username, user_id, user_expiration) = (None, None, None)
         elif delta > expiration_interval:

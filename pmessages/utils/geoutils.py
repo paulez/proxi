@@ -18,19 +18,25 @@ class GeoUtils:
     def get_user_location_address(self, request):
         # get user possible ip address list and return first associated location found and associated address
         address = self.get_user_address_list(request)
+        last_address = None
         for ip in address:
             loc = self.get_point_from_ip(ip)
+            last_address = ip
             if loc:
                 return (loc, ip)
-        error('Cannot locate user from adress %s.', address)
-        return (None, None)
+        error('Cannot locate user from adress %s, last address is %s', 
+                address, last_address)
+        return (None, last_address)
         
     def get_user_address_list(self, request):
         # get a list of possible user ip address from request
-        try:
-            ip = request.META['HTTP_X_FORWARDED_FOR']
+        forwarded_header = 'HTTP_X_FORWARDED_FOR'
+        remote_header = 'REMOTE_ADDR'
+        if forwarded_header in request.META:
+            ip = request.META[forwarded_header]
             ip = ip.split(",")
-            return [x.strip() for x in ip]
-            
-        except KeyError:
-            return [request.META['REMOTE_ADDR']]    
+            adresses = [x.strip() for x in ip]
+        else:
+            adresses = [request.META[remote_header]]
+        debug('geoip addresses: %s', adresses)
+        return adresses
