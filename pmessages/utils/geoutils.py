@@ -17,7 +17,7 @@ class GeoUtils:
 
     def get_user_location_address(self, request):
         # get user possible ip address list and return first associated location found and associated address
-        address = self.get_user_address_list(request)
+        address = self._get_user_address_list(request)
         last_address = None
         for ip in address:
             loc = self.get_point_from_ip(ip)
@@ -28,7 +28,7 @@ class GeoUtils:
                 address, last_address)
         return (None, last_address)
         
-    def get_user_address_list(self, request):
+    def _get_user_address_list(self, request):
         # get a list of possible user ip address from request
         forwarded_header = 'HTTP_X_FORWARDED_FOR'
         remote_header = 'REMOTE_ADDR'
