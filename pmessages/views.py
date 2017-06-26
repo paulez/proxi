@@ -39,7 +39,7 @@ class UserForm(Form):
 class SearchForm(Form):
     user_query = CharField(widget=TextInput(attrs={'placeholder': 'Search', 'class': 'search-query'}),max_length=100)
 
-def index(request, search_request = None):
+def index(request, search_request=None):
     # get location and address from session
     location = request.session.get(SLOCATION, None)
     debug('user location is %s', location)
@@ -114,6 +114,7 @@ def index(request, search_request = None):
                 (username, user_id, user_expiration) = (None, None, None)
     # Search form processing
     if "user_query" in request.POST:
+        debug('filtering messages by user')
         search_form = SearchForm(data=request.POST)
         if search_form.is_valid():
             search_request = search_form.cleaned_data['user_query']
@@ -122,6 +123,7 @@ def index(request, search_request = None):
     if location:
         # Getting messages near location
         if search_request:
+            debug('search_request is set')
             # Filter messages using search_request
             all_messages = ProxyMessage.near_messages(location).filter(Q(message__icontains=search_request) | Q(username__icontains=search_request)).order_by('-date')[:30]
         else:
