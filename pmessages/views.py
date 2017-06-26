@@ -1,5 +1,5 @@
 import logging
-from django.shortcuts import render_to_response, get_object_or_404
+from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseNotAllowed
 from django.http import HttpResponseBadRequest
 from django.core.urlresolvers import reverse
@@ -128,7 +128,7 @@ def index(request, search_request = None):
             all_messages = ProxyMessage.near_messages(location).order_by('-date')[:30]
     else:
         all_messages = None
-    return render_to_response('pmessages/index.html', {'all_messages': all_messages, 'message_form': message_form, 'user_form': user_form, 'search_form': search_form, 'username': username, 'location': location}, context_instance=RequestContext(request))
+    return render(request, 'pmessages/index.html', {'all_messages': all_messages, 'message_form': message_form, 'user_form': user_form, 'search_form': search_form, 'username': username, 'location': location})
     
 def logout(request, user_id, delete=True):
     if delete:
@@ -173,6 +173,5 @@ def about(request):
     Displays about page.
     """
     search_form = SearchForm()
-    return render_to_response('pmessages/about.html', 
-            {'search_form': search_form},
-            context_instance=RequestContext(request))
+    return render(request, 'pmessages/about.html', 
+            {'search_form': search_form})

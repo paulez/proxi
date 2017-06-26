@@ -113,7 +113,7 @@ MIDDLEWARE_CLASSES = (
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
-ROOT_URLCONF = 'pmessages.urls'
+ROOT_URLCONF = 'proxy.urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
 #WSGI_APPLICATION = 'proxy.wsgi.application'
@@ -206,3 +206,5 @@ AWS_ACCESS_KEY_ID = 'AKIAIZ2SRF2XR4HZFDLQ'
 AWS_SECRET_ACCESS_KEY = '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'
 import boto.s3.connection
 AWS_S3_CALLING_FORMAT = boto.s3.connection.SubdomainCallingFormat()
+# Allowed hosts for POST Protection
+ALLOWED_HOSTS = ['proxi1.home.ezvan.fr']

@@ -77,7 +77,7 @@
             </section>
             <section class=message-info>
                 <span class="message-author">
-                    Par <a href="{% url 'pmessages.views.index' message.username %}">{{ message.username }}</a>
+                    Par <a href="{% url 'pmessages:messages-user' message.username %}">{{ message.username }}</a>
                 </span>
                 <span class="message-date">
                     {{ message.date|naturaltime }}

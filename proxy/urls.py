@@ -1,4 +1,4 @@
-from django.conf.urls import patterns, include, url
+from django.conf.urls import include, url
 
 import pmessages
 
@@ -16,6 +16,6 @@ urlpatterns = [
 
     # Uncomment the next line to enable the admin:
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^$', pmessages.views.index, name='index'),
-    url(r'^m/', include('pmessages.urls')),
+    #url(r'^$', pmessages.views.index, name='index'),
+    url(r'', include('pmessages.urls', namespace='pmessages')),
 ]
