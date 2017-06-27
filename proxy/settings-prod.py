@@ -207,3 +207,5 @@ AWS_ACCESS_KEY_ID = 'AKIAIZ2SRF2XR4HZFDLQ'
 AWS_SECRET_ACCESS_KEY = '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'
 import boto.s3.connection
 AWS_S3_CALLING_FORMAT = boto.s3.connection.SubdomainCallingFormat()
+# Allowed hosts for POST Protection
+ALLOWED_HOSTS = ['proxi.gg']
