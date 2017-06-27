@@ -21,3 +21,10 @@ sudo -u postgres psql
 ALTER USER proxydb WITH PASSWORD 'password';
 sudo -u postgres psql --dbname=proxydb -c "CREATE EXTENSION postgis;"
 sudo -u postgres psql --dbname=proxydb -c "CREATE EXTENSION postgis_topology;"
+
+# git
+# push
+jgit push
+# pull
+jgit fetch
+git merge remotes/origin/dev
