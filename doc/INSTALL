@@ -4,6 +4,15 @@ virtualenv proxy_env
 cd proxy_env
 source bin/activate
 
+# configure git
+sudo apt-get install jgit
+put creds into ~/.jgit_s3_public
+
+# Clone source
+mkdir src
+cd src
+jgit clone amazon-s3://.jgit_s3_public@paulez-git/proxy
+
 # Set-up postgis
 sudo apt-get install postgis
 sudo -u postgres createuser proxydb
