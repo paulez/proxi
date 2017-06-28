@@ -15,8 +15,11 @@ from django.utils import timezone
 from django.conf import settings
 from django.views.decorators.cache import cache_page
 
+from rest_framework import generics
+
 from pmessages.utils.geoutils import GeoUtils
 from pmessages.models import ProxyMessage, ProxyUser
+from pmessages.serializers import ProxyMessageSerializer
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -177,3 +180,9 @@ def about(request):
     search_form = SearchForm()
     return render(request, 'pmessages/about.html', 
             {'search_form': search_form})
+
+class MessageList(generics.ListAPIView):
+    serializer_class = ProxyMessageSerializer
+
+    def get_queryset(self):
+        latitude = kwargs['latitude']

@@ -134,6 +134,7 @@ INSTALLED_APPS = (
     'pmessages',
     'django.contrib.humanize',
     'storages',
+    'rest_framework',
 )
 
 # A sample logging configuration. The only tangible logging

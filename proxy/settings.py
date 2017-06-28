@@ -133,6 +133,7 @@ INSTALLED_APPS = (
     'pmessages',
     'django.contrib.humanize',
     'storages',
+    'rest_framework',
 )
 
 # A sample logging configuration. The only tangible logging
@@ -207,4 +208,4 @@ AWS_SECRET_ACCESS_KEY = 'AefQSwIctFvfVKWL87McTDWQIy0v7SPWDIO4RZ8X'
 import boto.s3.connection
 AWS_S3_CALLING_FORMAT = boto.s3.connection.SubdomainCallingFormat()
 # Allowed hosts for POST Protection
-ALLOWED_HOSTS = ['proxi1.home.ezvan.fr']
+ALLOWED_HOSTS = ['proxi1.home.ezvan.fr', '127.0.0.1']
