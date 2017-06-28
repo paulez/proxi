@@ -1,0 +1,6 @@
+- write REST api to get messages, should require location in WGS84 format
+* url api/messages/latitude/longitude
+- think about authentication
+* temporary auth token only valid for a given location ?
+* posting would require a auth token
+* if client has moved, reauthentication is required
