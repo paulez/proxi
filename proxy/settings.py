@@ -65,7 +65,7 @@ STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    os.path.join(BASE_DIR, '../static/'),
+    os.path.join(BASE_DIR, '../static'),
 )
 
 # List of finder classes that know how to find static files in
@@ -196,13 +196,13 @@ PROXY_INDEX_EXPIRATION = 10
 GEOIP_PATH = os.path.join(BASE_DIR, 'data/geoip')
 # Static files to S3
 AWS_STORAGE_BUCKET_NAME = 'static.dev.proxi.gg'
-STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+#STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+#DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
 S3_URL = 'http://%s/' % AWS_STORAGE_BUCKET_NAME
 AWS_S3_CUSTOM_DOMAIN = AWS_STORAGE_BUCKET_NAME
 AWS_S3_SECURE_URLS = False
-STATIC_URL = S3_URL + 'static/'
-MEDIA_URL = S3_URL + 'media/'
+STATIC_URL = '/static/'
+MEDIA_URL = '/media/'
 AWS_ACCESS_KEY_ID = 'AKIAIZ2SRF2XR4HZFDLQ'
 AWS_SECRET_ACCESS_KEY = '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'
 import boto.s3.connection
