@@ -38,16 +38,20 @@ class ProxyMessage(models.Model):
     def near_radius(pos):
         """Return radius in which there are less than threshold messages posted in one day."""
         threshold = settings.PROXY_THRESHOLD
+        threshold_duration = settings.PROXY_THRESHOLD_DURATION
         radius_min = settings.PROXY_RADIUS_MIN
-        radius = 50000
+        radius_max = settings.PROXY_RADIUS_MAX
+
+        radius = radius_max
         nb = threshold + 1
-        yesterday = timezone.now() - timedelta(days=1)
-        i = 0
-        # Determining minimal distance to get less than level messages during on day
+        messages_since = timezone.now() - timedelta(minutes=threshold_duration)
+        # Determining minimal distance to get less than threshold
+        # messages during threshold duration
         while nb > threshold and radius > radius_min:
-            i = i + 1
             radius = radius / 2
-            nb = ProxyMessage.objects.filter(location__distance_lte=(pos, D(km=radius)), date__gt=yesterday).count()
+            nb = ProxyMessage.objects.filter(
+                    location__distance_lte=(pos, D(m=radius)), 
+                            date__gt=messages_since).count()
             debug('found %s messages in %s radius around %s', nb, radius, pos)
         radius = radius * 2
         return radius
@@ -56,7 +60,7 @@ class ProxyMessage(models.Model):
     def near_messages(pos):
         """Return messages which are near pos."""
         radius = ProxyIndex.indexed_radius(pos)
-        result = ProxyMessage.objects.filter(location__distance_lte=(pos, D(km=radius)))
+        result = ProxyMessage.objects.filter(location__distance_lte=(pos, D(m=radius)))
         return result
         
 class ProxyIndex(models.Model):
@@ -87,7 +91,7 @@ class ProxyIndex(models.Model):
                 radius = ProxyMessage.near_radius(pos)
                 d1 = ProxyIndex.objects.filter(pk=nearest_index.id).distance(pos)[0].distance
                 debug('nearest index is at %s', d1)
-                d2 = D(km=radius)
+                d2 = D(m=radius)
                 debug('radius is %s', radius)
                 if  d1 > d2:
                     create_index = True
@@ -120,7 +124,7 @@ class ProxyUser(models.Model):
         return False."""
         radius = ProxyIndex.indexed_radius(pos)
         try:
-            user = ProxyUser.objects.filter(location__distance_lte=(pos, D(km=radius)), username = username).distance(pos).order_by('distance')[0]
+            user = ProxyUser.objects.filter(location__distance_lte=(pos, D(m=radius)), username = username).distance(pos).order_by('distance')[0]
         except IndexError:
             new_user = ProxyUser(location = pos, last_use = timezone.now(), username = username)
             new_user.save()

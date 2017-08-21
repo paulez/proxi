@@ -134,6 +134,7 @@ INSTALLED_APPS = (
     'django.contrib.humanize',
     'storages',
     'rest_framework',
+    'sslserver',
 )
 
 # A sample logging configuration. The only tangible logging
@@ -182,16 +183,20 @@ LOGGING = {
 # Required to be able to serialize the session using the DB backend.
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
 
-# Mininum message display radius
-PROXY_RADIUS_MIN = 2
-# Message display threshold, corresponding to one day
-PROXY_THRESHOLD = 40
+# Mininum message display radius (meters)
+PROXY_RADIUS_MIN = 64
+# Maximum message display radius (meters)
+PROXY_RADIUS_MAX = 524288
+# In minutes, messages more recent are counter to find the zone threshold
+PROXY_THRESHOLD_DURATION = 60
+# Threshold of min messages to display in a zone for the last duration
+PROXY_THRESHOLD = 5
 # Proxy user expiration time, in minutes.
 PROXY_USER_EXPIRATION = 300
 # Proxy user expiration refresh, in minutes
-PROXY_USER_REFRESH = 60
+PROXY_USER_REFRESH = 5
 # Proxy index update expiration in minutes.
-PROXY_INDEX_EXPIRATION = 10
+PROXY_INDEX_EXPIRATION = 5
 # GeoIP
 GEOIP_PATH = os.path.join(BASE_DIR, 'data/geoip')
 # Static files to S3
