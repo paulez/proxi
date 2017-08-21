@@ -30,7 +30,7 @@ TIME_ZONE = 'Europe/Paris'
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
-LANGUAGE_CODE = 'en-gb'
+LANGUAGE_CODE = 'en-us'
 
 SITE_ID = 1
 
@@ -208,4 +208,4 @@ AWS_SECRET_ACCESS_KEY = 'AefQSwIctFvfVKWL87McTDWQIy0v7SPWDIO4RZ8X'
 import boto.s3.connection
 AWS_S3_CALLING_FORMAT = boto.s3.connection.SubdomainCallingFormat()
 # Allowed hosts for POST Protection
-ALLOWED_HOSTS = ['proxi1.home.ezvan.fr', '127.0.0.1']
+ALLOWED_HOSTS = ['proxi1.home.ezvan.fr', '127.0.0.1', 'proxi-dev-1.local']
