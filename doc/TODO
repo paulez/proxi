@@ -4,3 +4,4 @@
 * temporary auth token only valid for a given location ?
 * posting would require a auth token
 * if client has moved, reauthentication is required
+- fix search logic
