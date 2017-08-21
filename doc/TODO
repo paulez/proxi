@@ -5,3 +5,5 @@
 * posting would require a auth token
 * if client has moved, reauthentication is required
 - fix search logic
+- needs to run full https (geolocation not allowed in http)
+- weird behaviour when user is using same pseudo (login allowed, cannot post)
