@@ -203,14 +203,10 @@ GEOIP_PATH = os.path.join(BASE_DIR, 'data/geoip')
 AWS_STORAGE_BUCKET_NAME = 'static.proxi.gg'
 STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
-S3_URL = 'http://%s/' % AWS_STORAGE_BUCKET_NAME
-AWS_S3_CUSTOM_DOMAIN = AWS_STORAGE_BUCKET_NAME
-AWS_S3_SECURE_URLS = False
-STATIC_URL = S3_URL + 'static/'
-MEDIA_URL = S3_URL + 'media/'
-AWS_ACCESS_KEY_ID = 'AKIAIZ2SRF2XR4HZFDLQ'
-AWS_SECRET_ACCESS_KEY = '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'
+AWS_S3_REGION_NAME = 'eu-west-1'
+AWS_S3_HOST = 's3-eu-west-1.amazonaws.com'
+STATIC_URL = '/static/'
 import boto.s3.connection
-AWS_S3_CALLING_FORMAT = boto.s3.connection.SubdomainCallingFormat()
+AWS_S3_CALLING_FORMAT = boto.s3.connection.OrdinaryCallingFormat()
 # Allowed hosts for POST Protection
 ALLOWED_HOSTS = ['proxi.gg']
