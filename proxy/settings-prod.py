@@ -3,7 +3,7 @@ import os
 # Django settings for proxy project.
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DEBUG = True
+DEBUG = False
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
@@ -114,7 +114,7 @@ MIDDLEWARE_CLASSES = (
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
-ROOT_URLCONF = 'pmessages.urls'
+ROOT_URLCONF = 'proxy.urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
 WSGI_APPLICATION = 'proxy.wsgi.application'
