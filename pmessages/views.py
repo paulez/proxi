@@ -105,7 +105,7 @@ def index(request, search_request=None):
     # Display logout form
     logout_form = Form()
     # Search form processing
-    if "user_query" in request.POST:
+    if request.method == 'POST' and "user_query" in request.POST:
         debug('filtering messages by user')
         search_form = SearchForm(data=request.POST)
         if search_form.is_valid():
