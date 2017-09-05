@@ -1,16 +1,13 @@
 import logging
-from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponse, HttpResponseRedirect, HttpResponseNotAllowed
+from datetime import timedelta
+
+from django.shortcuts import render, redirect
+from django.http import HttpResponse, HttpResponseNotAllowed
 from django.http import HttpResponseBadRequest
-from django.core.urlresolvers import reverse
-from django.forms import ModelForm, Form, CharField
+from django.forms import Form, CharField
 from django.forms.widgets import Textarea, TextInput
-from django.forms.forms import NON_FIELD_ERRORS
-from django.template import RequestContext
-from django.contrib.gis.geoip import GeoIP
 from django.contrib.gis.geos import GEOSGeometry
 from django.db.models import Q
-from datetime import timedelta
 from django.utils import timezone
 from django.conf import settings
 from django.views.decorators.cache import cache_page
@@ -35,13 +32,19 @@ SUSER_ID = 'user_id'
 SUSER_EXPIRATION = 'user_expiration'
 
 class MessageForm(Form):
-    message = CharField(widget=Textarea(attrs={'placeholder': 'Your message...', 'autofocus': 'autofocus', 'rows': '4'}))
-    
+    message = CharField(widget=Textarea(
+        attrs={'placeholder': 'Your message...',
+               'autofocus': 'autofocus', 'rows': '3'}))
+
 class UserForm(Form):
-    username = CharField(widget=TextInput(attrs={'placeholder': 'Username', 'autofocus': 'autofocus'}), max_length=20)
+    username = CharField(widget=TextInput(
+        attrs={'placeholder': 'Username', 'autofocus': 'autofocus'}),
+        max_length=20)
 
 class SearchForm(Form):
-    user_query = CharField(widget=TextInput(attrs={'placeholder': 'Search', 'class': 'search-query'}),max_length=100)
+    user_query = CharField(widget=TextInput(
+        attrs={'placeholder': 'Search', 'class': 'search-query'}),
+        max_length=100)
 
 def get_location(request):
     # get location and address from session
@@ -66,7 +69,7 @@ def get_location(request):
 def index(request, search_request=None):
     location, address = get_location(request)
     debug('user location is %s', location)
-    debug('user session is %s', request.session.session_key) 
+    debug('user session is %s', request.session.session_key)
     # initialising session variables
     username = request.session.get(SUSERNAME, None)
     user_id = request.session.get(SUSER_ID, None)
@@ -93,7 +96,8 @@ def index(request, search_request=None):
             if username:
                 message = message_form.cleaned_data['message']
                 ref = None
-                m = ProxyMessage(username = username, message = message, address = address, location = location, ref = ref)
+                m = ProxyMessage(username=username, message=message,
+                        address=address, location=location, ref=ref)
                 m.save()
                 message_form = MessageForm()
             else:
@@ -120,16 +124,18 @@ def index(request, search_request=None):
         if search_request:
             debug('search_request is set')
             # Filter messages using search_request
-            all_messages = ProxyMessage.near_messages(location).filter(Q(message__icontains=search_request) | Q(username__icontains=search_request)).order_by('-date')[:30]
+            all_messages = ProxyMessage.near_messages(location).filter(
+                    Q(message__icontains=search_request) | Q(username__icontains=search_request)
+                    ).order_by('-date')[:30]
         else:
             all_messages = ProxyMessage.near_messages(location).order_by('-date')[:30]
     else:
         all_messages = None
-    return render(request, 'pmessages/index.html', 
-            {'all_messages': all_messages, 'message_form': message_form, 
-                'user_form': user_form, 'search_form': search_form, 
-                'username': username, 'location': location})
-    
+    return render(request, 'pmessages/index.html',
+                  {'all_messages': all_messages, 'message_form': message_form,
+                  'user_form': user_form, 'search_form': search_form,
+                  'username': username, 'location': location})
+
 def logout(request, user_id, delete=True):
     if delete:
         user = ProxyUser.objects.get(pk=user_id)
@@ -173,7 +179,7 @@ def about(request):
     Displays about page.
     """
     search_form = SearchForm()
-    return render(request, 'pmessages/about.html', 
+    return render(request, 'pmessages/about.html',
             {'search_form': search_form})
 
 def login(request):
@@ -192,7 +198,7 @@ def login(request):
                 request.session[SUSERNAME] = username
                 request.session[SUSER_ID] = user_id
                 request.session[SUSER_EXPIRATION] = timezone.now()
-                return HttpResponseRedirect('/')
+                return redirect('/')
             else:
                 user_form.full_clean()
                 login_in_use_msg = _('Pseudo already in use, please choose another one.')
