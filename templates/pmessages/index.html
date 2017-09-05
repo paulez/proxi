@@ -30,7 +30,7 @@
                 </fieldset>
             </form>
         {% else %}
-            <form action="" name="user_form" method="post">
+            <form action="{%url 'pmessages:login' %}" name="user_form" method="post">
                 {% csrf_token %}
                 <fieldset>
                 <legend>Choose your pseudo !</legend>

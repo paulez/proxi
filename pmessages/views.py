@@ -14,6 +14,7 @@ from datetime import timedelta
 from django.utils import timezone
 from django.conf import settings
 from django.views.decorators.cache import cache_page
+from django.utils.translation import ugettext as _
 
 from rest_framework import generics
 
@@ -42,7 +43,7 @@ class UserForm(Form):
 class SearchForm(Form):
     user_query = CharField(widget=TextInput(attrs={'placeholder': 'Search', 'class': 'search-query'}),max_length=100)
 
-def index(request, search_request=None):
+def get_location(request):
     # get location and address from session
     location = request.session.get(SLOCATION, None)
     debug('user location is %s', location)
@@ -60,6 +61,10 @@ def index(request, search_request=None):
         location = geo.get_user_location_address(request)[0]
         request.session[SLOCATION] = location
         debug('location from geoip set to %s', location)
+    return location, address
+
+def index(request, search_request=None):
+    location, address = get_location(request)
     debug('user location is %s', location)
     debug('user session is %s', request.session.session_key) 
     # initialising session variables
@@ -79,21 +84,8 @@ def index(request, search_request=None):
             user = ProxyUser.objects.get(pk=user_id)
             user.last_use = timezone.now()
             user.save()
-    # User form processing
-    if (not username) and ("use_pseudo" in request.POST):
-        user_form = UserForm(data=request.POST)
-        if user_form.is_valid():
-            username = user_form.cleaned_data['username']
-            user_id = ProxyUser.register_user(username, location)
-            if user_id:
-                request.session[SUSERNAME] = username
-                request.session[SUSER_ID] = user_id
-                request.session[SUSER_EXPIRATION] = timezone.now()
-            else:
-                user_form.full_clean()
-                user_form._errors['username'] = user_form.error_class(['Pseudo already used, please choose another one.'])
-    else:
-        user_form = UserForm()
+    # Display User form
+    user_form = UserForm()
     # Message from processing
     if "post_message" in request.POST:
         message_form = MessageForm(data=request.POST)
@@ -133,7 +125,10 @@ def index(request, search_request=None):
             all_messages = ProxyMessage.near_messages(location).order_by('-date')[:30]
     else:
         all_messages = None
-    return render(request, 'pmessages/index.html', {'all_messages': all_messages, 'message_form': message_form, 'user_form': user_form, 'search_form': search_form, 'username': username, 'location': location})
+    return render(request, 'pmessages/index.html', 
+            {'all_messages': all_messages, 'message_form': message_form, 
+                'user_form': user_form, 'search_form': search_form, 
+                'username': username, 'location': location})
     
 def logout(request, user_id, delete=True):
     if delete:
@@ -180,6 +175,32 @@ def about(request):
     search_form = SearchForm()
     return render(request, 'pmessages/about.html', 
             {'search_form': search_form})
+
+def login(request):
+    """
+    Process login POST requests.
+    """
+    location = get_location(request)[0]
+
+    # Handle POST
+    if request.method == 'POST':
+        user_form = UserForm(data=request.POST)
+        if user_form.is_valid():
+            username = user_form.cleaned_data['username']
+            user_id = ProxyUser.register_user(username, location)
+            if user_id:
+                request.session[SUSERNAME] = username
+                request.session[SUSER_ID] = user_id
+                request.session[SUSER_EXPIRATION] = timezone.now()
+                return HttpResponseRedirect('/')
+            else:
+                user_form.full_clean()
+                login_in_use_msg = _('Pseudo already in use, please choose another one.')
+                user_form.add_error('username', login_in_use_msg)
+    else:
+        user_form = UserForm()
+    return render(request, 'pmessages/login.html',
+        {'user_form': user_form})
 
 class MessageList(generics.ListAPIView):
     serializer_class = ProxyMessageSerializer
