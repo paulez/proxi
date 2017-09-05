@@ -198,7 +198,7 @@ def login(request):
                 request.session[SUSERNAME] = username
                 request.session[SUSER_ID] = user_id
                 request.session[SUSER_EXPIRATION] = timezone.now()
-                return redirect('/')
+                return redirect('pmessages:messages')
             else:
                 user_form.full_clean()
                 login_in_use_msg = _('Pseudo already in use, please choose another one.')
