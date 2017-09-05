@@ -47,6 +47,10 @@ class SearchForm(Form):
         max_length=100)
 
 def get_location(request):
+    """Get user location information.
+    Returns a tuple of location and ip address which
+    was located.
+    """
     # get location and address from session
     location = request.session.get(SLOCATION, None)
     debug('user location is %s', location)
@@ -66,10 +70,10 @@ def get_location(request):
         debug('location from geoip set to %s', location)
     return location, address
 
-def index(request, search_request=None):
-    location, address = get_location(request)
-    debug('user location is %s', location)
-    debug('user session is %s', request.session.session_key)
+def get_user(request):
+    """Get user session information.
+    Returns username, user id and user expiration.
+    """
     # initialising session variables
     username = request.session.get(SUSERNAME, None)
     user_id = request.session.get(SUSER_ID, None)
@@ -87,23 +91,17 @@ def index(request, search_request=None):
             user = ProxyUser.objects.get(pk=user_id)
             user.last_use = timezone.now()
             user.save()
+    return (username, user_id, user_expiration)
+
+def index(request, search_request=None):
+    location, address = get_location(request)
+    debug('user location is %s', location)
+    debug('user session is %s', request.session.session_key)
+    username, user_id, user_expiration = get_user(request)
     # Display User form
     user_form = UserForm()
     # Message from processing
-    if "post_message" in request.POST:
-        message_form = MessageForm(data=request.POST)
-        if message_form.is_valid():
-            if username:
-                message = message_form.cleaned_data['message']
-                ref = None
-                m = ProxyMessage(username=username, message=message,
-                        address=address, location=location, ref=ref)
-                m.save()
-                message_form = MessageForm()
-            else:
-                user_form._errors['username'] = user_form.error_class(['Please choose a pseudo before posting a message.'])
-    else:
-        message_form = MessageForm()
+    message_form = MessageForm()
     # Logout form processing
     if "logout" in request.POST:
         logout_form = Form(data=request.POST)
@@ -187,6 +185,9 @@ def login(request):
     Process login POST requests.
     """
     location = get_location(request)[0]
+    username = get_user(request)[0]
+    if username:
+        return redirect('pmessages:messages')
 
     # Handle POST
     if request.method == 'POST':
@@ -201,12 +202,39 @@ def login(request):
                 return redirect('pmessages:messages')
             else:
                 user_form.full_clean()
-                login_in_use_msg = _('Pseudo already in use, please choose another one.')
-                user_form.add_error('username', login_in_use_msg)
+                user_form.add_error('username',
+                        _('Pseudo already in use, please choose another one.'))
     else:
         user_form = UserForm()
     return render(request, 'pmessages/login.html',
-        {'user_form': user_form})
+            {'user_form': user_form, 'location': location})
+
+def message(request):
+    """
+    Process message POST requests.
+    """
+    location, address = get_location(request)
+    username = get_user(request)[0]
+
+    if request.method == 'POST':
+        message_form = MessageForm(data=request.POST)
+        if message_form.is_valid():
+            if username:
+                message_text = message_form.cleaned_data['message']
+                ref = None
+                message = ProxyMessage(username=username, message=message_text,
+                        address=address, location=location, ref=ref)
+                message.save()
+                message_form = MessageForm()
+                return redirect('pmessages:messages')
+            else:
+                login_msg = _('Please login before posting a message.')
+                message_form.add_error('message', login_msg)
+    else:
+        message_form = MessageForm()
+    return render(request, 'pmessages/message.html',
+            {'message_form': message_form, 'location': location,
+             'username': username})
 
 class MessageList(generics.ListAPIView):
     serializer_class = ProxyMessageSerializer
