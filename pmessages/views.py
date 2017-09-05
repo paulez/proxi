@@ -85,7 +85,7 @@ def get_user(request):
         delta = timezone.now() - user_expiration
         if delta > expiration_max:
             debug('expired user %s', user_id)
-            logout(request, user_id, delete=False)
+            do_logout(request, user_id, delete=False)
             (username, user_id, user_expiration) = (None, None, None)
         elif delta > expiration_interval:
             user = ProxyUser.objects.get(pk=user_id)
@@ -98,17 +98,12 @@ def index(request, search_request=None):
     debug('user location is %s', location)
     debug('user session is %s', request.session.session_key)
     username, user_id, user_expiration = get_user(request)
-    # Display User form
+    # Display user form
     user_form = UserForm()
-    # Message from processing
+    # Display message form
     message_form = MessageForm()
-    # Logout form processing
-    if "logout" in request.POST:
-        logout_form = Form(data=request.POST)
-        if logout_form.is_valid():
-            if user_id:
-                logout(request, user_id)
-                (username, user_id, user_expiration) = (None, None, None)
+    # Display logout form
+    logout_form = Form()
     # Search form processing
     if "user_query" in request.POST:
         debug('filtering messages by user')
@@ -134,7 +129,8 @@ def index(request, search_request=None):
                   'user_form': user_form, 'search_form': search_form,
                   'username': username, 'location': location})
 
-def logout(request, user_id, delete=True):
+def do_logout(request, user_id, delete=True):
+    debug('logging out %s', user_id)
     if delete:
         user = ProxyUser.objects.get(pk=user_id)
         user.delete()
@@ -235,6 +231,23 @@ def message(request):
     return render(request, 'pmessages/message.html',
             {'message_form': message_form, 'location': location,
              'username': username})
+
+def logout(request):
+    """
+    Process logout POST requests.
+    """
+    user_id = get_user(request)[1]
+    debug('user %s has hit logout', user_id)
+    if request.method == 'POST':
+        logout_form = Form(data=request.POST)
+        if logout_form.is_valid():
+            if user_id:
+                do_logout(request, user_id)
+        else:
+            debug('logout form is not valid')
+        return redirect('pmessages:messages')
+    else:
+        return HttpResponseNotAllowed(['POST'])
 
 class MessageList(generics.ListAPIView):
     serializer_class = ProxyMessageSerializer

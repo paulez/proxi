@@ -12,6 +12,7 @@ urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
     url(r'^about/', views.about, name='about'),
     url(r'^login/', views.login, name='login'),
+    url(r'^logout/', views.logout, name='logout'),
     url(r'^message/', views.message, name='message'),
     url(r'^$', views.index, name='messages'),
     url(r'^set_position/$', views.set_position),
