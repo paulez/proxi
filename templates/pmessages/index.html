@@ -1,6 +1,7 @@
 {% extends "pmessages/base.html" %}
 
 {% load humanize %}
+{% load pmessages_extras %}
 
 {% block content %}
 <div class="row">
@@ -77,7 +78,8 @@
         </section>
         <section class=message-info>
             <span class="message-author">
-                Par <a href="{% url 'pmessages:messages-user' message.username %}">{{ message.username }}</a>
+                By <a href="{% url 'pmessages:messages-user' message.username %}">{{ message.username }}</a>
+                within {{ message.distance|readable_distance }}
             </span>
             <span class="message-date">
                 {{ message.date|naturaltime }}

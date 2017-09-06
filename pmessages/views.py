@@ -7,6 +7,7 @@ from django.http import HttpResponseBadRequest
 from django.forms import Form, CharField
 from django.forms.widgets import Textarea, TextInput
 from django.contrib.gis.geos import GEOSGeometry
+from django.contrib.gis.db.models.functions import Distance
 from django.db.models import Q
 from django.utils import timezone
 from django.conf import settings
@@ -122,8 +123,11 @@ def index(request, search_request=None):
                     ).order_by('-date')[:30]
         else:
             all_messages = ProxyMessage.near_messages(location).order_by('-date')[:30]
+        # compute distance to messages
+        all_messages = all_messages.annotate(distance=Distance('location', location))
     else:
         all_messages = None
+
     return render(request, 'pmessages/index.html',
                   {'all_messages': all_messages, 'message_form': message_form,
                   'user_form': user_form, 'search_form': search_form,
