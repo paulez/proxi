@@ -1,6 +1,7 @@
 {% extends "pmessages/base.html" %}
 
 {% load humanize %}
+{% load pmessages_extras %}
 
 {% block content %}
 <div class="row">
@@ -10,7 +11,7 @@
         <form action="" name="message_form" method="post">
             {% csrf_token %}
             <fieldset>
-            <legend>Post a new proxi message !</legend>
+                <legend>Post a new proxi message within {{ radius|readable_distance }}!</legend>
             {% if message_form.non_field_errors %}
                 {% for error in message_form.non_field_errors %}
                     <div class="alert alert-error">

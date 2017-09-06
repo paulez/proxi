@@ -8,6 +8,7 @@ from django.forms import Form, CharField
 from django.forms.widgets import Textarea, TextInput
 from django.contrib.gis.geos import GEOSGeometry
 from django.contrib.gis.db.models.functions import Distance
+from django.contrib.gis.measure import D
 from django.db.models import Q
 from django.utils import timezone
 from django.conf import settings
@@ -17,7 +18,7 @@ from django.utils.translation import ugettext as _
 from rest_framework import generics
 
 from pmessages.utils.geoutils import GeoUtils
-from pmessages.models import ProxyMessage, ProxyUser
+from pmessages.models import ProxyMessage, ProxyUser, ProxyIndex
 from pmessages.serializers import ProxyMessageSerializer
 
 # Get an instance of a logger
@@ -115,23 +116,26 @@ def index(request, search_request=None):
         search_form = SearchForm()
     if location:
         # Getting messages near location
+        radius = D(m=ProxyIndex.indexed_radius(location))
+        near_messages = ProxyMessage.objects.filter(location__distance_lte=(location, radius))
         if search_request:
             debug('search_request is set')
             # Filter messages using search_request
-            all_messages = ProxyMessage.near_messages(location).filter(
+            all_messages = near_messages.filter(
                     Q(message__icontains=search_request) | Q(username__icontains=search_request)
                     ).order_by('-date')[:30]
         else:
-            all_messages = ProxyMessage.near_messages(location).order_by('-date')[:30]
+            all_messages = near_messages.order_by('-date')[:30]
         # compute distance to messages
         all_messages = all_messages.annotate(distance=Distance('location', location))
     else:
+        radius = 0
         all_messages = None
 
     return render(request, 'pmessages/index.html',
                   {'all_messages': all_messages, 'message_form': message_form,
                   'user_form': user_form, 'search_form': search_form,
-                  'username': username, 'location': location})
+                  'username': username, 'location': location, 'radius': radius})
 
 def do_logout(request, user_id, delete=True):
     debug('logging out %s', user_id)
@@ -230,11 +234,15 @@ def message(request):
             else:
                 login_msg = _('Please login before posting a message.')
                 message_form.add_error('message', login_msg)
+                return render(request, 'pmessages/message.html',
+                        {'message_form': message_form, 'location': location,
+                         'username': username})
     else:
-        message_form = MessageForm()
-    return render(request, 'pmessages/message.html',
-            {'message_form': message_form, 'location': location,
-             'username': username})
+        message_form = MessageForm() 
+        radius = D(m=ProxyIndex.indexed_radius(location))
+        return render(request, 'pmessages/message.html',
+                {'message_form': message_form, 'location': location,
+                 'username': username, 'radius': radius})
 
 def logout(request):
     """

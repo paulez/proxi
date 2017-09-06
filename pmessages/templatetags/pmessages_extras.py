@@ -9,7 +9,10 @@ register = template.Library()
 def readable_distance(distance):
     if isinstance(distance, Distance):
         dist = distance.km
-        rounded = ceil(round(dist, -int(floor(log10(abs(dist))))))
+        if dist == 0:
+            rounded = 1
+        else:
+            rounded = ceil(round(dist, -int(floor(log10(abs(dist))))))
         return '{} km'.format(rounded)
     else:
         return distance

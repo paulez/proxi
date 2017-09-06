@@ -55,13 +55,6 @@ class ProxyMessage(models.Model):
             debug('found %s messages in %s radius around %s', nb, radius, pos)
         radius = radius * 2
         return radius
-    
-    @staticmethod    
-    def near_messages(pos):
-        """Return messages which are near pos."""
-        radius = ProxyIndex.indexed_radius(pos)
-        result = ProxyMessage.objects.filter(location__distance_lte=(pos, D(m=radius)))
-        return result
         
 class ProxyIndex(models.Model):
     location = models.PointField()
