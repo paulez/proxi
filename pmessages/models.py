@@ -66,7 +66,7 @@ class ProxyMessage(models.Model):
 
         while compare(radius, thresholds, pos) and radius > radius_min:
             radius = radius / 2
-        return radius
+        return radius * 2
         
 class ProxyIndex(models.Model):
     location = models.PointField()
