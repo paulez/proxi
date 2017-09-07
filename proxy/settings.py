@@ -205,7 +205,7 @@ PROXY_INDEX_EXPIRATION = 0
 GEOIP_PATH = os.path.join(BASE_DIR, 'data/geoip')
 # Static files to S3
 AWS_STORAGE_BUCKET_NAME = 'static.dev.proxi.gg'
-STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+#STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
 AWS_S3_REGION_NAME = 'eu-west-1'
 AWS_S3_HOST = 's3-eu-west-1.amazonaws.com'
