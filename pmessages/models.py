@@ -35,25 +35,37 @@ class ProxyMessage(models.Model):
         return self.message
 
     @staticmethod
-    def near_radius(pos):
+    def near_radius(pos, username):
         """Return radius in which there are less than threshold messages posted in one day."""
-        threshold = settings.PROXY_THRESHOLD
-        threshold_duration = settings.PROXY_THRESHOLD_DURATION
+        thresholds = settings.PROXY_THRESHOLDS
         radius_min = settings.PROXY_RADIUS_MIN
         radius_max = settings.PROXY_RADIUS_MAX
 
         radius = radius_max
-        nb = threshold + 1
-        messages_since = timezone.now() - timedelta(minutes=threshold_duration)
-        # Determining minimal distance to get less than threshold
-        # messages during threshold duration
-        while nb > threshold and radius > radius_min:
+
+        def compare(radius, thresholds, pos):
+            """Compare message count against a dictionary of tresholds.
+            """
+            for time, threshold in thresholds.items():
+                since = timezone.now() - time
+                messages = ProxyMessage.objects.filter(
+                        location__distance_lte=(pos, D(m=radius)),
+                            date__gt=since)
+                if username is not None:
+                    # when we know the user, we remove its message from
+                    # the result set to avoid the user to only see
+                    # their messages
+                    messages = messages.exclude(username=username)
+                msg_count = messages.count()
+                debug('found %s messages in %s radius around %s since %s',
+                    msg_count, radius, pos, since)
+                if msg_count > threshold:
+                    return True
+            # Return False if no threshold is met
+            return False
+
+        while compare(radius, thresholds, pos) and radius > radius_min:
             radius = radius / 2
-            nb = ProxyMessage.objects.filter(
-                    location__distance_lte=(pos, D(m=radius)), 
-                            date__gt=messages_since).count()
-            debug('found %s messages in %s radius around %s', nb, radius, pos)
-        radius = radius * 2
         return radius
         
 class ProxyIndex(models.Model):
@@ -66,7 +78,7 @@ class ProxyIndex(models.Model):
         return "Index at %s." % self.location
         
     @staticmethod
-    def indexed_radius(pos):
+    def indexed_radius(pos, username):
         """Return index radius for pos location."""
         debug('Getting index for %s', pos)
         create_index = False
@@ -77,11 +89,11 @@ class ProxyIndex(models.Model):
             # No index found, we need to create one
             debug('no index found, creating a new one')
             create_index = True
-            radius = ProxyMessage.near_radius(pos)
+            radius = ProxyMessage.near_radius(pos, username)
         else:
             if nearest_index.update < timezone.now() - update_interval:
                 debug('Outdated index %s', nearest_index)
-                radius = ProxyMessage.near_radius(pos)
+                radius = ProxyMessage.near_radius(pos, username)
                 d1 = ProxyIndex.objects.filter(pk=nearest_index.id).distance(pos)[0].distance
                 debug('nearest index is at %s', d1)
                 d2 = D(m=radius)
@@ -115,7 +127,7 @@ class ProxyUser(models.Model):
         """Register user with its location and a creation date. 
         If a non expired user already exists in the effect area around location,
         return False."""
-        radius = ProxyIndex.indexed_radius(pos)
+        radius = ProxyIndex.indexed_radius(pos, username)
         try:
             user = ProxyUser.objects.filter(location__distance_lte=(pos, D(m=radius)), username = username).distance(pos).order_by('distance')[0]
         except IndexError:

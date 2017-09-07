@@ -116,7 +116,7 @@ def index(request, search_request=None):
         search_form = SearchForm()
     if location:
         # Getting messages near location
-        radius = D(m=ProxyIndex.indexed_radius(location))
+        radius = D(m=ProxyIndex.indexed_radius(location, username))
         near_messages = ProxyMessage.objects.filter(location__distance_lte=(location, radius))
         if search_request:
             debug('search_request is set')
@@ -239,7 +239,7 @@ def message(request):
                          'username': username})
     else:
         message_form = MessageForm() 
-        radius = D(m=ProxyIndex.indexed_radius(location))
+        radius = D(m=ProxyIndex.indexed_radius(location, username))
         return render(request, 'pmessages/message.html',
                 {'message_form': message_form, 'location': location,
                  'username': username, 'radius': radius})

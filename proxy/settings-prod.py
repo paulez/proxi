@@ -187,11 +187,13 @@ SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
 PROXY_RADIUS_MIN = 64
 # Maximum message display radius (meters)
 PROXY_RADIUS_MAX = 524288
-# In minutes, messages more recent are counter to find the zone threshold
-PROXY_THRESHOLD_DURATION = 60
-# Threshold of min messages to display in a zone for the last duration
-PROXY_THRESHOLD = 5
-# Proxy user expiration time, in minutes.
+# Thresholds dictionnary, composed as timedelta object as key
+# and message count as value.
+PROXY_THRESHOLDS = {
+        timedelta(hours=1): 3,
+        timedelta(hours=4): 5,
+        timedelta(days=1):  7
+        }
 PROXY_USER_EXPIRATION = 300
 # Proxy user expiration refresh, in minutes
 PROXY_USER_REFRESH = 5
