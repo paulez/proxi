@@ -52,6 +52,11 @@ $(document).ready( function(){
     } else {
         console.warn('Geolocation not enabled');
     }
+    var $container = $("#main");
+    var refreshId = setInterval(function()
+            {
+                $container.load('ajax_messages');
+            }, 60 * 1000);
 });
 
 function first_geo_success(position){

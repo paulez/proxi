@@ -115,19 +115,8 @@ def index(request, search_request=None):
     else:
         search_form = SearchForm()
     if location:
-        # Getting messages near location
         radius = D(m=ProxyIndex.indexed_radius(location, username))
-        near_messages = ProxyMessage.objects.filter(location__distance_lte=(location, radius))
-        if search_request:
-            debug('search_request is set')
-            # Filter messages using search_request
-            all_messages = near_messages.filter(
-                    Q(message__icontains=search_request) | Q(username__icontains=search_request)
-                    ).order_by('-date')[:30]
-        else:
-            all_messages = near_messages.order_by('-date')[:30]
-        # compute distance to messages
-        all_messages = all_messages.annotate(distance=Distance('location', location))
+        all_messages = get_messages(location, radius, search_request)
     else:
         radius = 0
         all_messages = None
@@ -136,6 +125,34 @@ def index(request, search_request=None):
                   {'all_messages': all_messages, 'message_form': message_form,
                   'user_form': user_form, 'search_form': search_form,
                   'username': username, 'location': location, 'radius': radius})
+
+def ajax_messages(request, search_request=None):
+    location, address = get_location(request)
+    username, user_id, user_expiration = get_user(request)
+
+    if location:
+        radius = D(m=ProxyIndex.indexed_radius(location, username))
+        all_messages = get_messages(location, radius, search_request)
+    else:
+        radius = 0
+        all_messages = None
+    return render(request, 'pmessages/messages.html',
+                  {'all_messages': all_messages, 'location': location, 
+                   'radius': radius})
+
+def get_messages(location, radius, search_request=None):
+    # Getting messages near location
+    near_messages = ProxyMessage.objects.filter(location__distance_lte=(location, radius))
+    if search_request:
+        debug('search_request is set')
+        # Filter messages using search_request
+        all_messages = near_messages.filter(
+                Q(message__icontains=search_request) | Q(username__icontains=search_request)
+                ).order_by('-date')[:30]
+    else:
+        all_messages = near_messages.order_by('-date')[:30]
+    # compute distance to messages
+    return all_messages.annotate(distance=Distance('location', location))
 
 def do_logout(request, user_id, delete=True):
     debug('logging out %s', user_id)
