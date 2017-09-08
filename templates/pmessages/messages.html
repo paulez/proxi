@@ -11,7 +11,7 @@
     {% for message in all_messages %}
     <article class="well well-small">
         <section class="message-text">
-            <p>{{ message.message|urlize|wordwrap:75|truncatechars:300|striptags }}</p>
+            <p>{{ message.message|wordwrap:75|truncatechars:300|striptags|urlize }}</p>
         </section>
         <section class=message-info>
             <span class="message-author">
