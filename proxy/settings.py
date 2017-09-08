@@ -213,4 +213,4 @@ STATIC_URL = '/static/'
 import boto.s3.connection
 AWS_S3_CALLING_FORMAT = boto.s3.connection.OrdinaryCallingFormat()
 # Allowed hosts for POST Protection
-ALLOWED_HOSTS = ['proxi1.home.ezvan.fr', '127.0.0.1', 'proxi-dev-1.local']
+ALLOWED_HOSTS = ['proxi1.home.ezvan.fr', '127.0.0.1', 'proxi-dev-1.local', 'localhost']

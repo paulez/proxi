@@ -78,7 +78,6 @@ class ProxyIndex(models.Model):
     def __unicode__(self):
         return "Index at %s." % self.location
         
-    @staticmethod
     def create_index(pos, radius):
         """Create an index at location pos.
         """
@@ -98,13 +97,15 @@ class ProxyIndex(models.Model):
             # No index found, we need to create one
             debug('no index found, creating a new one')
             radius = ProxyMessage.near_radius(pos, username)
-            create_index(pos, radius)
+            ProxyIndex.create_index(pos, radius)
         else:
-            if D(Distance(pos, nearest_index.location)) > D(m=nearest_index.radius):
+            if (ProxyIndex.objects.filter(
+                pk=nearest_index.id).distance(
+                    pos)[0].distance > D(m=nearest_index.radius)):
                 # The distance to the index is higher than its radius, we
                 # need to create a new index
                 radius = ProxyMessage.near_radius(pos, username)
-                create_index(pos, radius)
+                ProxyIndex.create_index(pos, radius)
             elif nearest_index.update < timezone.now() - update_interval:
                 # Index is out of date, refreshing it
                 debug('Outdated index %s', nearest_index)
