@@ -1,6 +1,6 @@
 from django.contrib.gis.db import models
 from django.contrib.gis.measure import D
-from django.contrib.gis.geos import *
+from django.contrib.gis.db.models.functions import Distance
 from datetime import timedelta
 from django.utils import timezone
 from django.conf import settings
@@ -36,7 +36,8 @@ class ProxyMessage(models.Model):
 
     @staticmethod
     def near_radius(pos, username):
-        """Return radius in which there are less than threshold messages posted in one day."""
+        """Return radius in which there are less than threshold messages
+        posted in one day."""
         thresholds = settings.PROXY_THRESHOLDS
         radius_min = settings.PROXY_RADIUS_MIN
         radius_max = settings.PROXY_RADIUS_MAX
@@ -78,6 +79,14 @@ class ProxyIndex(models.Model):
         return "Index at %s." % self.location
         
     @staticmethod
+    def create_index(pos, radius):
+        """Create an index at location pos.
+        """
+        debug('creating a new index')
+        new_index = ProxyIndex(location=pos, update=timezone.now(), radius=radius)
+        new_index.save()
+
+    @staticmethod
     def indexed_radius(pos, username):
         """Return index radius for pos location."""
         debug('Getting index for %s', pos)
@@ -88,29 +97,23 @@ class ProxyIndex(models.Model):
         except IndexError:
             # No index found, we need to create one
             debug('no index found, creating a new one')
-            create_index = True
             radius = ProxyMessage.near_radius(pos, username)
+            create_index(pos, radius)
         else:
-            if nearest_index.update < timezone.now() - update_interval:
+            if D(Distance(pos, nearest_index.location)) > D(m=nearest_index.radius):
+                # The distance to the index is higher than its radius, we
+                # need to create a new index
+                radius = ProxyMessage.near_radius(pos, username)
+                create_index(pos, radius)
+            elif nearest_index.update < timezone.now() - update_interval:
+                # Index is out of date, refreshing it
                 debug('Outdated index %s', nearest_index)
                 radius = ProxyMessage.near_radius(pos, username)
-                d1 = ProxyIndex.objects.filter(pk=nearest_index.id).distance(pos)[0].distance
-                debug('nearest index is at %s', d1)
-                d2 = D(m=radius)
-                debug('radius is %s', radius)
-                if  d1 > d2:
-                    create_index = True
-                    debug('we need to create a new index')
-                else:
-                    nearest_index.radius = radius
-                    nearest_index.update = timezone.now()
-                    nearest_index.save()
+                nearest_index.radius = radius
+                nearest_index.update = timezone.now()
+                nearest_index.save()
             else:
                 radius = nearest_index.radius
-        if create_index:
-            debug('creating a new index')
-            new_index = ProxyIndex(location = pos, update = timezone.now(), radius = radius)
-            new_index.save()
         return radius
         
 class ProxyUser(models.Model):
