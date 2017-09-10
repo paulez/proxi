@@ -1,9 +1,11 @@
+from datetime import timedelta
+
 from django.contrib.gis.db import models
 from django.contrib.gis.measure import D
 from django.contrib.gis.db.models.functions import Distance
-from datetime import timedelta
 from django.utils import timezone
 from django.conf import settings
+
 import logging
 
 # Get an instance of a logger
@@ -18,7 +20,7 @@ class ProxyMessage(models.Model):
     # username chosen by the message sender
     username = models.CharField(max_length=20)
     # message content
-    message = models.TextField()
+    message = models.CharField(max_length=500)
     # creation date of the message
     date = models.DateTimeField(auto_now_add=True)
     # ip address of the message sender

@@ -4,7 +4,7 @@ from datetime import timedelta
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, HttpResponseNotAllowed
 from django.http import HttpResponseBadRequest
-from django.forms import Form, CharField
+from django.forms import Form, CharField, SlugField
 from django.forms.widgets import Textarea, TextInput
 from django.contrib.gis.geos import GEOSGeometry
 from django.contrib.gis.db.models.functions import Distance
@@ -14,6 +14,7 @@ from django.utils import timezone
 from django.conf import settings
 from django.views.decorators.cache import cache_page
 from django.utils.translation import ugettext as _
+from django.contrib.auth.validators import UnicodeUsernameValidator
 
 from rest_framework import generics
 
@@ -36,12 +37,13 @@ SUSER_EXPIRATION = 'user_expiration'
 class MessageForm(Form):
     message = CharField(widget=Textarea(
         attrs={'placeholder': 'Your message...',
-               'autofocus': 'autofocus', 'rows': '3'}))
+               'autofocus': 'autofocus', 'rows': '3'}),
+        max_length=500)
 
 class UserForm(Form):
     username = CharField(widget=TextInput(
         attrs={'placeholder': 'Username', 'autofocus': 'autofocus'}),
-        max_length=20)
+        max_length=20, validators=[UnicodeUsernameValidator()])
 
 class SearchForm(Form):
     user_query = CharField(widget=TextInput(
@@ -256,10 +258,10 @@ def message(request):
                          'username': username})
     else:
         message_form = MessageForm() 
-        radius = D(m=ProxyIndex.indexed_radius(location, username))
-        return render(request, 'pmessages/message.html',
-                {'message_form': message_form, 'location': location,
-                 'username': username, 'radius': radius})
+    radius = D(m=ProxyIndex.indexed_radius(location, username))
+    return render(request, 'pmessages/message.html',
+            {'message_form': message_form, 'location': location,
+             'username': username, 'radius': radius})
 
 def logout(request):
     """
