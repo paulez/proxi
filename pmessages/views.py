@@ -16,7 +16,7 @@ from django.views.decorators.cache import cache_page
 from django.utils.translation import ugettext as _
 from django.contrib.auth.validators import UnicodeUsernameValidator
 
-from rest_framework import generics
+from rest_framework.generics import ListAPIView
 
 from pmessages.utils.geoutils import GeoUtils
 from pmessages.models import ProxyMessage, ProxyUser, ProxyIndex
@@ -280,8 +280,18 @@ def logout(request):
     else:
         return HttpResponseNotAllowed(['POST'])
 
-class MessageList(generics.ListAPIView):
+class MessageList(ListAPIView):
+
     serializer_class = ProxyMessageSerializer
 
     def get_queryset(self):
-        latitude = kwargs['latitude']
+        location, address = get_location(self.request)
+        debug('user location is %s', location)
+        debug('user session is %s', self.request.session.session_key)
+        username, user_id, user_expiration = get_user(self.request)
+        if location:
+            radius = D(m=ProxyIndex.indexed_radius(location, username))
+            all_messages = get_messages(location, radius)
+        else:
+            raise Http404('No location provided.')
+        return all_messages

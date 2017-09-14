@@ -10,6 +10,7 @@ app_name = 'pmessages'
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
+    url(r'^api/messages', views.MessageList.as_view()),
     url(r'^about/', views.about, name='about'),
     url(r'^login/', views.login, name='login'),
     url(r'^logout/', views.logout, name='logout'),
