@@ -97,7 +97,7 @@ def get_user(request):
             user.save()
     return (username, user_id, user_expiration)
 
-def index(request, search_request=None):
+def messages(request, search_request=None):
     location, address = get_location(request)
     debug('user location is %s', location)
     debug('user session is %s', request.session.session_key)
@@ -109,7 +109,7 @@ def index(request, search_request=None):
     # Display logout form
     logout_form = Form()
     # Search form processing
-    if request.method == 'POST' and "user_query" in request.POST:
+    if request.method == 'POST':
         debug('filtering messages by user')
         search_form = SearchForm(data=request.POST)
         if search_form.is_valid():
