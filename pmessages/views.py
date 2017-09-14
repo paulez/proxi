@@ -7,8 +7,8 @@ from django.http import HttpResponseBadRequest
 from django.forms import Form, CharField, SlugField
 from django.forms.widgets import Textarea, TextInput
 from django.contrib.gis.geos import GEOSGeometry
-from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.measure import D
+from django.contrib.gis.db.models.functions import Distance
 from django.db.models import Q
 from django.utils import timezone
 from django.conf import settings
@@ -18,7 +18,7 @@ from django.contrib.auth.validators import UnicodeUsernameValidator
 
 from rest_framework.generics import ListAPIView
 
-from pmessages.utils.geoutils import GeoUtils
+from pmessages.utils.geo import GeoUtils
 from pmessages.models import ProxyMessage, ProxyUser, ProxyIndex
 from pmessages.serializers import ProxyMessageSerializer
 

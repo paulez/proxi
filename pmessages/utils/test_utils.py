@@ -1,6 +1,6 @@
 from django.test import TestCase, RequestFactory
 
-from .geoutils import GeoUtils
+from .utils import GeoUtils
 
 class GeoUtilsTest(TestCase):
     def setUp(self):
