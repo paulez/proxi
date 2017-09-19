@@ -1,6 +1,6 @@
 from django.conf.urls import include, url
 
-from . import views
+from . import views, apis
 
 # Uncomment the next two lines to enable the admin:
 from django.contrib.gis import admin
@@ -10,7 +10,7 @@ app_name = 'pmessages'
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^api/messages', views.api_messages),
+    url(r'^api/messages', apis.messages),
     url(r'^about/', views.about, name='about'),
     url(r'^login/', views.login, name='login'),
     url(r'^logout/', views.logout, name='logout'),

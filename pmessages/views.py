@@ -1,28 +1,20 @@
 import logging
-from datetime import timedelta
 
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, HttpResponseNotAllowed
 from django.http import HttpResponseBadRequest
-from django.forms import Form, CharField, SlugField
+from django.forms import Form, CharField
 from django.forms.widgets import Textarea, TextInput
 from django.contrib.gis.geos import GEOSGeometry
 from django.contrib.gis.measure import D
-from django.contrib.gis.db.models.functions import Distance
-from django.db.models import Q
-from django.utils import timezone
-from django.conf import settings
 from django.views.decorators.cache import cache_page
 from django.utils.translation import ugettext as _
 from django.contrib.auth.validators import UnicodeUsernameValidator
 
-from rest_framework.generics import ListAPIView
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-
-from pmessages.utils.geo import GeoUtils
-from pmessages.models import ProxyMessage, ProxyUser, ProxyIndex
-from pmessages.serializers import ProxyMessageSerializer
+from .models import ProxyMessage, ProxyUser, ProxyIndex
+from .utils.location import get_location, SLOCATION
+from .utils.messages import get_messages
+from .utils.users import get_user, do_logout, get_user_id, save_user
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -30,11 +22,6 @@ debug = logger.debug
 info = logger.info
 error = logger.error
 
-SLOCATION = 'location'
-SADDRESS = 'address'
-SUSERNAME = 'username'
-SUSER_ID = 'user_id'
-SUSER_EXPIRATION = 'user_expiration'
 
 class MessageForm(Form):
     message = CharField(widget=Textarea(
@@ -52,52 +39,6 @@ class SearchForm(Form):
         attrs={'placeholder': 'Search', 'class': 'search-query'}),
         max_length=100)
 
-def get_location(request):
-    """Get user location information.
-    Returns a tuple of location and ip address which
-    was located.
-    """
-    # get location and address from session
-    location = request.session.get(SLOCATION, None)
-    debug('user location is %s', location)
-    address = request.session.get(SADDRESS, None)
-    debug('user adress is %s', address)
-    # if the session doesn't contain session and address
-    # get it from geotils (so from the ip)
-    if not address:
-        geo = GeoUtils()
-        address = geo.get_user_location_address(request)[1]
-        request.session[SADDRESS] = address
-        debug('address from geoip set to %s', address)
-    if not location:
-        geo = GeoUtils()
-        location = geo.get_user_location_address(request)[0]
-        request.session[SLOCATION] = location
-        debug('location from geoip set to %s', location)
-    return location, address
-
-def get_user(request):
-    """Get user session information.
-    Returns username, user id and user expiration.
-    """
-    # initialising session variables
-    username = request.session.get(SUSERNAME, None)
-    user_id = request.session.get(SUSER_ID, None)
-    user_expiration = request.session.get(SUSER_EXPIRATION, None)
-    # refresh user expiration info
-    if user_expiration and user_id:
-        expiration_interval = timedelta(minutes=settings.PROXY_USER_REFRESH)
-        expiration_max = timedelta(minutes=settings.PROXY_USER_EXPIRATION)
-        delta = timezone.now() - user_expiration
-        if delta > expiration_max:
-            debug('expired user %s', user_id)
-            do_logout(request, user_id, delete=False)
-            (username, user_id, user_expiration) = (None, None, None)
-        elif delta > expiration_interval:
-            user = ProxyUser.objects.get(pk=user_id)
-            user.last_use = timezone.now()
-            user.save()
-    return (username, user_id, user_expiration)
 
 def messages(request, search_request=None):
     location, address = get_location(request)
@@ -144,29 +85,6 @@ def ajax_messages(request, search_request=None):
                   {'all_messages': all_messages, 'location': location, 
                    'radius': radius})
 
-def get_messages(location, radius, search_request=None):
-    # Getting messages near location
-    near_messages = ProxyMessage.objects.filter(location__distance_lte=(location, radius))
-    if search_request:
-        debug('search_request is set')
-        # Filter messages using search_request
-        all_messages = near_messages.filter(
-                Q(message__icontains=search_request) | Q(username__icontains=search_request)
-                ).order_by('-date')[:30]
-    else:
-        all_messages = near_messages.order_by('-date')[:30]
-    # compute distance to messages
-    return all_messages.annotate(distance=Distance('location', location))
-
-def do_logout(request, user_id, delete=True):
-    debug('logging out %s', user_id)
-    if delete:
-        user = ProxyUser.objects.get(pk=user_id)
-        user.delete()
-    del request.session[SUSERNAME]
-    del request.session[SUSER_ID]
-    del request.session[SUSER_EXPIRATION]
-
 def set_position(request):
     """
     Process POST request containing position encoded in GeoJSON.
@@ -177,7 +95,7 @@ def set_position(request):
     if request.method != 'POST':
         debug('Non POST request')
         return HttpResponseNotAllowed(['POST'])
-    user_id = request.session.get(SUSER_ID, None)
+    user_id = get_user_id(request)
     debug('set_position session is %s', request.session.session_key)
     # get position from POST Geojson data
     try:
@@ -221,9 +139,7 @@ def login(request):
             username = user_form.cleaned_data['username']
             user_id = ProxyUser.register_user(username, location)
             if user_id:
-                request.session[SUSERNAME] = username
-                request.session[SUSER_ID] = user_id
-                request.session[SUSER_EXPIRATION] = timezone.now()
+                save_user(request, username, user_id)
                 return redirect('pmessages:messages')
             else:
                 user_form.full_clean()
@@ -281,17 +197,3 @@ def logout(request):
         return redirect('pmessages:messages')
     else:
         return HttpResponseNotAllowed(['POST'])
-
-@api_view(['GET'])
-def api_messages(request):
-    location, address = get_location(request)
-    debug('user location is %s', location)
-    debug('user session is %s', request.session.session_key)
-    username, user_id, user_expiration = get_user(request)
-    if location:
-        radius = D(m=ProxyIndex.indexed_radius(location, username))
-        all_messages = get_messages(location, radius)
-    else:
-        raise Http404('No location provided.')
-    serializer = ProxyMessageSerializer(all_messages, many=True)
-    return Response(serializer.data)

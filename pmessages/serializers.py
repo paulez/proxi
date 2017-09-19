@@ -1,11 +1,11 @@
 from rest_framework import serializers
 
 from pmessages.models import ProxyMessage, ProxyUser
-from pmessages.utils.distance import DistanceUtils
+from pmessages.utils.distance import rounded_distance
 
 class DistanceField(serializers.IntegerField):
     def to_representation(self, obj):
-        rounded = DistanceUtils.rounded_distance(obj)
+        rounded = rounded_distance(obj)
         return super(DistanceField, self).to_representation(rounded)
 
 
