@@ -17,6 +17,8 @@ from django.utils.translation import ugettext as _
 from django.contrib.auth.validators import UnicodeUsernameValidator
 
 from rest_framework.generics import ListAPIView
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 
 from pmessages.utils.geo import GeoUtils
 from pmessages.models import ProxyMessage, ProxyUser, ProxyIndex
@@ -280,18 +282,16 @@ def logout(request):
     else:
         return HttpResponseNotAllowed(['POST'])
 
-class MessageList(ListAPIView):
-
-    serializer_class = ProxyMessageSerializer
-
-    def get_queryset(self):
-        location, address = get_location(self.request)
-        debug('user location is %s', location)
-        debug('user session is %s', self.request.session.session_key)
-        username, user_id, user_expiration = get_user(self.request)
-        if location:
-            radius = D(m=ProxyIndex.indexed_radius(location, username))
-            all_messages = get_messages(location, radius)
-        else:
-            raise Http404('No location provided.')
-        return all_messages
+@api_view(['GET'])
+def api_messages(request):
+    location, address = get_location(request)
+    debug('user location is %s', location)
+    debug('user session is %s', request.session.session_key)
+    username, user_id, user_expiration = get_user(request)
+    if location:
+        radius = D(m=ProxyIndex.indexed_radius(location, username))
+        all_messages = get_messages(location, radius)
+    else:
+        raise Http404('No location provided.')
+    serializer = ProxyMessageSerializer(all_messages, many=True)
+    return Response(serializer.data)
