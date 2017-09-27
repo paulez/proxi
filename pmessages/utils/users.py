@@ -8,6 +8,7 @@ from django.conf import settings
 from django.utils import timezone
 
 from ..models import ProxyUser
+from .session import SUSERNAME, SUSER_ID, SUSER_EXPIRATION, SLOCATION
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -15,9 +16,6 @@ debug = logger.debug
 info = logger.info
 error = logger.error
 
-SUSERNAME = 'username'
-SUSER_ID = 'user_id'
-SUSER_EXPIRATION = 'user_expiration'
 
 def get_user(request):
     """Get user session information.
@@ -53,6 +51,21 @@ def save_user(request, username, user_id):
     request.session[SUSERNAME] = username
     request.session[SUSER_ID] = user_id
     request.session[SUSER_EXPIRATION] = timezone.now()
+
+def save_position(request, position):
+    """Save user position in session storage.
+    If user is logged in update last position
+    in database.
+    """
+    request.session[SLOCATION] = position
+    user_id = get_user_id(request)
+    if not user_id:
+        debug('Unknown user.')
+    else:
+        user = ProxyUser.objects.get(pk=user_id)
+        user.location = position
+        user.save()
+        debug('User %s position %s saved', user_id, position)
 
 def do_logout(request, user_id, delete=True):
     """Logout a user. Clears its session, and remove

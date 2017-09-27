@@ -15,6 +15,7 @@ from .models import ProxyMessage, ProxyUser, ProxyIndex
 from .utils.location import get_location, SLOCATION
 from .utils.messages import get_messages
 from .utils.users import get_user, do_logout, get_user_id, save_user
+from .utils.users import save_position
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -95,7 +96,6 @@ def set_position(request):
     if request.method != 'POST':
         debug('Non POST request')
         return HttpResponseNotAllowed(['POST'])
-    user_id = get_user_id(request)
     debug('set_position session is %s', request.session.session_key)
     # get position from POST Geojson data
     try:
@@ -104,14 +104,7 @@ def set_position(request):
         error('Unknown data format.')
         return HttpResponseBadRequest('Unknown data format.')
     debug('The position is: %s', position)
-    request.session[SLOCATION] = position
-    if not user_id:
-        debug('Unknown user.')
-    else:
-        user = ProxyUser.objects.get(pk=user_id)
-        user.position = position
-        user.save()
-        debug('User %s position saved', user)
+    save_position(request, position)
     return HttpResponse('OK')
 
 @cache_page(60 * 60)

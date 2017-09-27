@@ -19,3 +19,7 @@ class ProxySimpleMessageSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = ProxyMessage
         fields = ('message',)
+
+class ProxyLocationSerializer(serializers.Serializer):
+    longitude = serializers.FloatField()
+    latitude = serializers.FloatField()

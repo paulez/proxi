@@ -4,6 +4,7 @@
 import logging
 
 from django.contrib.gis.measure import D
+from django.contrib.gis.geos import Point
 from django.http import Http404, HttpResponseBadRequest
 from rest_framework import status
 from rest_framework.decorators import api_view
@@ -11,9 +12,10 @@ from rest_framework.response import Response
 
 from .models import ProxyIndex, ProxyMessage
 from .serializers import ProxyMessageSerializer, ProxySimpleMessageSerializer
+from .serializers import ProxyLocationSerializer
 from .utils.location import get_location
 from .utils.messages import get_messages
-from .utils.users import get_user
+from .utils.users import get_user, save_position
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -60,3 +62,18 @@ def message(request):
         else:
             raise Http404('Not logged in.')
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+def position(request):
+    """API to post position. Sends latitude and longitude.
+    """
+    if request.method == 'POST':
+        serializer = ProxyLocationSerializer(data=request.data)
+        if serializer.is_valid():
+            longitude = serializer.validated_data['longitude']
+            latitude = serializer.validated_data['latitude']
+            position = Point(longitude, latitude)
+            save_position(request, position)
+            return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+

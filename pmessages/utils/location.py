@@ -3,7 +3,8 @@
 
 import logging
 
-from pmessages.utils.geo import get_user_location_address
+from .geo import get_user_location_address
+from .session import SLOCATION, SADDRESS
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -11,8 +12,6 @@ debug = logger.debug
 info = logger.info
 error = logger.error
 
-SLOCATION = 'location'
-SADDRESS = 'address'
 
 def get_location(request):
     """get user location information.
