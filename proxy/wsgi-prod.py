@@ -17,14 +17,7 @@ import os
 import sys
 import site
 
-# Add the site-packages of the chosen virtualenv to work with
-site.addsitedir('/var/proxy/lib/python3.4/site-packages')
-
-# Add the app's directory to the PYTHONPATH
-sys.path.append('/var/proxy/src/proxy')
-
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "proxy.settings-prod")
-
 
 # This application object is used by any WSGI server configured to use this
 # file. This includes Django's development server, if the WSGI_APPLICATION
