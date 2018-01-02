@@ -1,4 +1,4 @@
-sudo apt-get install virtualenv build-essential python-dev postgresql-server-dev-9.4 libmemcached-dev libmemcached-dev
+sudo apt-get install virtualenv build-essential python-dev postgresql-server-dev-9.4 libmemcached-dev libmemcached-dev zlib1g-dev
 # Create a virtual env
 virtualenv proxy_env
 cd proxy_env
