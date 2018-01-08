@@ -1,10 +1,11 @@
 import os
 from datetime import timedelta
+from decouple import config, Csv
 
 # Django settings for proxy project.
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DEBUG = True
+DEBUG = config('DEBUG', default=False, cast=bool)
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
@@ -15,11 +16,11 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'proxydb',                      # Or path to database file if using sqlite3.
-        'USER': 'proxydb',                      # Not used with sqlite3.
-        'PASSWORD': 'bah9Roof',                  # Not used with sqlite3.
-        'HOST': 'localhost',                      # Set to empty string for localhost. Not used with sqlite3.
-        'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
+        'NAME': config('DB_NAME'),                  # Or path to database file if using sqlite3.
+        'USER': config('DB_USER'),                  # Not used with sqlite3.
+        'PASSWORD': config('DB_PASSWORD'),          # Not used with sqlite3.
+        'HOST': config('DB_HOST'),                  # Set to empty string for localhost. Not used with sqlite3.
+        'PORT': config('DB_PORT', default=''),      # Set to empty string for default. Not used with sqlite3.
     }
 }
 
@@ -78,7 +79,7 @@ STATICFILES_FINDERS = (
 )
 
 # Make this unique, and don't share it with anybody.
-SECRET_KEY = '#af$pz3*u@s(1hwjdhiez#qdvz*^26p22kw9te+=8c02oa2a$m'
+SECRET_KEY = config('SECRET_KEY')
 
 TEMPLATES = [
     {
@@ -143,13 +144,17 @@ INSTALLED_APPS = (
 # the site admins on every HTTP 500 error when DEBUG=False.
 # See http://docs.djangoproject.com/en/dev/topics/logging for
 # more details on how to customize your logging configuration.
+LEVEL = 'DEBUG' if DEBUG else 'ERROR'
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'filters': {
         'require_debug_false': {
             '()': 'django.utils.log.RequireDebugFalse'
-        }
+        },
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue',
+        },
     },
     'formatters': {
         'verbose': {
@@ -163,10 +168,15 @@ LOGGING = {
             'class': 'django.utils.log.AdminEmailHandler'
         },
         'console': {
-            'level': 'DEBUG',
+            'level': LEVEL,
+            'filters': ['require_debug_true'],
             'class': 'logging.StreamHandler',
-            'formatter': 'verbose'
-            }
+            },
+        'django.server': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
     },
     'loggers': {
         'django.request': {
@@ -176,7 +186,7 @@ LOGGING = {
         },
         'pmessages': {
             'handlers': ['console'],
-            'level': 'DEBUG',
+            'level': LEVEL,
         }
     }
 }
@@ -185,9 +195,9 @@ LOGGING = {
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
 
 # Mininum message display radius (meters)
-PROXY_RADIUS_MIN = 64
+PROXY_RADIUS_MIN = config('PROXY_RADIUS_MIN', default=64, cast=int)
 # Maximum message display radius (meters)
-PROXY_RADIUS_MAX = 524288
+PROXY_RADIUS_MAX = config('PROXY_RADIUS_MAX', default=524288, cast=int)
 # Thresholds dictionnary, composed as timedelta object as key
 # and message count as value.
 PROXY_THRESHOLDS = {
@@ -196,15 +206,15 @@ PROXY_THRESHOLDS = {
         timedelta(days=1):  7
         }
 # Proxy user expiration time, in minutes.
-PROXY_USER_EXPIRATION = 300
+PROXY_USER_EXPIRATION = config('PROXY_USER_EXPIRATION', default=300, cast=int)
 # Proxy user expiration refresh, in minutes
-PROXY_USER_REFRESH = 5
+PROXY_USER_REFRESH = config('PROXY_USER_REFRESH', default=5, cast=int)
 # Proxy index update expiration in minutes.
-PROXY_INDEX_EXPIRATION = 0
+PROXY_INDEX_EXPIRATION = config('PROXY_INDEX_EXPIRATION', default=5, cast=int)
 # GeoIP
 GEOIP_PATH = os.path.join(BASE_DIR, 'data/geoip')
 # Static files to S3
-AWS_STORAGE_BUCKET_NAME = 'static.dev.proxi.gg'
+AWS_STORAGE_BUCKET_NAME = config('AWS_STORAGE_BUCKET_NAME')
 STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
 AWS_S3_REGION_NAME = 'eu-west-1'
@@ -213,4 +223,4 @@ STATIC_URL = '/static/'
 import boto.s3.connection
 AWS_S3_CALLING_FORMAT = boto.s3.connection.OrdinaryCallingFormat()
 # Allowed hosts for POST Protection
-ALLOWED_HOSTS = ['proxi1.home.ezvan.fr', '127.0.0.1', 'proxi-dev-1.local', 'localhost']
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=Csv())
