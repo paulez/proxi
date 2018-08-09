@@ -5,6 +5,7 @@ import logging
 
 from datetime import timedelta
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
 
 from ..models import ProxyUser
@@ -33,11 +34,17 @@ def get_user(request):
         if delta > expiration_max:
             debug('expired user %s', user_id)
             do_logout(request, user_id, delete=False)
-            (username, user_id, user_expiration) = (None, None, None)
+            (username, user_id, user_expiration)
         elif delta > expiration_interval:
-            user = ProxyUser.objects.get(pk=user_id)
-            user.last_use = timezone.now()
-            user.save()
+            try:
+                user = ProxyUser.objects.get(pk=user_id)
+            except ObjectDoesNotExist:
+                error("User %s with id %s doesn't exist", username, user_id)
+                do_logout(request, user_id, delete=False)
+                (username, user_id, user_expiration)
+            else:
+                user.last_use = timezone.now()
+                user.save()
     return (username, user_id, user_expiration)
 
 def get_user_id(request):

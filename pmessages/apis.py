@@ -10,12 +10,12 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from .models import ProxyIndex, ProxyMessage
+from .models import ProxyIndex, ProxyMessage, ProxyUser
 from .serializers import ProxyMessageSerializer, ProxySimpleMessageSerializer
-from .serializers import ProxyLocationSerializer
+from .serializers import ProxyLocationSerializer, ProxyUserSerializer
 from .utils.location import get_location
 from .utils.messages import get_messages
-from .utils.users import get_user, save_position
+from .utils.users import do_logout, get_user, save_position, save_user
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -77,3 +77,32 @@ def position(request):
             return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+@api_view(['POST'])
+def login(request):
+    """API to login with a username and the current session.
+    """
+    if request.method == 'POST':
+        username = get_user(request)[0]
+        serializer = ProxyUserSerializer(data=request.data)
+        if serializer.is_valid():
+            username = serializer.validated_data['username']
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        location = get_location(request)[0]
+        user_id = ProxyUser.register_user(username, location)
+        if user_id:
+            save_user(request, username, user_id)
+            return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_409_CONFLICT)
+
+@api_view(['POST'])
+def logout(request):
+    if request.method == 'POST':
+        user_id = get_user(request)[1]
+        debug('user %s has called logout', user_id)
+        if user_id:
+                do_logout(request, user_id)
+                return Response(status=status.HTTP_202_ACCEPTED)
+        else:
+            return Response(status=status.HTTP_404_NOT_FOUND)

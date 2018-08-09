@@ -13,6 +13,8 @@ urlpatterns = [
     url(r'^api/messages', apis.messages),
     url(r'^api/message', apis.message),
     url(r'^api/position', apis.position),
+    url(r'^api/login', apis.login),
+    url(r'^api/logout', apis.logout),
     url(r'^about/', views.about, name='about'),
     url(r'^login/', views.login, name='login'),
     url(r'^logout/', views.logout, name='logout'),
