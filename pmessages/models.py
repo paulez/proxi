@@ -1,4 +1,5 @@
 from datetime import timedelta
+import uuid
 
 from django.contrib.gis.db import models
 from django.contrib.gis.measure import D
@@ -17,6 +18,8 @@ error = logger.error
 class ProxyMessage(models.Model):
     """A ProxyMessage is a simple text message with location information, username, originated ip and date.
     It may be extended in the future to support multimedia attached files."""
+    # use unique id to not expose message sequence
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False)
     # username chosen by the message sender
     username = models.CharField(max_length=20)
     # message content

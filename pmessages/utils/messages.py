@@ -19,6 +19,7 @@ def get_messages(location, radius, search_request=None):
     defined radius.
     """
     # Getting messages near location
+    debug("Getting messages in radius %s of %s", radius, location)
     near_messages = ProxyMessage.objects.filter(location__distance_lte=(location, radius))
     if search_request:
         debug('search_request is set')
@@ -30,4 +31,5 @@ def get_messages(location, radius, search_request=None):
     else:
         all_messages = near_messages.order_by('-date')[:30]
     # compute distance to messages
+    debug("Found %s messages", len(all_messages))
     return all_messages.annotate(distance=Distance('location', location))

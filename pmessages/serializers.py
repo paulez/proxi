@@ -13,7 +13,7 @@ class ProxyMessageSerializer(serializers.HyperlinkedModelSerializer):
     distance = DistanceField()
     class Meta:
         model = ProxyMessage
-        fields = ('username', 'message', 'date', 'distance')
+        fields = ('uuid', 'username', 'message', 'date', 'distance')
 
 class ProxySimpleMessageSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
