@@ -1,22 +1,26 @@
 import React, { Component } from 'react';
+import { Well } from 'react-bootstrap';
 import logo from './logo.svg';
 import './App.css';
+import Header from './Header.js';
 
 class ProxyMessage extends React.Component {
   render () {
     return (
-      <article className="well well-small">
-        <section className="message-text">
-            <p>{this.props.message.message}</p>
-        </section>
-        <section className="message-info">
-            <span className="message-author">
-                By {this.props.message.username} within {this.props.message.distance}
-            </span>
-            <span className="message-date">
-                {this.props.date}
-            </span>
-        </section>
+      <article>
+        <Well bsSize="small">
+          <section className="message-text">
+              <p>{this.props.message.message}</p>
+          </section>
+          <section className="message-info">
+              <span className="message-author">
+                  By {this.props.message.username} within {this.props.message.distance}
+              </span>
+              <span className="message-date">
+                  {this.props.date}
+              </span>
+          </section>
+        </Well>
     </article>
     )
   }
@@ -41,7 +45,7 @@ class ProxyMessageList extends React.Component {
       let messages = results.map((message) => {
         console.log("message", message)
         return(
-          <ProxyMessage message={message} />
+          <ProxyMessage key={message.uuid} message={message} />
         )
       })
       this.setState({messages: messages});
@@ -62,13 +66,14 @@ class ProxyMessageList extends React.Component {
 class App extends Component {
   render() {
     return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h1 className="App-title">Welcome to React</h1>
-        </header>
-        <ProxyMessageList />
-      </div>
+      <React.Fragment>
+        <Header />
+        <div class="container">
+          <section id="main" class="col-md-8">
+            <ProxyMessageList />
+          </section>
+        </div>
+      </React.Fragment>
     );
   }
 }
