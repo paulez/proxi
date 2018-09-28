@@ -3,8 +3,9 @@ import { Well } from 'react-bootstrap';
 import logo from './logo.svg';
 import './App.css';
 import Header from './Header.js';
+import UserLoginForm from './User.js';
 
-class ProxyMessage extends React.Component {
+class ProxyMessage extends Component {
   render () {
     return (
       <article>
@@ -26,7 +27,7 @@ class ProxyMessage extends React.Component {
   }
 }
 
-class ProxyMessageList extends React.Component {
+class ProxyMessageList extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -69,6 +70,9 @@ class App extends Component {
       <React.Fragment>
         <Header />
         <div class="container">
+          <section id="input" class="cold-md-4">
+            <UserLoginForm />
+          </section>
           <section id="main" class="col-md-8">
             <ProxyMessageList />
           </section>
