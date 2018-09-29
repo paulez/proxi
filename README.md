@@ -37,6 +37,13 @@ sudo -u postgres psql --dbname=proxydb -c "CREATE EXTENSION postgis;"
 sudo -u postgres psql --dbname=proxydb -c "CREATE EXTENSION postgis_topology;"
 ```
 
+### Install dependencies
+
+```
+sudo apt install build-essential python3-dev libgeoip-dev
+pip install -r doc/pip_requirements.txt
+```
+
 #### Install the database and run server
 
 ```
