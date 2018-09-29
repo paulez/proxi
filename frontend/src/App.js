@@ -3,7 +3,7 @@ import { Well } from 'react-bootstrap';
 import logo from './logo.svg';
 import './App.css';
 import Header from './Header.js';
-import UserLoginForm from './User.js';
+import ProxyUser from './User.js';
 
 class ProxyMessage extends Component {
   render () {
@@ -71,7 +71,7 @@ class App extends Component {
         <Header />
         <div class="container">
           <section id="input" class="cold-md-4">
-            <UserLoginForm />
+            <ProxyUser />
           </section>
           <section id="main" class="col-md-8">
             <ProxyMessageList />

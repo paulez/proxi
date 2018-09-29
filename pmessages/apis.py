@@ -96,6 +96,19 @@ def login(request):
         else:
             return Response(serializer.errors, status=status.HTTP_409_CONFLICT)
 
+@api_view(['GET'])
+def user(request):
+    """
+    API to retrieve current user.
+    """
+    username = get_user(request)[0]
+    if username:
+        user = ProxyUser(username=username)
+        serializer = ProxyUserSerializer(user)
+        return Response(serializer.data)
+    else:
+        raise Http404('Not logged in.') 
+
 @api_view(['POST'])
 def logout(request):
     if request.method == 'POST':
