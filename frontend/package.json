@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@types/react-bootstrap": "^0.32.14",
+    "axios": "^0.18.0",
     "react": "^16.4.2",
     "react-bootstrap": "^0.32.4",
     "react-dom": "^16.4.2",
@@ -15,5 +16,5 @@
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
   },
-  "proxy": "https://proxi-dev-1:8000"
+  "proxy": "https://localhost:8000"
 }

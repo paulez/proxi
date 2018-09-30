@@ -225,3 +225,5 @@ import boto.s3.connection
 AWS_S3_CALLING_FORMAT = boto.s3.connection.OrdinaryCallingFormat()
 # Allowed hosts for POST Protection
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=Csv())
+# CSRF
+CSRF_TRUSTED_ORIGINS = ['localhost:3000', 'prxi.net']

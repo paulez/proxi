@@ -1,12 +1,18 @@
 import React, { Component } from 'react';
-import { FormGroup, FormControl } from 'react-bootstrap';
+import axios from 'axios';
+import { Button, FormGroup, FormControl } from 'react-bootstrap';
+
+axios.defaults.xsrfCookieName = 'csrftoken'
+axios.defaults.xsrfHeaderName = 'X-CSRFToken'
 
 class ProxyUser extends Component {
   constructor(props) {
     super(props);
     this.state = {
       form_username: '',
-      username: null
+      form_valid: null,
+      form_error: "",
+      username: "",
     }
   }
 
@@ -23,19 +29,27 @@ class ProxyUser extends Component {
   }
 
   handleSubmit = (event) => {
-    const form = event.target;
-    const data = new FormData(form);
-
-    fetch("api/login", {
-      method: 'POST',
-      body: data,
-    })
-    .then(response => {
-      if(!response.ok) throw new Error(response.status);
-      else return response.json();
+    axios.post("api/login", {
+      username: this.state.form_username,
     })
     .then(data => {
-      this.setState({ username: data.username});
+      this.setState({ username: data.data.username});
+    })
+    .catch(error => {
+      this.setState({
+        form_valid: "error",
+        form_error: "Pseudo already in use, please choose another one!",
+        username: null,
+      })
+      console.log("cannot login", error);
+    })
+    event.preventDefault();
+  }
+
+  handleLogout = (event) => {
+    axios.post("api/logout")
+    .then(data => {
+      this.setState({ username: null});
     })
     event.preventDefault();
   }
@@ -46,12 +60,19 @@ class ProxyUser extends Component {
   }
 
   getValidationState() {
-    return null;
+    return this.state.form_valid;
   }
   render () {
     if(this.state.username) {
       return (
-        <div>Currently logged as {this.state.username}</div>
+        <div>Currently logged as {this.state.username}
+          <form onSubmit={this.handleLogout}>
+            <FormGroup
+              controlId="logoutForm"
+            />
+            <Button type="submit" bsStyle="default">Logout</Button>
+          </form>
+        </div>
       )
     } else {
       return (
@@ -68,6 +89,7 @@ class ProxyUser extends Component {
               onChange={this.handleChange}
             />
           </FormGroup>
+          <Button type="submit" bsStyle="primary">Use</Button>
         </form>
       )
     }

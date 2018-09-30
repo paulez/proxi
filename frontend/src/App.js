@@ -70,10 +70,10 @@ class App extends Component {
       <React.Fragment>
         <Header />
         <div class="container">
-          <section id="input" class="cold-md-4">
+          <section id="input" className="col-md-4">
             <ProxyUser />
           </section>
-          <section id="main" class="col-md-8">
+          <section id="main" className="col-md-8">
             <ProxyMessageList />
           </section>
         </div>

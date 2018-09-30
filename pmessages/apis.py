@@ -6,6 +6,7 @@ import logging
 from django.contrib.gis.measure import D
 from django.contrib.gis.geos import Point
 from django.http import Http404, HttpResponseBadRequest
+from django.views.decorators.csrf import ensure_csrf_cookie
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -82,11 +83,19 @@ def login(request):
     """API to login with a username and the current session.
     """
     if request.method == 'POST':
-        username = get_user(request)[0]
+        current_username = get_user(request)[0]
         serializer = ProxyUserSerializer(data=request.data)
         if serializer.is_valid():
             username = serializer.validated_data['username']
+            if current_username:
+                user = ProxyUser(username=current_username)
+                response_serializer = serializer = ProxyUserSerializer(user)
+                if current_username == username:
+                    return Response(response_serializer.data, status=status.HTTP_202_ACCEPTED)
+                else:
+                    return Response(response_serializer.data, status=status.HTTP_400_BAD_REQUEST)
         else:
+            debug("Invalid login request: %s", serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         location = get_location(request)[0]
         user_id = ProxyUser.register_user(username, location)
@@ -97,6 +106,7 @@ def login(request):
             return Response(serializer.errors, status=status.HTTP_409_CONFLICT)
 
 @api_view(['GET'])
+@ensure_csrf_cookie
 def user(request):
     """
     API to retrieve current user.
