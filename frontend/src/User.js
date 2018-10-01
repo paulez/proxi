@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import axios from 'axios';
 import { Button, FormGroup, FormControl } from 'react-bootstrap';
+import ProxyMessageForm from './MessageForm.js';
+
 
 axios.defaults.xsrfCookieName = 'csrftoken'
 axios.defaults.xsrfHeaderName = 'X-CSRFToken'
@@ -9,7 +11,7 @@ class ProxyUser extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      form_username: '',
+      form_username: "",
       form_valid: null,
       form_error: "",
       username: "",
@@ -43,6 +45,7 @@ class ProxyUser extends Component {
       })
       console.log("cannot login", error);
     })
+    this.props.updateMessages();
     event.preventDefault();
   }
 
@@ -65,13 +68,18 @@ class ProxyUser extends Component {
   render () {
     if(this.state.username) {
       return (
-        <div>Currently logged as {this.state.username}
-          <form onSubmit={this.handleLogout}>
-            <FormGroup
-              controlId="logoutForm"
-            />
-            <Button type="submit" bsStyle="default">Logout</Button>
-          </form>
+        <div>
+          <ProxyMessageForm 
+            updateMessages = {this.props.updateMessages}
+          />
+          <div>Currently logged as {this.state.username}
+            <form onSubmit={this.handleLogout}>
+              <FormGroup
+                controlId="logoutForm"
+              />
+              <Button type="submit" bsStyle="default">Logout</Button>
+            </form>
+          </div>
         </div>
       )
     } else {

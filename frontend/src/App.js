@@ -30,13 +30,33 @@ class ProxyMessage extends Component {
 class ProxyMessageList extends Component {
   constructor(props) {
     super(props);
+  }
+
+  render() {
+    return (
+      <div className="messages">
+      {this.props.messages}
+      </div>
+    )
+  }
+}
+
+class App extends Component {
+
+  constructor(props) {
+    super(props);
     this.state = {
       messages: [],
     }
+    this.updateMessages = this.updateMessages.bind(this);
   }
 
   componentDidMount() {
-    console.log("fetching");
+    this.updateMessages();
+  }
+
+  updateMessages() {
+    console.log("fetching messages");
     fetch("/api/messages/")
     .then(results => {
       return results.json();
@@ -54,27 +74,21 @@ class ProxyMessageList extends Component {
     })
     .catch(err => console.log("fetch error", err))
   }
-  
-  render() {
-    return (
-      <div className="messages">
-      {this.state.messages}
-      </div>
-    )
-  }
-}
 
-class App extends Component {
   render() {
     return (
       <React.Fragment>
         <Header />
         <div class="container">
           <section id="input" className="col-md-4">
-            <ProxyUser />
+            <ProxyUser 
+              updateMessages = {this.updateMessages}
+            />
           </section>
           <section id="main" className="col-md-8">
-            <ProxyMessageList />
+            <ProxyMessageList 
+              messages = {this.state.messages}
+            />
           </section>
         </div>
       </React.Fragment>
