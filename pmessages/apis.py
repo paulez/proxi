@@ -33,9 +33,10 @@ def messages(request):
     debug('user location is %s', location)
     debug('user session is %s', request.session.session_key)
     username = get_user(request)[0]
+    search = request.query_params.get('search', None)
     if location:
         radius = D(m=ProxyIndex.indexed_radius(location, username))
-        all_messages = get_messages(location, radius)
+        all_messages = get_messages(location, radius, search)
     else:
         raise Http404('No location provided.')
     serializer = ProxyMessageSerializer(all_messages, many=True)
