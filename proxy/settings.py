@@ -206,6 +206,8 @@ PROXY_THRESHOLDS = {
         timedelta(hours=4): 5,
         timedelta(days=1):  7
         }
+# Don't Display messages older than this many days
+PROXY_MAX_DAYS = config('PROXY_MAX_DAYS', default=7, cast=int)
 # Proxy user expiration time, in minutes.
 PROXY_USER_EXPIRATION = config('PROXY_USER_EXPIRATION', default=300, cast=int)
 # Proxy user expiration refresh, in minutes
