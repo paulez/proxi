@@ -4,8 +4,13 @@ import logo from './logo.svg';
 import './App.css';
 import Header from './Header.js';
 import ProxyUser from './User.js';
+import axios from 'axios';
+
+axios.defaults.xsrfCookieName = 'csrftoken'
+axios.defaults.xsrfHeaderName = 'X-CSRFToken'
 
 class ProxyMessage extends Component {
+
   render () {
     return (
       <article>
@@ -53,6 +58,22 @@ class App extends Component {
 
   componentDidMount() {
     this.updateMessages();
+    if ('geolocation' in window.navigator) {
+      window.navigator.geolocation.getCurrentPosition(
+        this.setPosition
+      )
+    } 
+  }
+
+  setPosition(position) {
+    axios.post("api/position", {
+      latitude: position.coords.latitude,
+      longitude: position.coords.longitude
+    })
+    .then(() => {
+      console.log("position posted", position);
+      this.updateMessages();
+    })
   }
 
   updateMessages() {
