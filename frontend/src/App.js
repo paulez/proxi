@@ -5,6 +5,7 @@ import './App.css';
 import Header from './Header.js';
 import ProxyUser from './User.js';
 import axios from 'axios';
+import TimeAgo from 'react-timeago';
 
 axios.defaults.xsrfCookieName = 'csrftoken'
 axios.defaults.xsrfHeaderName = 'X-CSRFToken'
@@ -18,7 +19,17 @@ class ProxyMessage extends Component {
   handleClick() {
     this.props.setSearch(this.props.message.username);
   }
+
+  formatDistance(distance) {
+    if(distance < 1000) {
+      return `${distance} m`
+    } else {
+      distance = distance / 1000
+      return `${distance} km`
+    }
+  }
   render () {
+    var distance = this.formatDistance(this.props.message.distance);
     return (
       <article>
         <Well bsSize="small">
@@ -28,10 +39,13 @@ class ProxyMessage extends Component {
           <section className="message-info">
               <span className="message-author">
                   By <a onClick={this.handleClick}>{this.props.message.username}</a>
-                  &nbsp;within {this.props.message.distance}
+                  &nbsp;within {distance}
               </span>
               <span className="message-date">
-                  {this.props.message.date}
+                  <TimeAgo 
+                    date={this.props.message.date} 
+                    minPeriod={30}
+                  />
               </span>
           </section>
         </Well>
