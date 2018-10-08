@@ -54,6 +54,15 @@ class ProxyUser extends Component {
     .then(data => {
       this.setState({ username: null});
     })
+    .catch(error => {
+      if (error.response) {
+        if(error.response.status == 404) {
+          console.log("already logged out");
+          this.setState({ username: null});
+        }
+      }
+      console.log("cannot logout", error);
+    })
     event.preventDefault();
   }
 
