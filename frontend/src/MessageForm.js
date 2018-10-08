@@ -11,8 +11,29 @@ class ProxyMessageForm extends Component {
     this.state = {
       form_message: "",
       form_valid: null,
-      form_error: ""
+      form_error: "",
+      radius: null,
     }
+  }
+
+  componentDidMount() {
+    this.updateRadius();
+  }
+
+  formatDistance(distance) {
+    if(distance < 1000) {
+      return `${distance} m`
+    } else {
+      distance = distance / 1000
+      return `${distance} km`
+    }
+  }
+
+  updateRadius() {
+    axios.get("api/radius")
+    .then(data => {
+      this.setState({radius: data.data.radius});
+    })
   }
 
   handleSubmit = (event) => {
@@ -40,12 +61,13 @@ class ProxyMessageForm extends Component {
   }
 
   render () {
+    var radius = this.formatDistance(this.state.radius);
     return (
       <form onSubmit={this.handleSubmit}>
         <FormGroup
           controlId="messageForm"
         >
-          <ControlLabel>Post a new Proxi message</ControlLabel>
+          <ControlLabel>Post a new Proxi message within {radius}</ControlLabel>
           <FormControl
             componentClass="textarea"
             placeholder="Your message..."
