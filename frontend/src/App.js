@@ -10,7 +10,14 @@ axios.defaults.xsrfCookieName = 'csrftoken'
 axios.defaults.xsrfHeaderName = 'X-CSRFToken'
 
 class ProxyMessage extends Component {
+  constructor(props) {
+    super(props);
+    this.handleClick = this.handleClick.bind(this);
+  }
 
+  handleClick() {
+    this.props.setSearch(this.props.message.username);
+  }
   render () {
     return (
       <article>
@@ -20,28 +27,15 @@ class ProxyMessage extends Component {
           </section>
           <section className="message-info">
               <span className="message-author">
-                  By {this.props.message.username} within {this.props.message.distance}
+                  By <a onClick={this.handleClick}>{this.props.message.username}</a>
+                  &nbsp;within {this.props.message.distance}
               </span>
               <span className="message-date">
-                  {this.props.date}
+                  {this.props.message.date}
               </span>
           </section>
         </Well>
     </article>
-    )
-  }
-}
-
-class ProxyMessageList extends Component {
-  constructor(props) {
-    super(props);
-  }
-
-  render() {
-    return (
-      <div className="messages">
-      {this.props.messages}
-      </div>
     )
   }
 }
@@ -52,8 +46,17 @@ class App extends Component {
     super(props);
     this.state = {
       messages: [],
+      search: "",
     }
     this.updateMessages = this.updateMessages.bind(this);
+    this.setSearch = this.setSearch.bind(this);
+  }
+
+  setSearch(search) {
+    this.setState({
+      search: search,
+    });
+    this.updateMessages(search);
   }
 
   componentDidMount() {
@@ -76,21 +79,31 @@ class App extends Component {
     })
   }
 
-  updateMessages() {
+  updateMessages(search) {
+    if(search === undefined) {
+      search = this.state.search;
+    }
     console.log("fetching messages");
-    fetch("/api/messages/")
-    .then(results => {
-      return results.json();
+    axios.get("/api/messages/", {
+      params: {
+        search: search,
+      }
     })
     .then(results => {
-      console.log("data", results)
-      let messages = results.map((message) => {
+      console.log("data", results.data)
+      let messages = results.data.map((message) => {
         console.log("message", message)
         return(
-          <ProxyMessage key={message.uuid} message={message} />
+          <ProxyMessage
+            key={message.uuid}
+            message={message}
+            setSearch={this.setSearch}
+          />
         )
       })
-      this.setState({messages: messages});
+      this.setState({
+        messages: messages,
+      });
       console.log("state", this.state.messages);
     })
     .catch(err => console.log("fetch error", err))
@@ -99,7 +112,10 @@ class App extends Component {
   render() {
     return (
       <React.Fragment>
-        <Header />
+        <Header
+          search={this.state.search}
+          setSearch={this.setSearch}
+        />
         <div class="container">
           <section id="input" className="col-md-4">
             <ProxyUser 
@@ -107,9 +123,9 @@ class App extends Component {
             />
           </section>
           <section id="main" className="col-md-8">
-            <ProxyMessageList 
-              messages = {this.state.messages}
-            />
+            <div className="messages">
+              {this.state.messages}
+            </div>
           </section>
         </div>
       </React.Fragment>
