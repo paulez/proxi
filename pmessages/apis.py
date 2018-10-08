@@ -14,6 +14,7 @@ from rest_framework.response import Response
 from .models import ProxyIndex, ProxyMessage, ProxyUser
 from .serializers import ProxyMessageSerializer, ProxySimpleMessageSerializer
 from .serializers import ProxyLocationSerializer, ProxyUserSerializer
+from .serializers import ProxyRadiusSerializer
 from .utils.location import get_location
 from .utils.messages import get_messages
 from .utils.users import do_logout, get_user, save_position, save_user
@@ -130,3 +131,16 @@ def logout(request):
                 return Response(status=status.HTTP_202_ACCEPTED)
         else:
             return Response(status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['GET'])
+def radius(request):
+    """API which returns current message radius.
+    """
+    location = get_location(request)[0]
+    username = get_user(request)[0]
+    if location:
+        radius = D(m=ProxyIndex.indexed_radius(location, username))
+    else:
+        raise Http404('No location provided.')
+    serializer = ProxyRadiusSerializer({'radius': radius})
+    return Response(serializer.data)

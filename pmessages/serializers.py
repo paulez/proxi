@@ -28,3 +28,6 @@ class ProxyUserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = ProxyUser
         fields = ('username',)
+
+class ProxyRadiusSerializer(serializers.Serializer):
+    radius = DistanceField()

@@ -13,8 +13,10 @@ error = logger.error
 
 def rounded_distance(distance):
     """Return the distance ceiled to its most significant digit.
+    Minimum value is 100.
     """
     dist = distance.m
     if dist == 0:
-        return 1
-    return ceil(round(dist, -int(floor(log10(abs(dist))))))
+        return 100
+    ceiled_distance = ceil(round(dist, -int(floor(log10(abs(dist))))))
+    return max(ceiled_distance, 100)
