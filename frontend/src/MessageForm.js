@@ -65,6 +65,14 @@ class ProxyMessageForm extends Component {
     event.preventDefault();
   }
 
+  onEnterPress = (event) => {
+    if(event.keyCode == 13 && event.shiftKey == false) {
+      event.preventDefault();
+      this.handleSubmit(event);
+    }
+  }
+  
+
   render () {
     var radius = this.formatDistance(this.state.radius);
     return (
@@ -78,6 +86,7 @@ class ProxyMessageForm extends Component {
             placeholder="Your message..."
             value={this.state.form_message}
             onChange={this.handleChange}
+            onKeyDown={this.onEnterPress}
           />
           <Button type="submit" bsStyle="primary">Post</Button>
         </FormGroup>
