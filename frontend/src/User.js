@@ -1,11 +1,7 @@
 import React, { Component } from 'react';
-import axios from 'axios';
+import api from './api.js';
 import { Button, FormGroup, FormControl } from 'react-bootstrap';
 import ProxyMessageForm from './MessageForm.js';
-
-
-axios.defaults.xsrfCookieName = 'csrftoken'
-axios.defaults.xsrfHeaderName = 'X-CSRFToken'
 
 class ProxyUser extends Component {
   constructor(props) {
@@ -31,7 +27,7 @@ class ProxyUser extends Component {
   }
 
   handleSubmit = (event) => {
-    axios.post("api/login", {
+    api.post("api/login", {
       username: this.state.form_username,
     })
     .then(data => {
@@ -50,7 +46,7 @@ class ProxyUser extends Component {
   }
 
   handleLogout = (event) => {
-    axios.post("api/logout")
+    api.post("api/logout")
     .then(data => {
       this.setState({ username: null});
     })

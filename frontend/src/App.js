@@ -4,11 +4,8 @@ import logo from './logo.svg';
 import './App.css';
 import Header from './Header.js';
 import ProxyUser from './User.js';
-import axios from 'axios';
 import TimeAgo from 'react-timeago';
-
-axios.defaults.xsrfCookieName = 'csrftoken'
-axios.defaults.xsrfHeaderName = 'X-CSRFToken'
+import api from './api.js';
 
 class ProxyMessage extends Component {
   constructor(props) {
@@ -95,7 +92,7 @@ class App extends Component {
   }
 
   setPosition(position) {
-    axios.post("api/position", {
+    api.post("api/position", {
       latitude: position.coords.latitude,
       longitude: position.coords.longitude
     })
@@ -110,7 +107,7 @@ class App extends Component {
       search = this.state.search;
     }
     console.log("fetching messages");
-    axios.get("/api/messages/", {
+    api.get("api/messages/", {
       params: {
         search: search,
       }

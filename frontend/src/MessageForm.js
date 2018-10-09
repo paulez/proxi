@@ -1,9 +1,6 @@
 import React, { Component } from 'react';
-import axios from 'axios';
+import api from './api.js';
 import { Button, ControlLabel, FormGroup, FormControl } from 'react-bootstrap';
-
-axios.defaults.xsrfCookieName = 'csrftoken'
-axios.defaults.xsrfHeaderName = 'X-CSRFToken'
 
 class ProxyMessageForm extends Component {
   constructor(props) {
@@ -35,14 +32,14 @@ class ProxyMessageForm extends Component {
   }
 
   updateRadius() {
-    axios.get("api/radius")
+    api.get("api/radius")
     .then(data => {
       this.setState({radius: data.data.radius});
     })
   }
 
   handleSubmit = (event) => {
-    axios.post("api/message", {
+    api.post("api/message", {
       message: this.state.form_message,
     })
     .then(data => {
@@ -66,7 +63,7 @@ class ProxyMessageForm extends Component {
   }
 
   onEnterPress = (event) => {
-    if(event.keyCode == 13 && event.shiftKey == false) {
+    if(event.keyCode === 13 && event.shiftKey === false) {
       event.preventDefault();
       this.handleSubmit(event);
     }
