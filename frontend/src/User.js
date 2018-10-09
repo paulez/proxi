@@ -56,7 +56,7 @@ class ProxyUser extends Component {
     })
     .catch(error => {
       if (error.response) {
-        if(error.response.status == 404) {
+        if(error.response.status === 404) {
           console.log("already logged out");
           this.setState({ username: null});
         }

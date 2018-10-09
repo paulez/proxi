@@ -63,6 +63,7 @@ class App extends Component {
       search: "",
     }
     this.updateMessages = this.updateMessages.bind(this);
+    this.updatePosition = this.updatePosition.bind(this);
     this.setSearch = this.setSearch.bind(this);
   }
 
@@ -75,11 +76,22 @@ class App extends Component {
 
   componentDidMount() {
     this.updateMessages();
+    this.updatePosition();
+    this.messageInterval = setInterval(this.updateMessages, 60 * 1000);
+    this.positionInterval = setInterval(this.updatePosition, 60 * 1000);
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.messageInterval);
+    clearInterval(this.positionInterval);
+  }
+
+  updatePosition() {
     if ('geolocation' in window.navigator) {
       window.navigator.geolocation.getCurrentPosition(
         this.setPosition
       )
-    } 
+    }
   }
 
   setPosition(position) {

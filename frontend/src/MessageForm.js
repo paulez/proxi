@@ -18,6 +18,11 @@ class ProxyMessageForm extends Component {
 
   componentDidMount() {
     this.updateRadius();
+    this.radiusInterval = setInterval(this.updateRadius, 5 * 60 * 1000);
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.radiusInterval);
   }
 
   formatDistance(distance) {
