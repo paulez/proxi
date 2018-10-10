@@ -85,9 +85,9 @@ class App extends Component {
 
   updatePosition() {
     if ('geolocation' in window.navigator) {
-      window.navigator.geolocation.getCurrentPosition(
-        this.setPosition
-      )
+      window.navigator.geolocation.getCurrentPosition((position) => {
+        this.setPosition(position);
+      })
     }
   }
 
@@ -97,7 +97,6 @@ class App extends Component {
       longitude: position.coords.longitude
     })
     .then(() => {
-      console.log("position posted", position);
       this.updateMessages();
     })
   }

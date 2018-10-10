@@ -26,7 +26,7 @@ class Header extends Component {
   }
 
   formValue () {
-    if(!this.state.search) {
+    if(this.state.search === null) {
       return this.props.search;
     } else {
       return this.state.search;
