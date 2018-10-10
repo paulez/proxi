@@ -66,6 +66,8 @@ def save_position(request, position):
     """
     request.session[SLOCATION] = position
     user_id = get_user_id(request)
+    debug("save_position: set session location to %s for %s",
+            position, user_id)
     if not user_id:
         debug('Unknown user.')
     else:

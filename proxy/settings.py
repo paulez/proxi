@@ -106,6 +106,7 @@ TEMPLATES = [
 ]
 
 MIDDLEWARE_CLASSES = (
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -135,6 +136,7 @@ INSTALLED_APPS = (
     'pmessages',
     'django.contrib.humanize',
     'storages',
+    'corsheaders',
     'rest_framework',
     'sslserver',
     'django_generate_secret_key',
@@ -228,4 +230,8 @@ AWS_S3_CALLING_FORMAT = boto.s3.connection.OrdinaryCallingFormat()
 # Allowed hosts for POST Protection
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=Csv())
 # CSRF
-CSRF_TRUSTED_ORIGINS = ['localhost:3000', 'prxi.net']
+CSRF_TRUSTED_ORIGINS = config('ALLOWED_HOSTS', cast=Csv())
+# CORS
+CORS_ORIGIN_WHITELIST = config('CORS_HOSTS', cast=Csv())
+CORS_URLS_REGEX = r'^/api/.*$'
+CORS_ALLOW_CREDENTIALS = True

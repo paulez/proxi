@@ -31,8 +31,8 @@ def messages(request):
     location set in the session.
     """
     location = get_location(request)[0]
-    debug('user location is %s', location)
-    debug('user session is %s', request.session.session_key)
+    debug('messages: user location is %s', location)
+    debug('messages: user session is %s', request.session.session_key)
     username = get_user(request)[0]
     search = request.query_params.get('search', None)
     if location:
@@ -100,6 +100,9 @@ def login(request):
             debug("Invalid login request: %s", serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         location = get_location(request)[0]
+        if not location:
+            debug("Cannot login, no location known: %s", serializer.errors)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         user_id = ProxyUser.register_user(username, location)
         if user_id:
             save_user(request, username, user_id)
