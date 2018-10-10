@@ -16,12 +16,9 @@ class ProxyUser extends Component {
 
   componentDidMount() {
     console.log("fetching user state");
-    fetch("/api/user/")
+    api.get("/api/user/")
     .then(results => {
-      return results.json();
-    })
-    .then(data => {
-      this.setState({username: data.username});
+      this.setState({username: results.data.username});
     })
     .catch(err => console.log("user fetch error", err))
   }
