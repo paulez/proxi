@@ -2,11 +2,13 @@
 """
 
 import logging
-from datetime import datetime, timedelta
+from datetime import timedelta
+
 
 from django.conf import settings
 from django.contrib.gis.db.models.functions import Distance
 from django.db.models import Q
+from django.utils import timezone
 
 from ..models import ProxyMessage
 
@@ -24,7 +26,7 @@ def get_messages(location, radius, search_request=None):
     debug("Getting messages in radius %s of %s", radius, location)
     near_messages = ProxyMessage.objects.filter(
         location__distance_lte=(location, radius),
-        date__gt=datetime.now() - timedelta(days=settings.PROXY_MAX_DAYS))
+        date__gt=timezone.now() - timedelta(days=settings.PROXY_MAX_DAYS))
     if search_request:
         debug('search_request is set')
         # Filter messages using search_request
