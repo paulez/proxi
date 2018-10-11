@@ -15,8 +15,10 @@ class Header extends Component {
   }
 
   handleSubmit = (event) => {
-    this.props.setSearch(this.state.search);
-    this.setState({ search: null});
+    if(this.state.search != null && this.state.search != this.props.search) {
+      this.props.setSearch(this.state.search);
+      this.setState({ search: null});
+    }
     event.preventDefault();
   }
 
