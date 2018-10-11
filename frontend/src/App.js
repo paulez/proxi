@@ -74,7 +74,7 @@ class App extends Component {
   componentDidMount() {
     this.updateMessages();
     this.updatePosition();
-    this.messageInterval = setInterval(this.updateMessages, 60 * 1000);
+    this.messageInterval = setInterval(this.updateMessages, 20 * 1000);
     this.positionInterval = setInterval(this.updatePosition, 60 * 1000);
   }
 

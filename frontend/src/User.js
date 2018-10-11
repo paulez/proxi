@@ -12,10 +12,19 @@ class ProxyUser extends Component {
       form_error: "",
       username: "",
     }
+    this.getUserState = this.getUserState.bind(this);
   }
 
   componentDidMount() {
-    console.log("fetching user state");
+    this.getUserState();
+    this.positionInterval = setInterval(this.getUserState, 10 * 60 * 1000);
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.positionInterval);
+  }
+
+  getUserState() {
     api.get("/api/user/")
     .then(results => {
       this.setState({username: results.data.username});
