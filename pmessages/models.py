@@ -21,11 +21,11 @@ class ProxyMessage(models.Model):
     # use unique id to not expose message sequence
     uuid = models.UUIDField(default=uuid.uuid4, editable=False)
     # username chosen by the message sender
-    username = models.CharField(max_length=20)
+    username = models.CharField(max_length=20, db_index=True)
     # message content
     message = models.CharField(max_length=500)
     # creation date of the message
-    date = models.DateTimeField(auto_now_add=True)
+    date = models.DateTimeField(auto_now_add=True, db_index=True)
     # ip address of the message sender
     address = models.GenericIPAddressField()
     # location of the message sender
@@ -125,7 +125,7 @@ class ProxyIndex(models.Model):
 class ProxyUser(models.Model):
     location = models.PointField()
     last_use = models.DateTimeField()
-    username = models.CharField(max_length=20)
+    username = models.CharField(max_length=20, db_index=True)
     objects = models.GeoManager()
     
     def __unicode__(self):
