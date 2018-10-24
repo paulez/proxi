@@ -198,9 +198,9 @@ LOGGING = {
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
 
 # Mininum message display radius (meters)
-PROXY_RADIUS_MIN = config('PROXY_RADIUS_MIN', default=64, cast=int)
+PROXY_RADIUS_MIN = config('PROXY_RADIUS_MIN', default=128, cast=int)
 # Maximum message display radius (meters)
-PROXY_RADIUS_MAX = config('PROXY_RADIUS_MAX', default=524288, cast=int)
+PROXY_RADIUS_MAX = config('PROXY_RADIUS_MAX', default=1048576, cast=int)
 # Thresholds dictionnary, composed as timedelta object as key
 # and message count as value.
 PROXY_THRESHOLDS = {

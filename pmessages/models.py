@@ -47,7 +47,8 @@ class ProxyMessage(models.Model):
         radius_min = settings.PROXY_RADIUS_MIN
         radius_max = settings.PROXY_RADIUS_MAX
 
-        radius = radius_max
+        radius = radius_max / 2
+        radius_min = radius_min / 2
 
         def compare(radius, thresholds, pos):
             """Compare message count against a dictionary of tresholds.
@@ -82,7 +83,8 @@ class ProxyIndex(models.Model):
     
     def __unicode__(self):
         return "Index at %s." % self.location
-        
+    
+    @staticmethod
     def create_index(pos, radius):
         """Create an index at location pos.
         """
@@ -91,11 +93,13 @@ class ProxyIndex(models.Model):
         new_index.save()
 
     @staticmethod
-    def indexed_radius(pos, username):
+    def indexed_radius(pos, username, interval=None):
         """Return index radius for pos location."""
         debug('Getting index for %s', pos)
-        create_index = False
-        update_interval = timedelta(minutes=settings.PROXY_INDEX_EXPIRATION)
+        if not interval:
+            update_interval = timedelta(minutes=settings.PROXY_INDEX_EXPIRATION)
+        else:
+            update_interval = interval
         try:
             nearest_index = ProxyIndex.objects.distance(pos).order_by('distance')[0]
         except IndexError:
