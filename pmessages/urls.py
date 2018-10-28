@@ -10,8 +10,8 @@ app_name = 'pmessages'
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^api/messages', apis.messages),
-    url(r'^api/message', apis.message),
+    url(r'^api/messages', apis.messages, name="api-messages"),
+    url(r'^api/message', apis.message, name="api-message"),
     url(r'^api/position', apis.position, name="api-position"),
     url(r'^api/login', apis.login, name="api-login"),
     url(r'^api/logout', apis.logout, name="api-logout"),

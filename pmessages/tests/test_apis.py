@@ -2,11 +2,14 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+login_url = reverse("pmessages:api-login")
+logout_url = reverse("pmessages:api-logout")
+
 class UserTests(APITestCase):
 
     def test_login_without_position(self):
         data = {"username": "toto"}
-        response = self.client.post(reverse("pmessages:api-login"), data, format="json")
+        response = self.client.post(login_url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_login_logout(self):
@@ -14,21 +17,56 @@ class UserTests(APITestCase):
         response = self.client.post(
             reverse("pmessages:api-position"), data, format="json")
         self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
+
+        response = self.client.get(reverse("pmessages:api-user"))
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         
         data = {"username": "toto"}
         response = self.client.post(
-            reverse("pmessages:api-login"), data, format="json")
+            login_url, data, format="json")
+        self.assertEqual(response.data, data)
+        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
+
+        # login twice
+        response = self.client.post(
+            login_url, data, format="json")
+        self.assertEqual(response.data, data)
         self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
 
         response = self.client.get(reverse("pmessages:api-user"))
         self.assertEqual(response.data, {"username": "toto"})
 
         response = self.client.post(
-            reverse("pmessages:api-logout"))
+            logout_url)
         self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
 
         # can't logout twice
         response = self.client.post(
-            reverse("pmessages:api-logout"))
+            logout_url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
+
+class MessageTests(APITestCase):
+    
+    def setUp(self):
+        self.message_data = {"message": "plop le monde"}
+
+    def test_post_message_without_login(self):
+        response = self.client.post(
+            reverse("pmessages:api-message"), self.message_data, format="json"
+        )
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_post_message_success(self):
+        data = {"latitude": 42, "longitude": 127}
+        response = self.client.post(
+            reverse("pmessages:api-position"), data, format="json")
+
+        data = {"username": "toto"}
+        response = self.client.post(
+            login_url, data, format="json")
+        
+        response = self.client.post(
+            reverse("pmessages:api-message"), self.message_data, format="json"
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)

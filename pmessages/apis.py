@@ -61,8 +61,10 @@ def message(request):
                 message.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
         elif not location:
+            debug("No location provided for user %s and request %s", username, request)
             raise Http404('No location provided.')
         else:
+            debug("No user logged in for request %s", request)
             raise Http404('Not logged in.')
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
