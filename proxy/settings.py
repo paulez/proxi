@@ -140,6 +140,7 @@ INSTALLED_APPS = (
     'rest_framework',
     'sslserver',
     'django_generate_secret_key',
+    'coverage',
 )
 
 # A sample logging configuration. The only tangible logging
