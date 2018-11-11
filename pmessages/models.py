@@ -38,6 +38,9 @@ class ProxyMessage(models.Model):
     
     def __unicode__(self):
         return self.message
+    
+    def __str__(self):
+        return "{}: {}: {}".format(self.uuid, self.username, self.message)
 
     @staticmethod
     def near_radius(pos, username):
