@@ -1,6 +1,9 @@
+from django.contrib.gis.geos import Point
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
+
+from pmessages.models import ProxyMessage
 
 login_url = reverse("pmessages:api-login")
 logout_url = reverse("pmessages:api-logout")
@@ -65,12 +68,22 @@ class MessageTests(APITestCase):
 class MessageTestsWithLoginAndPosition(APITestCase):
     def setUp(self):
         self.message_data = {"message": "plop le monde"}
+        self.pos1 = Point(127, 42)
+        data = {"latitude": self.pos1.y, "longitude": self.pos1.x}
 
-        data = {"latitude": 42, "longitude": 127}
-        response = self.client.post(position_url, data, format="json")
+        self.pos2 = Point(42, 127)
+        self.client.post(position_url, data, format="json")
 
         data = {"username": "toto"}
         self.client.post(login_url, data, format="json")
+
+        self.msg1 = ProxyMessage(username="titi", message="blah",
+            address="127.0.0.1", location=self.pos1)
+        self.msg1.save()
+
+        self.msg2 = ProxyMessage(username="tutu", message="bloh",
+            address="127.0.0.1", location=self.pos2)
+        self.msg2.save()
         
     def tearDown(self):
         self.client.post(logout_url)
@@ -80,3 +93,15 @@ class MessageTestsWithLoginAndPosition(APITestCase):
             message_url, self.message_data, format="json"
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_get_messages_success(self):
+        response = self.client.get(messages_url)
+        self.assertEqual(response.data[0]["uuid"], str(self.msg1.uuid))
+        self.assertEqual(len(response.data), 1)
+
+    def test_get_messages_change_position(self):
+        data = {"latitude": self.pos2.y, "longitude": self.pos2.x}
+        self.client.post(position_url, data, format="json")
+        response = self.client.get(messages_url)
+        self.assertEqual(response.data[0]["uuid"], str(self.msg2.uuid))
+        self.assertEqual(len(response.data), 1)

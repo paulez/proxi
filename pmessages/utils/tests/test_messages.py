@@ -1,6 +1,8 @@
 from django.test import TestCase
 from django.contrib.gis.geos import Point
 from django.contrib.gis.measure import D
+from django.utils import timezone
+from datetime import timedelta
 
 from pmessages.utils import messages
 from pmessages.models import ProxyMessage
@@ -26,6 +28,18 @@ class MessageUtilsTest(TestCase):
                 address=self.address, location=self.pos2)
             message.save()
             self.messages_2.add(message)
+
+        old_date = timezone.now() - timedelta(days=365)
+        old_message = ProxyMessage(
+            username=self.username, message="vieux",
+            address=self.address, location=self.pos2)
+        old_message.date = old_date
+        old_message.save()
+        ProxyMessage(
+            username=self.username, message="vieux",
+            address=self.address, location=self.pos1)
+        old_message.date = old_date
+        old_message.save()
         
     def test_get_messages(self):
         distance = D(km=1)
