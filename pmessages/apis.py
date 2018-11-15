@@ -16,7 +16,7 @@ from .serializers import ProxyMessageSerializer, ProxySimpleMessageSerializer
 from .serializers import ProxyLocationSerializer, ProxyUserSerializer
 from .serializers import ProxyRadiusSerializer
 from .utils.location import get_location
-from .utils.messages import get_messages
+from .utils.messages import get_messages_for_request
 from .utils.users import do_logout, get_user, save_position, save_user
 
 # Get an instance of a logger
@@ -30,16 +30,7 @@ def messages(request):
     """API which returns list of nearby messages based on the
     location set in the session.
     """
-    location = get_location(request)[0]
-    debug('messages: user location is %s', location)
-    debug('messages: user session is %s', request.session.session_key)
-    username = get_user(request)[0]
-    search = request.query_params.get('search', None)
-    if location:
-        radius = D(m=ProxyIndex.indexed_radius(location, username))
-        all_messages = get_messages(location, radius, search)
-    else:
-        raise Http404('No location provided.')
+    all_messages = get_messages_for_request(request)
     serializer = ProxyMessageSerializer(all_messages, many=True)
     return Response(serializer.data)
 

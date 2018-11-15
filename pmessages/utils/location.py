@@ -4,7 +4,7 @@
 import logging
 
 from .geo import get_user_location_address
-from .session import SLOCATION, SADDRESS
+from .session import SLOCATION, SLOCATION_ACCURATE, SADDRESS
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -32,5 +32,6 @@ def get_location(request):
     if not location:
         location = get_user_location_address(request)[0]
         request.session[SLOCATION] = location
+        request.session[SLOCATION_ACCURATE] = False
         debug('get_location from geoip set to %s', location)
     return location, address
