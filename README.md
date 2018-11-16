@@ -1,8 +1,10 @@
 # Proxi
 
 Proxi is a proximity messaging service.
-Your messages will be displayed to people around you, and the messages you see were posted by people around.
+Your messages will be displayed to people around you, and the messages you see were posted by people nearby.
 You want to know if there is an open bakery around? Just ask! 
+
+Try it! https://prxi.net/
 
 ## Getting started
 
@@ -37,10 +39,17 @@ sudo -u postgres psql --dbname=proxydb -c "CREATE EXTENSION postgis;"
 sudo -u postgres psql --dbname=proxydb -c "CREATE EXTENSION postgis_topology;"
 ```
 
+To be able to run tests the database user needs to have super user permissions to setup the test database.
+
+```
+sudo -u postgres psql
+ALTER ROLE proxydb SUPERUSER;
+```
+
 ### Install dependencies
 
 ```
-sudo apt install build-essential python3-dev libgeoip-dev
+sudo apt install build-essential python3-dev libgeoip-dev zlib1g-dev
 pip install -r doc/pip_requirements.txt
 ```
 
@@ -50,6 +59,26 @@ pip install -r doc/pip_requirements.txt
 cd proxi
 ./manage.py migrate
 ./manage.py runsslserver "0.0.0.0:8000"
+```
+#### Run tests
+
+```
+./manage.py test -v 2
+```
+
+### Front-end
+
+The front-end uses React. We need npm to run it.
+
+#### Install
+
+Follow npm install instructions at https://nodejs.org/en/download/package-manager/#debian-and-ubuntu-based-linux-distributions-enterprise-linux-fedora-and-snap-packages
+
+#### Run
+
+```
+cd frontend
+npm run
 ```
 
 ## Authors
