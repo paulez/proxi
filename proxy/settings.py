@@ -219,15 +219,8 @@ PROXY_USER_REFRESH = config('PROXY_USER_REFRESH', default=5, cast=int)
 PROXY_INDEX_EXPIRATION = config('PROXY_INDEX_EXPIRATION', default=5, cast=int)
 # GeoIP
 GEOIP_PATH = os.path.join(BASE_DIR, 'data/geoip')
-# Static files to S3
-AWS_STORAGE_BUCKET_NAME = config('AWS_STORAGE_BUCKET_NAME')
-STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
-AWS_S3_REGION_NAME = 'eu-west-1'
-AWS_S3_HOST = 's3-eu-west-1.amazonaws.com'
+# Static files
 STATIC_URL = '/static/'
-import boto.s3.connection
-AWS_S3_CALLING_FORMAT = boto.s3.connection.OrdinaryCallingFormat()
 # Allowed hosts for POST Protection
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=Csv())
 # CSRF
