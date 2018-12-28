@@ -1,5 +1,5 @@
 const dev = {
-  api: "https://proxi-dev-1:8000/",
+  api: "https://localhost:8000/",
 };
 
 const prod = {
