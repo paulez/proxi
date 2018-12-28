@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Well } from 'react-bootstrap';
+import { Well, Alert } from 'react-bootstrap';
 import logo from './logo.svg';
 import './App.css';
 import Header from './Header.js';
@@ -48,6 +48,25 @@ class ProxyMessage extends Component {
         </Well>
     </article>
     )
+  }
+}
+
+class MessageList extends Component {
+
+  render () {
+    if (this.props.messages.length > 0) {
+      return (
+        <div className="messages">
+          {this.props.messages}
+        </div>
+      );
+    } else {
+      return (
+        <Alert bsStyle="info">
+          No recent message nearby! <strong>Start the local discussion now!</strong>
+        </Alert>
+      );
+    }
   }
 }
 
@@ -145,9 +164,9 @@ class App extends Component {
             />
           </section>
           <section id="main" className="col-md-8">
-            <div className="messages">
-              {this.state.messages}
-            </div>
+            <MessageList
+              messages = {this.state.messages}
+            />
           </section>
         </div>
       </React.Fragment>
