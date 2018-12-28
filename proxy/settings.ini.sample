@@ -1,0 +1,10 @@
+[settings]
+DEBUG=True
+DB_NAME=proxydb
+DB_USER=proxydb
+DB_PASSWORD=password_to_be_changed
+DB_HOST=localhost
+SECRET_KEY=
+ALLOWED_HOSTS=localhost
+PROXY_INDEX_EXPIRATION=0
+CORS_HOSTS=localhost:3000
