@@ -14,7 +14,9 @@ Proxi uses GeoDjango and PostgreSQL with PostGis as backend. We show how to set-
 
 #### Create a virtual env
 
-```virtualenv -p /usr/bin/python3 proxi_env/
+```
+sudo apt install virtualenv
+virtualenv -p python3 proxi_env
 cd proxi_env
 source bin/activate
 ```
@@ -24,17 +26,16 @@ source bin/activate
 ```
 mkdir src
 cd src
-git https://github.com/paulez/proxi.git
+git clone https://github.com/paulez/proxi.git
 ```
 
 #### Set-up postgis
 
 ```
-sudo apt-get install postgis
+sudo apt install postgis
 sudo -u postgres createuser proxydb
 sudo -u postgres createdb -E UTF8 -O proxydb proxydb
-sudo -u postgres psql
-ALTER USER proxydb WITH PASSWORD 'password';
+sudo -u postgres psql -c "ALTER USER proxydb WITH PASSWORD 'choose_a_random_password';"
 sudo -u postgres psql --dbname=proxydb -c "CREATE EXTENSION postgis;"
 sudo -u postgres psql --dbname=proxydb -c "CREATE EXTENSION postgis_topology;"
 ```
@@ -42,21 +43,36 @@ sudo -u postgres psql --dbname=proxydb -c "CREATE EXTENSION postgis_topology;"
 To be able to run tests the database user needs to have super user permissions to setup the test database.
 
 ```
-sudo -u postgres psql
-ALTER ROLE proxydb SUPERUSER;
+sudo -u postgres psql -c "ALTER ROLE proxydb SUPERUSER";
 ```
 
 ### Install dependencies
 
 ```
-sudo apt install build-essential python3-dev libgeoip-dev zlib1g-dev
+cd proxi
+sudo apt install build-essential python3-dev libgeoip-dev zlib1g-dev libmemcached-dev
 pip install -r doc/pip_requirements.txt
+```
+
+### Create the configuration file
+
+Create a configuration file from the sample.
+
+```
+cp proxy/settings.ini.sample proxy/settings.ini
+```
+
+Edit the file, and set DB_PASSWORD with the database user password created above.
+
+Run the django_secret_key script and use the output to set the SECRET_KEY parameter.
+
+```
+./utils/django_secret_key.py
 ```
 
 #### Install the database and run server
 
 ```
-cd proxi
 ./manage.py migrate
 ./manage.py runsslserver "0.0.0.0:8000"
 ```
@@ -74,12 +90,24 @@ The front-end uses React. We need npm to run it.
 
 Follow npm install instructions at https://nodejs.org/en/download/package-manager/#debian-and-ubuntu-based-linux-distributions-enterprise-linux-fedora-and-snap-packages
 
-#### Run
+Install dependencies using npm.
 
 ```
 cd frontend
-npm run
+npm install
 ```
+
+#### Run
+
+```
+npm start
+```
+
+### Test
+
+The backend and frontend development servers both use self signed SSL certificates. You need to add exceptions for your browser to use them. Connect to https://localhost:8000/ and https://localhost:3000/ and add the exception for those certifications.
+
+Now you can test the application at https://localhost:3000/
 
 ## Authors
 
