@@ -5,6 +5,6 @@ DB_USER=proxydb
 DB_PASSWORD=password_to_be_changed
 DB_HOST=localhost
 SECRET_KEY=
-ALLOWED_HOSTS=localhost
+ALLOWED_HOSTS=localhost:3000
 PROXY_INDEX_EXPIRATION=0
 CORS_HOSTS=localhost:3000
