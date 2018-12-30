@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Well, Alert } from 'react-bootstrap';
+import { Well, Jumbotron, Button } from 'react-bootstrap';
 import logo from './logo.svg';
 import './App.css';
 import Header from './Header.js';
@@ -62,9 +62,18 @@ class MessageList extends Component {
       );
     } else {
       return (
-        <Alert bsStyle="info">
-          No recent message nearby! <strong>Start the local discussion now!</strong>
-        </Alert>
+        <Jumbotron>
+          <h2>Start the local discussion!</h2>
+          <p>
+          No recent message nearby!
+          </p>
+          <p>
+            Choose a pseudo, and start the discussion with nearby people by posting a message!
+          </p>
+          <p>
+            <Button bsStyle="info">About proxi</Button>
+          </p>
+        </Jumbotron>
       );
     }
   }
