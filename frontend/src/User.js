@@ -1,18 +1,135 @@
 import React, { Component } from 'react';
 import api from './api.js';
-import { Button, FormGroup, FormControl } from 'react-bootstrap';
+import { Button, FormGroup, FormControl, ControlLabel } from 'react-bootstrap';
 import ProxyMessageForm from './MessageForm.js';
 
-class ProxyUser extends Component {
+class LogoutForm extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      form_valid: null,
+      form_error: "",
+    }
+  }
+
+  handleLogout = (event) => {
+    api.post("api/logout")
+    .then(data => {
+      this.props.setUser(null);
+    })
+    .catch(error => {
+      if (error.response) {
+        if(error.response.status === 404) {
+          console.log("already logged out");
+          this.props.setUser(null);
+        }
+      }
+      console.log("cannot logout", error);
+    })
+    event.preventDefault();
+  }
+
+  getValidationState() {
+    return this.state.form_valid;
+  }
+
+  render () {
+    var username = this.props.getUser()
+    return (
+      <div>
+        <ProxyMessageForm
+          updateMessages = {this.props.updateMessages}
+        />
+        <form onSubmit={this.handleLogout}>
+          <FormGroup controlId="logoutForm">
+          <span>
+            <ControlLabel>Currently known as <mark>{username}</mark></ControlLabel>
+          </span>
+          { " " }
+          <span>
+            <Button type="submit" bsSize="small">Logout</Button>
+          </span>
+          </FormGroup>
+        </form>
+      </div>
+    )
+  }
+}
+
+class LoginForm extends Component {
   constructor(props) {
     super(props);
     this.state = {
       form_username: "",
       form_valid: null,
       form_error: "",
+    }
+  }
+
+  handleSubmit = (event) => {
+    api.post("api/login", {
+      username: this.state.form_username,
+    })
+    .then(data => {
+      this.props.setUser(data.data.username);
+    })
+    .catch(error => {
+      this.props.setUser(null);
+      this.setState({
+        form_valid: "error",
+        form_error: "Pseudo already in use, please choose another one!",
+      })
+      console.log("cannot login", error);
+    })
+    this.props.updateMessages();
+    event.preventDefault();
+  }
+
+  handleChange = (event) => {
+    this.setState({ form_username: event.target.value});
+    event.preventDefault();
+  }
+
+  getValidationState() {
+    return this.state.form_valid;
+  }
+
+  componentDidMount() {
+    this.usernameInput.focus();
+  }
+
+  render () {
+    return (
+      <form onSubmit={this.handleSubmit}>
+        <FormGroup
+          controlId="userForm"
+          validationState={this.getValidationState()}
+        >
+        <FormControl
+          type="text"
+          name="username"
+          value={this.state.form_username}
+          placeholder="Choose your pseudo!"
+          onChange={this.handleChange}
+          inputRef={ref => { this.usernameInput = ref; }}
+        />
+        </FormGroup>
+        <Button type="submit" bsStyle="primary">Use</Button>
+      </form>
+    )
+  }
+}
+
+
+class ProxyUser extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
       username: "",
     }
     this.getUserState = this.getUserState.bind(this);
+    this.setUser = this.setUser.bind(this);
+    this.getUser = this.getUser.bind(this);
   }
 
   componentDidMount() {
@@ -32,84 +149,29 @@ class ProxyUser extends Component {
     .catch(err => console.log("user fetch error", err))
   }
 
-  handleSubmit = (event) => {
-    api.post("api/login", {
-      username: this.state.form_username,
-    })
-    .then(data => {
-      this.setState({ username: data.data.username});
-    })
-    .catch(error => {
-      this.setState({
-        form_valid: "error",
-        form_error: "Pseudo already in use, please choose another one!",
-        username: null,
-      })
-      console.log("cannot login", error);
-    })
-    this.props.updateMessages();
-    event.preventDefault();
+  setUser(username) {
+    this.setState({ username: username});
   }
 
-  handleLogout = (event) => {
-    api.post("api/logout")
-    .then(data => {
-      this.setState({ username: null});
-    })
-    .catch(error => {
-      if (error.response) {
-        if(error.response.status === 404) {
-          console.log("already logged out");
-          this.setState({ username: null});
-        }
-      }
-      console.log("cannot logout", error);
-    })
-    event.preventDefault();
+  getUser() {
+    return this.state.username;
   }
 
-  handleChange = (event) => {
-    this.setState({ form_username: event.target.value});
-    event.preventDefault();
-  }
-
-  getValidationState() {
-    return this.state.form_valid;
-  }
   render () {
     if(this.state.username) {
       return (
-        <div>
-          <ProxyMessageForm 
-            updateMessages = {this.props.updateMessages}
-          />
-          <div>Currently logged as {this.state.username}
-            <form onSubmit={this.handleLogout}>
-              <FormGroup
-                controlId="logoutForm"
-              />
-              <Button type="submit" bsStyle="default">Logout</Button>
-            </form>
-          </div>
-        </div>
+        <LogoutForm
+          setUser = {this.setUser}
+          getUser = {this.getUser}
+          updateMessages = {this.props.updateMessages}
+        />
       )
     } else {
       return (
-        <form onSubmit={this.handleSubmit}>
-          <FormGroup
-            controlId="userForm"
-            validationState={this.getValidationState()}
-          >
-            <FormControl
-              type="text"
-              name="username"
-              value={this.state.form_username}
-              placeholder="Choose your pseudo!"
-              onChange={this.handleChange}
-            />
-          </FormGroup>
-          <Button type="submit" bsStyle="primary">Use</Button>
-        </form>
+        <LoginForm
+          setUser = {this.setUser}
+          updateMessages = {this.props.updateMessages}
+        />
       )
     }
   }

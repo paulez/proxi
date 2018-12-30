@@ -16,6 +16,7 @@ class ProxyMessageForm extends Component {
   componentDidMount() {
     this.updateRadius();
     this.radiusInterval = setInterval(this.updateRadius, 5 * 60 * 1000);
+    this.messageInput.focus();
   }
 
   componentWillUnmount() {
@@ -84,6 +85,7 @@ class ProxyMessageForm extends Component {
             value={this.state.form_message}
             onChange={this.handleChange}
             onKeyDown={this.onEnterPress}
+            inputRef={ref => { this.messageInput = ref; }}
           />
           <Button type="submit" bsStyle="primary">Post</Button>
         </FormGroup>
