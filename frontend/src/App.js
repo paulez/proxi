@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import { Well, Jumbotron, Button } from 'react-bootstrap';
+import { BrowserRouter as Router, Route, Link } from "react-router-dom";
+import { LinkContainer } from 'react-router-bootstrap';
 import logo from './logo.svg';
 import './App.css';
 import Header from './Header.js';
@@ -39,8 +41,8 @@ class ProxyMessage extends Component {
                   &nbsp;within {distance}
               </span>
               <span className="message-date">
-                  <TimeAgo 
-                    date={this.props.message.date} 
+                  <TimeAgo
+                    date={this.props.message.date}
                     minPeriod={30}
                   />
               </span>
@@ -71,7 +73,9 @@ class MessageList extends Component {
             Choose a pseudo, and start the discussion with nearby people by posting a message!
           </p>
           <p>
+          <LinkContainer to="/about">
             <Button bsStyle="info">About proxi</Button>
+          </LinkContainer>
           </p>
         </Jumbotron>
       );
@@ -168,7 +172,7 @@ class App extends Component {
         />
         <div class="container">
           <section id="input" className="col-md-4">
-            <ProxyUser 
+            <ProxyUser
               updateMessages = {this.updateMessages}
             />
           </section>

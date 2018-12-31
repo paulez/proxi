@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
-import { Navbar, FormControl, FormGroup } from 'react-bootstrap';
+import { Nav, Navbar, FormControl, FormGroup, NavItem } from 'react-bootstrap';
+import { NavLink } from 'react-router-dom'
+import { LinkContainer } from 'react-router-bootstrap'
 
 class Header extends Component {
   constructor(props) {
@@ -7,11 +9,6 @@ class Header extends Component {
     this.state = {
       search: null,
     }
-    this.handleHomeClick = this.handleHomeClick.bind(this);
-  }
-
-  handleHomeClick() {
-    this.props.setSearch("");
   }
 
   handleSubmit = (event) => {
@@ -34,22 +31,27 @@ class Header extends Component {
       return this.state.search;
     }
   }
-  
+
   render () {
     var formValue = this.formValue();
     return (
       <Navbar inverse>
         <Navbar.Header>
           <Navbar.Brand>
-            <a onClick={this.handleHomeClick}>Proxi</a>
+            <NavLink to="/">Proxi</NavLink>
           </Navbar.Brand>
           <Navbar.Toggle />
         </Navbar.Header>
+        <Nav>
+          <LinkContainer to='/about'>
+            <NavItem>About</NavItem>
+          </LinkContainer>
+        </Nav>
         <Navbar.Collapse>
           <Navbar.Form pullRight>
             <form onSubmit={this.handleSubmit}>
               <FormGroup>
-                <FormControl 
+                <FormControl
                   type="text"
                   value={formValue}
                   onChange={this.handleChange}
