@@ -4,7 +4,6 @@ import { BrowserRouter as Router, Route } from 'react-router-dom';
 import './index.css';
 import App from './App';
 import ProxyAbout from './About.js';
-import Header from './Header.js';
 import registerServiceWorker from './registerServiceWorker';
 
 ReactDOM.render(

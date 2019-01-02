@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
 import { Well, Jumbotron, Button } from 'react-bootstrap';
-import { BrowserRouter as Router, Route, Link } from "react-router-dom";
+import { Row, Col, Grid } from 'react-bootstrap';
 import { LinkContainer } from 'react-router-bootstrap';
-import logo from './logo.svg';
 import './App.css';
 import Header from './Header.js';
+import ProxyFooter from './Footer.js';
 import ProxyUser from './User.js';
 import TimeAgo from 'react-timeago';
 import api from './api.js';
@@ -70,7 +70,7 @@ class MessageList extends Component {
           No recent message nearby!
           </p>
           <p>
-            Choose a pseudo, and start the discussion with nearby people by posting a message!
+            Choose a pseudo, and start the discussion with people nearby by posting a message!
           </p>
           <p>
           <LinkContainer to="/about">
@@ -170,18 +170,21 @@ class App extends Component {
           search={this.state.search}
           setSearch={this.setSearch}
         />
-        <div class="container">
-          <section id="input" className="col-md-4">
+        <Grid>
+          <Row>
+          <Col md={4}>
             <ProxyUser
               updateMessages = {this.updateMessages}
             />
-          </section>
-          <section id="main" className="col-md-8">
+          </Col>
+          <Col md={6}>
             <MessageList
               messages = {this.state.messages}
             />
-          </section>
-        </div>
+          </Col>
+            </Row>
+          </Grid>
+        <ProxyFooter/>
       </React.Fragment>
     );
   }

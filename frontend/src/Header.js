@@ -12,7 +12,7 @@ class Header extends Component {
   }
 
   handleSubmit = (event) => {
-    if(this.state.search != null && this.state.search != this.props.search) {
+    if(this.state.search !== null && this.state.search !== this.props.search) {
       this.props.setSearch(this.state.search);
       this.setState({ search: null});
     }
@@ -42,12 +42,12 @@ class Header extends Component {
           </Navbar.Brand>
           <Navbar.Toggle />
         </Navbar.Header>
+        <Navbar.Collapse>
         <Nav>
           <LinkContainer to='/about'>
             <NavItem>About</NavItem>
           </LinkContainer>
         </Nav>
-        <Navbar.Collapse>
           <Navbar.Form pullRight>
             <form onSubmit={this.handleSubmit}>
               <FormGroup>
