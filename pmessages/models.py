@@ -35,6 +35,8 @@ class ProxyMessage(models.Model):
     ref = models.ForeignKey('self', null=True)
     # message priority
     priority = models.PositiveSmallIntegerField(default=0)
+    # user who created the message
+    user = models.ForeignKey('ProxyUser', null=True)
     
     def __unicode__(self):
         return self.message
