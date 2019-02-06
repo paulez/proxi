@@ -40,7 +40,7 @@ def message(request):
     session.
     """
     location, address = get_location(request)
-    username = get_user(request)[0]
+    username = get_user(request).name
     if request.method == 'POST':
         if location and username:
             serializer = ProxySimpleMessageSerializer(data=request.data)
@@ -78,7 +78,7 @@ def login(request):
     """API to login with a username and the current session.
     """
     if request.method == 'POST':
-        current_username = get_user(request)[0]
+        current_username = get_user(request).name
         serializer = ProxyUserSerializer(data=request.data)
         if serializer.is_valid():
             username = serializer.validated_data['username']
@@ -109,7 +109,7 @@ def user(request):
     """
     API to retrieve current user.
     """
-    username = get_user(request)[0]
+    username = get_user(request).name
     if username:
         user = ProxyUser(username=username)
         serializer = ProxyUserSerializer(user)
@@ -120,7 +120,7 @@ def user(request):
 @api_view(['POST'])
 def logout(request):
     if request.method == 'POST':
-        user_id = get_user(request)[1]
+        user_id = get_user(request).id
         debug('user %s has called logout', user_id)
         if user_id:
                 do_logout(request, user_id)
@@ -133,7 +133,7 @@ def radius(request):
     """API which returns current message radius.
     """
     location = get_location(request)[0]
-    username = get_user(request)[0]
+    username = get_user(request).name
     if location:
         radius = D(m=ProxyIndex.indexed_radius(location, username))
     else:

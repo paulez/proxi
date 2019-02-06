@@ -18,6 +18,14 @@ debug = logger.debug
 info = logger.info
 error = logger.error
 
+class SessionUser(object):
+    """
+    User information stored in session.
+    """
+    def __init__(self, id, name, expiration):
+        self.id = id
+        self.name = name
+        self.expiration = expiration
 
 def get_user(request):
     """Get user session information.
@@ -46,7 +54,7 @@ def get_user(request):
             else:
                 user.last_use = timezone.now()
                 user.save()
-    return (username, user_id, user_expiration)
+    return SessionUser(user_id, username, user_expiration)
 
 def get_user_id(request):
     """Returns user id from session information.

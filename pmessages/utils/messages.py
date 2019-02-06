@@ -60,7 +60,7 @@ def get_messages_for_request(request):
     location = get_location(request)[0]
     debug('messages: user location is %s', location)
     debug('messages: user session is %s', request.session.session_key)
-    username = get_user(request)[0]
+    username = get_user(request).name
     search = request.query_params.get('search', None)
     history = get_message_history(request)
     debug("Message history: %s", history)

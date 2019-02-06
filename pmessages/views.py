@@ -45,7 +45,7 @@ def messages(request, search_request=None):
     location, address = get_location(request)
     debug('user location is %s', location)
     debug('user session is %s', request.session.session_key)
-    username, user_id, user_expiration = get_user(request)
+    user = get_user(request)
     # Display user form
     user_form = UserForm()
     # Display message form
@@ -61,7 +61,7 @@ def messages(request, search_request=None):
     else:
         search_form = SearchForm()
     if location:
-        radius = D(m=ProxyIndex.indexed_radius(location, username))
+        radius = D(m=ProxyIndex.indexed_radius(location, user.name))
         all_messages = get_messages(location, radius, search_request)
     else:
         radius = 0
@@ -70,14 +70,14 @@ def messages(request, search_request=None):
     return render(request, 'pmessages/index.html',
                   {'all_messages': all_messages, 'message_form': message_form,
                   'user_form': user_form, 'search_form': search_form,
-                  'username': username, 'location': location, 'radius': radius})
+                  'username': user.name, 'location': location, 'radius': radius})
 
 def ajax_messages(request, search_request=None):
     location, address = get_location(request)
-    username, user_id, user_expiration = get_user(request)
+    user = get_user(request)
 
     if location:
-        radius = D(m=ProxyIndex.indexed_radius(location, username))
+        radius = D(m=ProxyIndex.indexed_radius(location, user.name))
         all_messages = get_messages(location, radius, search_request)
     else:
         radius = 0
@@ -121,7 +121,7 @@ def login(request):
     Process login POST requests.
     """
     location = get_location(request)[0]
-    username = get_user(request)[0]
+    username = get_user(request).name
     if username:
         return redirect('pmessages:messages')
 
@@ -178,7 +178,7 @@ def logout(request):
     """
     Process logout POST requests.
     """
-    user_id = get_user(request)[1]
+    user_id = get_user(request).id
     debug('user %s has hit logout', user_id)
     if request.method == 'POST':
         logout_form = Form(data=request.POST)
