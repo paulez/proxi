@@ -14,7 +14,7 @@ from django.utils import timezone
 
 from ..models import ProxyMessage, ProxyIndex
 from .location import get_location
-from .users import get_user
+from .users import get_user_from_request
 from .session import get_message_history, add_messages_to_history
 
 # Get an instance of a logger
@@ -60,7 +60,7 @@ def get_messages_for_request(request):
     location = get_location(request)[0]
     debug('messages: user location is %s', location)
     debug('messages: user session is %s', request.session.session_key)
-    username = get_user(request).name
+    username = get_user_from_request(request).name
     search = request.query_params.get('search', None)
     history = get_message_history(request)
     debug("Message history: %s", history)

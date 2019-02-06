@@ -26,35 +26,53 @@ class SessionUser(object):
         self.id = id
         self.name = name
         self.expiration = expiration
+    
 
-def get_user(request):
+class UserDoesNotExist(Exception):
+    pass
+
+class ExpiredUser(Exception):
+    pass
+
+def get_user_from_request(request):
     """Get user session information.
     Returns username, user id and user expiration.
     """
     # initialising session variables
-    username = request.session.get(SUSERNAME, None)
-    user_id = request.session.get(SUSER_ID, None)
-    user_expiration = request.session.get(SUSER_EXPIRATION, None)
+    session_user = SessionUser(
+        name=request.session.get(SUSERNAME, None),
+        id=request.session.get(SUSER_ID, None),
+        expiration=request.session.get(SUSER_EXPIRATION, None)
+    )
+    return get_user(session_user)
+
+def get_user(session_user):
     # refresh user expiration info
-    if user_expiration and user_id:
+    if session_user.expiration and session_user.id:
         expiration_interval = timedelta(minutes=settings.PROXY_USER_REFRESH)
         expiration_max = timedelta(minutes=settings.PROXY_USER_EXPIRATION)
-        delta = timezone.now() - user_expiration
+        delta = timezone.now() - session_user.expiration
         if delta > expiration_max:
-            debug('expired user %s', user_id)
-            do_logout(request, user_id, delete=False)
-            (username, user_id, user_expiration)
+            debug('expired user %s', session_user.id)
+            do_logout(request, session_user.id, delete=False)
+            raise ExpiredUser()
         elif delta > expiration_interval:
             try:
-                user = ProxyUser.objects.get(pk=user_id)
+                db_user = ProxyUser.objects.get(pk=session_user.id)
             except ObjectDoesNotExist:
-                error("User %s with id %s doesn't exist", username, user_id)
+                msg = "User {session_user.name} with id {session_user.id} doesn't exist".format(
+                    session_user.name, session_user.id)
+                error()
                 do_logout(request, user_id, delete=False)
-                (username, user_id, user_expiration)
+                raise UserDoesNotExist()
             else:
-                user.last_use = timezone.now()
-                user.save()
-    return SessionUser(user_id, username, user_expiration)
+                db_user.last_use = timezone.now()
+                db_user.save()
+    return SessionUser(
+        session_user.id,
+        session_user.name,
+        session_user.expiration
+    )
 
 def get_user_id(request):
     """Returns user id from session information.

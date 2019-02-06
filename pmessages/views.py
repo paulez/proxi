@@ -14,7 +14,7 @@ from django.contrib.auth.validators import UnicodeUsernameValidator
 from .models import ProxyMessage, ProxyUser, ProxyIndex
 from .utils.location import get_location, SLOCATION
 from .utils.messages import get_messages
-from .utils.users import get_user, do_logout, get_user_id, save_user
+from .utils.users import get_user_from_request, do_logout, get_user_id, save_user
 from .utils.users import save_position
 
 # Get an instance of a logger
@@ -45,7 +45,7 @@ def messages(request, search_request=None):
     location, address = get_location(request)
     debug('user location is %s', location)
     debug('user session is %s', request.session.session_key)
-    user = get_user(request)
+    user = get_user_from_request(request)
     # Display user form
     user_form = UserForm()
     # Display message form
@@ -74,7 +74,7 @@ def messages(request, search_request=None):
 
 def ajax_messages(request, search_request=None):
     location, address = get_location(request)
-    user = get_user(request)
+    user = get_user_from_request(request)
 
     if location:
         radius = D(m=ProxyIndex.indexed_radius(location, user.name))
@@ -121,7 +121,7 @@ def login(request):
     Process login POST requests.
     """
     location = get_location(request)[0]
-    username = get_user(request).name
+    username = get_user_from_request(request).name
     if username:
         return redirect('pmessages:messages')
 
@@ -148,7 +148,7 @@ def message(request):
     Process message POST requests.
     """
     location, address = get_location(request)
-    username = get_user(request)[0]
+    username = get_user_from_request(request)[0]
 
     if request.method == 'POST':
         message_form = MessageForm(data=request.POST)
@@ -178,7 +178,7 @@ def logout(request):
     """
     Process logout POST requests.
     """
-    user_id = get_user(request).id
+    user_id = get_user_from_request(request).id
     debug('user %s has hit logout', user_id)
     if request.method == 'POST':
         logout_form = Form(data=request.POST)

@@ -17,7 +17,7 @@ from .serializers import ProxyLocationSerializer, ProxyUserSerializer
 from .serializers import ProxyRadiusSerializer
 from .utils.location import get_location
 from .utils.messages import get_messages_for_request
-from .utils.users import do_logout, get_user, save_position, save_user
+from .utils.users import do_logout, get_user_from_request, save_position, save_user
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -40,7 +40,7 @@ def message(request):
     session.
     """
     location, address = get_location(request)
-    username = get_user(request).name
+    username = get_user_from_request(request).name
     if request.method == 'POST':
         if location and username:
             serializer = ProxySimpleMessageSerializer(data=request.data)
@@ -78,7 +78,7 @@ def login(request):
     """API to login with a username and the current session.
     """
     if request.method == 'POST':
-        current_username = get_user(request).name
+        current_username = get_user_from_request(request).name
         serializer = ProxyUserSerializer(data=request.data)
         if serializer.is_valid():
             username = serializer.validated_data['username']
@@ -109,7 +109,7 @@ def user(request):
     """
     API to retrieve current user.
     """
-    username = get_user(request).name
+    username = get_user_from_request(request).name
     if username:
         user = ProxyUser(username=username)
         serializer = ProxyUserSerializer(user)
@@ -120,7 +120,7 @@ def user(request):
 @api_view(['POST'])
 def logout(request):
     if request.method == 'POST':
-        user_id = get_user(request).id
+        user_id = get_user_from_request(request).id
         debug('user %s has called logout', user_id)
         if user_id:
                 do_logout(request, user_id)
@@ -133,7 +133,7 @@ def radius(request):
     """API which returns current message radius.
     """
     location = get_location(request)[0]
-    username = get_user(request).name
+    username = get_user_from_request(request).name
     if location:
         radius = D(m=ProxyIndex.indexed_radius(location, username))
     else:
