@@ -142,6 +142,9 @@ class ProxyUser(models.Model):
 
     def __repr__(self):
         return '{}-{}'.format(self.username, self.location)
+
+    def __str__(self):
+        return self.username
     
     @staticmethod
     def register_user(username, pos):

@@ -139,6 +139,21 @@ class MessageTestsWithLoginAndPosition(APITestCase):
         self.assertEqual(response.data[0]["uuid"], str(self.msg1.uuid))
         self.assertEqual(len(response.data), 1)
 
+    def test_delete_message(self):
+        self.client.post(
+            message_url, self.message_data, format="json"
+        )
+        response = self.client.get(messages_url)
+        message_uuid = response.data[0]["uuid"]
+        response = self.client.delete(
+            message_url,
+            {
+                'uuid': message_uuid
+            },
+            format="json"
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
     def test_get_messages_change_position(self):
         self.client.get(messages_url)
         data = {"latitude": self.pos2.y, "longitude": self.pos2.x}

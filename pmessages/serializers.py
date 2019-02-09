@@ -20,6 +20,9 @@ class ProxySimpleMessageSerializer(serializers.HyperlinkedModelSerializer):
         model = ProxyMessage
         fields = ('message',)
 
+class ProxyMessageIdSerializer(serializers.Serializer):
+    uuid = serializers.UUIDField(format='hex_verbose')
+
 class ProxyLocationSerializer(serializers.Serializer):
     longitude = serializers.FloatField()
     latitude = serializers.FloatField()

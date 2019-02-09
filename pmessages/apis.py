@@ -5,7 +5,7 @@ import logging
 
 from django.contrib.gis.measure import D
 from django.contrib.gis.geos import Point
-from django.http import Http404, HttpResponseBadRequest
+from django.http import Http404, HttpResponseForbidden, HttpResponseBadRequest
 from django.views.decorators.csrf import ensure_csrf_cookie
 from rest_framework import status
 from rest_framework.decorators import api_view
@@ -13,6 +13,7 @@ from rest_framework.response import Response
 
 from .models import ProxyIndex, ProxyMessage, ProxyUser
 from .serializers import ProxyMessageSerializer, ProxySimpleMessageSerializer
+from .serializers import ProxyMessageIdSerializer
 from .serializers import ProxyLocationSerializer, ProxyUserSerializer
 from .serializers import ProxyRadiusSerializer
 from .utils.location import get_location
@@ -23,6 +24,7 @@ from .utils.users import do_logout, get_user_from_request, save_position, save_u
 logger = logging.getLogger(__name__)
 debug = logger.debug
 info = logger.info
+warning = logger.warning
 error = logger.error
 
 @api_view(['GET'])
@@ -34,30 +36,46 @@ def messages(request):
     serializer = ProxyMessageSerializer(all_messages, many=True)
     return Response(serializer.data)
 
-@api_view(['POST'])
+@api_view(['POST', 'DELETE'])
 def message(request):
     """API to post a message. Location should have already been set in
     session.
     """
     location, address = get_location(request)
+    
     user = get_user_from_request(request)
+    if not location:
+        debug("No location provided for request %s", request)
+        raise Http404('No location provided.')
+    if not user:
+        debug("No user logged in for request %s", request)
+        raise Http404('Not logged in.')
     if request.method == 'POST':
-        if location and user:
-            serializer = ProxySimpleMessageSerializer(data=request.data)
-            if serializer.is_valid():
-                message_text = serializer.validated_data['message']
-                ref = None
-                message = ProxyMessage(username=user.name, message=message_text,
-                        address=address, location=location, ref=ref)
-                message.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-        elif not location and user:
-            debug("No location provided for user %s and request %s", user.name, request)
-            raise Http404('No location provided.')
-        else:
-            debug("No user logged in for request %s", request)
-            raise Http404('Not logged in.')
+        serializer = ProxySimpleMessageSerializer(data=request.data)
+        if serializer.is_valid():
+            message_text = serializer.validated_data['message']
+            ref = None
+            db_user = ProxyUser.objects.get(pk=user.id)
+            message = ProxyMessage(username=user.name, message=message_text,
+                    address=address, location=location, ref=ref, user=db_user)
+            message.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)                        
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    elif request.method == 'DELETE':
+        db_user = ProxyUser.objects.get(pk=user.id)
+        serializer = ProxyMessageIdSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        debug("Delete message validated data: %s", serializer.validated_data)
+        message_uuid = serializer.validated_data['uuid']
+        message = ProxyMessage.objects.get(uuid=message_uuid)
+        if message.user != db_user:
+            warning("User %s cannot delete message %s", db_user, message)
+            raise HttpResponseForbidden("User cannot delete this message.")
+        else:
+            message.delete()
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
 @api_view(['POST'])
 def position(request):

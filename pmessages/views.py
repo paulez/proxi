@@ -156,8 +156,9 @@ def message(request):
             if user:
                 message_text = message_form.cleaned_data['message']
                 ref = None
+                db_user = ProxyUser.objects.get(pk=user.id)
                 message = ProxyMessage(username=user.name, message=message_text,
-                        address=address, location=location, ref=ref)
+                        address=address, location=location, ref=ref, user=db_user)
                 message.save()
                 message_form = MessageForm()
                 return redirect('pmessages:messages')
