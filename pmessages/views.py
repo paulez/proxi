@@ -121,8 +121,8 @@ def login(request):
     Process login POST requests.
     """
     location = get_location(request)[0]
-    username = get_user_from_request(request).name
-    if username:
+    user = get_user_from_request(request)
+    if user:
         return redirect('pmessages:messages')
 
     # Handle POST
@@ -148,15 +148,15 @@ def message(request):
     Process message POST requests.
     """
     location, address = get_location(request)
-    username = get_user_from_request(request)[0]
+    user = get_user_from_request(request)
 
     if request.method == 'POST':
         message_form = MessageForm(data=request.POST)
         if message_form.is_valid():
-            if username:
+            if user:
                 message_text = message_form.cleaned_data['message']
                 ref = None
-                message = ProxyMessage(username=username, message=message_text,
+                message = ProxyMessage(username=user.name, message=message_text,
                         address=address, location=location, ref=ref)
                 message.save()
                 message_form = MessageForm()
@@ -166,25 +166,25 @@ def message(request):
                 message_form.add_error('message', login_msg)
                 return render(request, 'pmessages/message.html',
                         {'message_form': message_form, 'location': location,
-                         'username': username})
+                         'username': user.name})
     else:
         message_form = MessageForm() 
-    radius = D(m=ProxyIndex.indexed_radius(location, username))
+    radius = D(m=ProxyIndex.indexed_radius(location, user.name))
     return render(request, 'pmessages/message.html',
             {'message_form': message_form, 'location': location,
-             'username': username, 'radius': radius})
+             'username': user.name, 'radius': radius})
 
 def logout(request):
     """
     Process logout POST requests.
     """
-    user_id = get_user_from_request(request).id
-    debug('user %s has hit logout', user_id)
+    user = get_user_from_request(request)
+    debug('user %s has hit logout', user)
     if request.method == 'POST':
         logout_form = Form(data=request.POST)
         if logout_form.is_valid():
-            if user_id:
-                do_logout(request, user_id)
+            if user:
+                do_logout(request, user.id)
         else:
             debug('logout form is not valid')
         return redirect('pmessages:messages')

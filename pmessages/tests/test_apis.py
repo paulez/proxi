@@ -11,6 +11,7 @@ logout_url = reverse("pmessages:api-logout")
 message_url = reverse("pmessages:api-message")
 messages_url = reverse("pmessages:api-messages")
 position_url = reverse("pmessages:api-position")
+user_url = reverse("pmessages:api-user")
 
 class UserTests(APITestCase):
 
@@ -22,10 +23,10 @@ class UserTests(APITestCase):
     def test_login_logout(self):
         data = {"latitude": 42, "longitude": 127}
         response = self.client.post(
-            reverse("pmessages:api-position"), data, format="json")
+            position_url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
 
-        response = self.client.get(reverse("pmessages:api-user"))
+        response = self.client.get(user_url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         
         data = {"username": "toto"}
@@ -40,7 +41,7 @@ class UserTests(APITestCase):
         self.assertEqual(response.data, data)
         self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
 
-        response = self.client.get(reverse("pmessages:api-user"))
+        response = self.client.get(user_url)
         self.assertEqual(response.data, {"username": "toto"})
 
         response = self.client.post(logout_url)
@@ -50,6 +51,20 @@ class UserTests(APITestCase):
         response = self.client.post(logout_url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
+    def test_expired_user(self):
+        data = {"latitude": 42, "longitude": 127}
+        response = self.client.post(
+            position_url, data, format="json")
+        data = {"username": "toto"}
+        response = self.client.post(
+            login_url, data, format="json")
+        
+        response = self.client.get(user_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        with self.settings(PROXY_USER_EXPIRATION=0):
+            response = self.client.get(user_url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 class MessageTests(APITestCase):
     

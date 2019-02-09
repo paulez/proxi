@@ -40,19 +40,19 @@ def message(request):
     session.
     """
     location, address = get_location(request)
-    username = get_user_from_request(request).name
+    user = get_user_from_request(request)
     if request.method == 'POST':
-        if location and username:
+        if location and user:
             serializer = ProxySimpleMessageSerializer(data=request.data)
             if serializer.is_valid():
                 message_text = serializer.validated_data['message']
                 ref = None
-                message = ProxyMessage(username=username, message=message_text,
+                message = ProxyMessage(username=user.name, message=message_text,
                         address=address, location=location, ref=ref)
                 message.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
-        elif not location:
-            debug("No location provided for user %s and request %s", username, request)
+        elif not location and user:
+            debug("No location provided for user %s and request %s", user.name, request)
             raise Http404('No location provided.')
         else:
             debug("No user logged in for request %s", request)
@@ -78,14 +78,14 @@ def login(request):
     """API to login with a username and the current session.
     """
     if request.method == 'POST':
-        current_username = get_user_from_request(request).name
+        current_user = get_user_from_request(request)
         serializer = ProxyUserSerializer(data=request.data)
         if serializer.is_valid():
             username = serializer.validated_data['username']
-            if current_username:
-                user = ProxyUser(username=current_username)
+            if current_user:
+                user = ProxyUser(username=current_user.name)
                 response_serializer = serializer = ProxyUserSerializer(user)
-                if current_username == username:
+                if current_user.name == username:
                     return Response(response_serializer.data, status=status.HTTP_202_ACCEPTED)
                 else:
                     return Response(response_serializer.data, status=status.HTTP_400_BAD_REQUEST)
@@ -109,9 +109,9 @@ def user(request):
     """
     API to retrieve current user.
     """
-    username = get_user_from_request(request).name
-    if username:
-        user = ProxyUser(username=username)
+    session_user = get_user_from_request(request)
+    if session_user:
+        user = ProxyUser(username=session_user.name)
         serializer = ProxyUserSerializer(user)
         return Response(serializer.data)
     else:
@@ -120,10 +120,10 @@ def user(request):
 @api_view(['POST'])
 def logout(request):
     if request.method == 'POST':
-        user_id = get_user_from_request(request).id
-        debug('user %s has called logout', user_id)
-        if user_id:
-                do_logout(request, user_id)
+        user = get_user_from_request(request)
+        debug('user %s has called logout', user)
+        if user:
+                do_logout(request, user.id)
                 return Response(status=status.HTTP_202_ACCEPTED)
         else:
             return Response(status=status.HTTP_404_NOT_FOUND)
@@ -133,9 +133,9 @@ def radius(request):
     """API which returns current message radius.
     """
     location = get_location(request)[0]
-    username = get_user_from_request(request).name
+    user = get_user_from_request(request)
     if location:
-        radius = D(m=ProxyIndex.indexed_radius(location, username))
+        radius = D(m=ProxyIndex.indexed_radius(location, user.name))
     else:
         raise Http404('No location provided.')
     serializer = ProxyRadiusSerializer({'radius': radius})

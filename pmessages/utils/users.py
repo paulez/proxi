@@ -44,7 +44,17 @@ def get_user_from_request(request):
         id=request.session.get(SUSER_ID, None),
         expiration=request.session.get(SUSER_EXPIRATION, None)
     )
-    return get_user(session_user)
+    if session_user.name is None:
+        return None
+    try:
+        user = get_user(session_user)
+    except ExpiredUser:
+        do_logout(request, session_user.id, delete=False)
+        return None
+    except UserDoesNotExist:
+        do_logout(request, session_user.id, delete=False)
+        return None
+    return user
 
 def get_user(session_user):
     # refresh user expiration info
@@ -54,7 +64,6 @@ def get_user(session_user):
         delta = timezone.now() - session_user.expiration
         if delta > expiration_max:
             debug('expired user %s', session_user.id)
-            do_logout(request, session_user.id, delete=False)
             raise ExpiredUser()
         elif delta > expiration_interval:
             try:
@@ -62,9 +71,8 @@ def get_user(session_user):
             except ObjectDoesNotExist:
                 msg = "User {session_user.name} with id {session_user.id} doesn't exist".format(
                     session_user.name, session_user.id)
-                error()
-                do_logout(request, user_id, delete=False)
-                raise UserDoesNotExist()
+                error(msg)
+                raise UserDoesNotExist(msg)
             else:
                 db_user.last_use = timezone.now()
                 db_user.save()
