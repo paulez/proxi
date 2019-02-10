@@ -9,7 +9,7 @@ from django.conf import settings
 from django.contrib.gis.measure import D
 from django.contrib.gis.db.models.functions import Distance
 from django.http import Http404
-from django.db.models import Q
+from django.db.models import Q, Case, Value, When, BooleanField
 from django.utils import timezone
 
 from ..models import ProxyMessage, ProxyIndex
@@ -76,4 +76,15 @@ def get_messages_for_request(request):
     add_history = [msg.uuid for msg in all_messages if msg.uuid not in history]
     debug("Adding messages to history: %s", add_history)
     add_messages_to_history(request, add_history)
+    if user:
+        all_messages = all_messages.annotate(
+            current_user=Case(
+                When(
+                    user__pk=user.id,then=Value(True)
+                ),
+                default=Value(False),
+                output_field=BooleanField()
+            )
+        )
+
     return all_messages
