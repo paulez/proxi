@@ -5,12 +5,16 @@ from django.http.response import Http404
 from django.utils import timezone
 from django.urls import reverse
 from datetime import timedelta
+import logging
 
 from pmessages.utils import messages
 from pmessages.utils import session
 from pmessages.models import ProxyMessage
 
 messages_url = reverse("pmessages:api-messages")
+
+logger = logging.getLogger(__name__)
+debug = logger.debug
 
 class MessageUtilsTest(TestCase):
     def setUp(self):
@@ -83,4 +87,12 @@ class MessageUtilsTest(TestCase):
         }
         test_messages = messages.get_messages_for_request(self.request)
         self.assertFalse(not test_messages)
+        for message in test_messages:
+            debug(
+                "Current user for message %s is %s for %s",
+                message,
+                message.username,
+                message.current_user
+            )
+            self.assertFalse(message.current_user)
         

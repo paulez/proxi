@@ -26,6 +26,11 @@ class SessionUser(object):
         self.id = id
         self.name = name
         self.expiration = expiration
+
+    def __str__(self):
+        return "SessionUser-{}-{}-{}".format(
+            self.id, self.name, self.expiration
+        )
     
 
 class UserDoesNotExist(Exception):

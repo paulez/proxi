@@ -76,8 +76,12 @@ def get_messages_for_request(request):
     debug("Adding messages to history: %s", add_history)
     add_messages_to_history(request, add_history)
     if user:
+        debug("User for messages is: %s", user)
         all_messages = all_messages.annotate(
             current_user=Case(
+                When(
+                    user__pk=None, then=Value(False)
+                ),
                 When(
                     user__pk=user.id,then=Value(True)
                 ),
@@ -85,5 +89,7 @@ def get_messages_for_request(request):
                 output_field=BooleanField()
             )
         )
-
+    else:
+        debug("No user for messages.")
+    debug("Returned messages: %s", all_messages)
     return all_messages
