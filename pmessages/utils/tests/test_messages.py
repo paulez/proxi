@@ -9,7 +9,7 @@ import logging
 
 from pmessages.utils import messages
 from pmessages.utils import session
-from pmessages.models import ProxyMessage
+from pmessages.models import ProxyMessage, ProxyUser
 
 messages_url = reverse("pmessages:api-messages")
 
@@ -24,8 +24,14 @@ class MessageUtilsTest(TestCase):
 
         self.pos1 = Point(-127, 42)
         self.pos2 = Point(127, 42)
+
         self.username = "toto"
         self.address = "127.0.0.1"
+        self.user_id = ProxyUser.register_user(
+            self.username, self.pos2
+        )
+        self.user = ProxyUser.objects.get(pk=self.user_id)
+
         
         self.messages_1 = set()
         self.messages_2 = set()
@@ -38,7 +44,7 @@ class MessageUtilsTest(TestCase):
 
         for __ in range(10):
             message = ProxyMessage(username=self.username, message="bloh",
-                address=self.address, location=self.pos2)
+                address=self.address, location=self.pos2, user=self.user)
             message.save()
             self.messages_2.add(message)
 
@@ -94,5 +100,24 @@ class MessageUtilsTest(TestCase):
                 message.username,
                 message.current_user
             )
+            self.assertFalse(message.current_user)
+        
+        # Get messages from a location for which messages had a user set.
+        self.request.session = {
+            session.SLOCATION: self.pos2,
+            session.SUSERNAME: self.username,
+            session.SUSER_ID: self.user_id
+        }
+        test_messages = messages.get_messages_for_request(self.request)
+        for message in test_messages:
+            self.assertTrue(message.current_user)
+        
+        # Get messages from location for which messages didn't have
+        # a user set.
+        self.request.session[session.SLOCATION] = self.pos1
+        # Clear message history
+        self.request.session[session.SMESSAGE_HISTORY] = []
+        test_messages = messages.get_messages_for_request(self.request)
+        for message in test_messages:
             self.assertFalse(message.current_user)
         
