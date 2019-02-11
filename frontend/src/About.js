@@ -1,5 +1,5 @@
 import React from 'react';
-import { Jumbotron, Grid, Row, Col } from 'react-bootstrap';
+import { Jumbotron, Container, Row, Col } from 'react-bootstrap';
 import { NavLink } from 'react-router-dom'
 import Header from './Header.js';
 import ProxyFooter from './Footer.js';
@@ -8,7 +8,7 @@ import ProxyFooter from './Footer.js';
 const ProxyAbout = () => (
   <React.Fragment>
     <Header/>
-    <Grid>
+    <Container>
       <Row>
       <Col mdOffset={4} md={6}>
         <Jumbotron>
@@ -23,7 +23,7 @@ const ProxyAbout = () => (
         </Jumbotron>
       </Col>
       </Row>
-      </Grid>
+      </Container>
       <ProxyFooter/>
   </React.Fragment>
 )

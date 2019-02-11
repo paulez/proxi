@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Nav, Navbar, FormControl, FormGroup, NavItem } from 'react-bootstrap';
+import { Nav, Navbar, Form, FormControl, FormGroup, NavItem } from 'react-bootstrap';
 import { NavLink } from 'react-router-dom'
 import { LinkContainer } from 'react-router-bootstrap'
 
@@ -36,19 +36,17 @@ class Header extends Component {
     var formValue = this.formValue();
     return (
       <Navbar inverse>
-        <Navbar.Header>
-          <Navbar.Brand>
-            <NavLink to="/">Proxi</NavLink>
-          </Navbar.Brand>
-          <Navbar.Toggle />
-        </Navbar.Header>
+        <Navbar.Brand>
+          <NavLink to="/">Proxi</NavLink>
+        </Navbar.Brand>
+        <Navbar.Toggle />
         <Navbar.Collapse>
         <Nav>
           <LinkContainer to='/about'>
             <NavItem>About</NavItem>
           </LinkContainer>
         </Nav>
-          <Navbar.Form pullRight>
+          <Form pullRight>
             <form onSubmit={this.handleSubmit}>
               <FormGroup>
                 <FormControl
@@ -58,7 +56,7 @@ class Header extends Component {
                   placeholder="Search" />
               </FormGroup>{' '}
             </form>
-          </Navbar.Form>
+          </Form>
         </Navbar.Collapse>
       </Navbar>
     );

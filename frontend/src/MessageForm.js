@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import api from './api.js';
-import { Button, ControlLabel, FormGroup, FormControl } from 'react-bootstrap';
+import { Button, FormLabel, FormGroup, FormControl } from 'react-bootstrap';
 
 class ProxyMessageForm extends Component {
   constructor(props) {
@@ -78,14 +78,14 @@ class ProxyMessageForm extends Component {
         <FormGroup
           controlId="messageForm"
         >
-          <ControlLabel>Post a new Proxi message within {radius}</ControlLabel>
+          <FormLabel>Post a new Proxi message within {radius}</FormLabel>
           <FormControl
             componentClass="textarea"
             placeholder="Your message..."
             value={this.state.form_message}
             onChange={this.handleChange}
             onKeyDown={this.onEnterPress}
-            inputRef={ref => { this.messageInput = ref; }}
+            ref={ref => { this.messageInput = ref; }}
           />
           <Button type="submit" bsStyle="primary">Post</Button>
         </FormGroup>

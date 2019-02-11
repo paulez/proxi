@@ -1,9 +1,9 @@
 import React from 'react';
-import { Row, Col, Grid } from 'react-bootstrap';
+import { Row, Col, Container } from 'react-bootstrap';
 
 const ProxyFooter = () => (
   <footer>
-    <Grid>
+    <Container>
       <Row>
         <Col mdOffset={5} md={3}>
         <p>
@@ -14,7 +14,7 @@ const ProxyFooter = () => (
         </p>
         </Col>
       </Row>
-    </Grid>
+    </Container>
   </footer>
   )
   export default ProxyFooter;

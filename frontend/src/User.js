@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import api from './api.js';
-import { Button, FormGroup, FormControl, ControlLabel } from 'react-bootstrap';
+import { Button, FormGroup, FormControl, FormLabel } from 'react-bootstrap';
 import ProxyMessageForm from './MessageForm.js';
 
 class LogoutForm extends Component {
@@ -43,7 +43,7 @@ class LogoutForm extends Component {
         <form onSubmit={this.handleLogout}>
           <FormGroup controlId="logoutForm">
           <span>
-            <ControlLabel>Currently known as <mark>{username}</mark></ControlLabel>
+            <FormLabel>Currently known as <mark>{username}</mark></FormLabel>
           </span>
           { " " }
           <span>
@@ -111,7 +111,7 @@ class LoginForm extends Component {
           value={this.state.form_username}
           placeholder="Choose your pseudo!"
           onChange={this.handleChange}
-          inputRef={ref => { this.usernameInput = ref; }}
+          ref={ref => { this.usernameInput = ref; }}
         />
         </FormGroup>
         <Button type="submit" bsStyle="primary">Use</Button>

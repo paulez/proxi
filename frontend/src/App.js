@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import { Well, Jumbotron, Button } from 'react-bootstrap';
-import { Row, Col, Grid } from 'react-bootstrap';
+import { Card, Jumbotron, Button } from 'react-bootstrap';
+import { Row, Col, Container } from 'react-bootstrap';
 import { LinkContainer } from 'react-router-bootstrap';
 import './App.css';
 import Header from './Header.js';
@@ -31,7 +31,7 @@ class ProxyMessage extends Component {
     var distance = this.formatDistance(this.props.message.distance);
     return (
       <article>
-        <Well bsSize="small">
+        <Card bsSize="small">
           <section className="message-text">
               <p>{this.props.message.message}</p>
           </section>
@@ -47,7 +47,7 @@ class ProxyMessage extends Component {
                   />
               </span>
           </section>
-        </Well>
+        </Card>
     </article>
     )
   }
@@ -170,7 +170,7 @@ class App extends Component {
           search={this.state.search}
           setSearch={this.setSearch}
         />
-        <Grid>
+        <Container>
           <Row>
           <Col md={4}>
             <ProxyUser
@@ -183,7 +183,7 @@ class App extends Component {
             />
           </Col>
             </Row>
-          </Grid>
+          </Container>
         <ProxyFooter/>
       </React.Fragment>
     );
