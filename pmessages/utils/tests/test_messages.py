@@ -1,14 +1,23 @@
-from django.test import TestCase
+from django.test import TestCase, RequestFactory
 from django.contrib.gis.geos import Point
 from django.contrib.gis.measure import D
+from django.http.response import Http404
 from django.utils import timezone
+from django.urls import reverse
 from datetime import timedelta
 
 from pmessages.utils import messages
+from pmessages.utils import session
 from pmessages.models import ProxyMessage
+
+messages_url = reverse("pmessages:api-messages")
 
 class MessageUtilsTest(TestCase):
     def setUp(self):
+        self.request = RequestFactory().get(messages_url)
+        self.request.session = {}
+        self.request.query_params = {}
+
         self.pos1 = Point(-127, 42)
         self.pos2 = Point(127, 42)
         self.username = "toto"
@@ -62,4 +71,16 @@ class MessageUtilsTest(TestCase):
         self.assertEqual(
             set(test_messages),
             self.messages_2)
+    
+    def test_get_messages_for_request_empty_session(self):
+        with self.assertRaises(Http404):
+            messages.get_messages_for_request(self.request)
+
+    def test_get_messages_for_request_with_session(self):
+        self.request.session = {
+            session.SLOCATION: self.pos1,
+            session.SUSERNAME: self.username,
+        }
+        test_messages = messages.get_messages_for_request(self.request)
+        self.assertFalse(not test_messages)
         

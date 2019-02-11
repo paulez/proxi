@@ -59,7 +59,6 @@ def get_messages_for_request(request):
     """
     location = get_location(request)[0]
     debug('messages: user location is %s', location)
-    debug('messages: user session is %s', request.session.session_key)
     user = get_user_from_request(request)
     if user:
         username = user.name

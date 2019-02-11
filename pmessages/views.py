@@ -44,7 +44,6 @@ class SearchForm(Form):
 def messages(request, search_request=None):
     location, address = get_location(request)
     debug('user location is %s', location)
-    debug('user session is %s', request.session.session_key)
     user = get_user_from_request(request)
     # Display user form
     user_form = UserForm()
@@ -96,7 +95,6 @@ def set_position(request):
     if request.method != 'POST':
         debug('Non POST request')
         return HttpResponseNotAllowed(['POST'])
-    debug('set_position session is %s', request.session.session_key)
     # get position from POST Geojson data
     try:
         position = GEOSGeometry(request.body)
