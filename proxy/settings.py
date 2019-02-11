@@ -163,6 +163,9 @@ LOGGING = {
     'formatters': {
         'verbose': {
             'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
+        },
+        'console': {
+            'format': '%(levelname)s %(module)s %(message)s'
         }
     },
     'handlers': {
@@ -175,6 +178,7 @@ LOGGING = {
             'level': LEVEL,
             'filters': ['require_debug_true'],
             'class': 'logging.StreamHandler',
+            'formatter': 'console',
             },
         'django.server': {
             'level': 'INFO',
