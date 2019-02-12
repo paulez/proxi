@@ -80,14 +80,14 @@ class ProxyMessageForm extends Component {
         >
           <FormLabel>Post a new Proxi message within {radius}</FormLabel>
           <FormControl
-            componentClass="textarea"
+            as="textarea"
             placeholder="Your message..."
             value={this.state.form_message}
             onChange={this.handleChange}
             onKeyDown={this.onEnterPress}
             ref={ref => { this.messageInput = ref; }}
           />
-          <Button type="submit" bsStyle="primary">Post</Button>
+          <Button type="submit" variant="primary">Post</Button>
         </FormGroup>
       </form>
     )

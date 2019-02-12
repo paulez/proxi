@@ -10,7 +10,7 @@ const ProxyAbout = () => (
     <Header/>
     <Container>
       <Row>
-      <Col mdOffset={4} md={6}>
+      <Col offset={4} md={6}>
         <Jumbotron>
           <h1>About Proxi</h1>
           <p>

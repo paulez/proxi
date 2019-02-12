@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Card, Jumbotron, Button } from 'react-bootstrap';
+import { Card, Jumbotron, Button, CardColumns } from 'react-bootstrap';
 import { Row, Col, Container } from 'react-bootstrap';
 import { LinkContainer } from 'react-router-bootstrap';
 import './App.css';
@@ -74,7 +74,7 @@ class MessageList extends Component {
           </p>
           <p>
           <LinkContainer to="/about">
-            <Button bsStyle="info">About proxi</Button>
+            <Button variant="info">About proxi</Button>
           </LinkContainer>
           </p>
         </Jumbotron>

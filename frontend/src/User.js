@@ -47,7 +47,7 @@ class LogoutForm extends Component {
           </span>
           { " " }
           <span>
-            <Button type="submit" bsSize="small">Logout</Button>
+            <Button type="submit" size="small">Logout</Button>
           </span>
           </FormGroup>
         </form>
@@ -103,7 +103,7 @@ class LoginForm extends Component {
       <form onSubmit={this.handleSubmit}>
         <FormGroup
           controlId="userForm"
-          validationState={this.getValidationState()}
+          validated={this.getValidationState()}
         >
         <FormControl
           type="text"
@@ -114,7 +114,7 @@ class LoginForm extends Component {
           ref={ref => { this.usernameInput = ref; }}
         />
         </FormGroup>
-        <Button type="submit" bsStyle="primary">Use</Button>
+        <Button type="submit" variant="primary">Use</Button>
       </form>
     )
   }

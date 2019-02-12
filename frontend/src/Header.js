@@ -35,28 +35,30 @@ class Header extends Component {
   render () {
     var formValue = this.formValue();
     return (
-      <Navbar inverse>
+      <Navbar bg="dark" collapseOnSelect expand="lg" variant="dark">
         <Navbar.Brand>
-          <NavLink to="/">Proxi</NavLink>
+          <LinkContainer to='/'>
+            <Nav.Link>Proxi</Nav.Link>
+          </LinkContainer>
         </Navbar.Brand>
         <Navbar.Toggle />
         <Navbar.Collapse>
-        <Nav>
+        <Nav className="mr-auto">
           <LinkContainer to='/about'>
-            <NavItem>About</NavItem>
+            <Nav.Link>About</Nav.Link>
           </LinkContainer>
         </Nav>
-          <Form pullRight>
-            <form onSubmit={this.handleSubmit}>
-              <FormGroup>
-                <FormControl
-                  type="text"
-                  value={formValue}
-                  onChange={this.handleChange}
-                  placeholder="Search" />
-              </FormGroup>{' '}
-            </form>
-          </Form>
+        <Form
+          inline
+          onSubmit={this.handleSubmit}
+        >
+            <FormControl
+              type="text"
+              className="mr-sm-2"
+              value={formValue}
+              onChange={this.handleChange}
+              placeholder="Search" />
+        </Form>
         </Navbar.Collapse>
       </Navbar>
     );
