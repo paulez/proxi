@@ -31,7 +31,7 @@ class ProxyMessage extends Component {
     var distance = this.formatDistance(this.props.message.distance);
     return (
       <article>
-        <Card bg="light">
+        <Card bg="light" className="mb-1">
           <Card.Body>
             <Card.Text>
               <p>{this.props.message.message}</p>
@@ -40,14 +40,14 @@ class ProxyMessage extends Component {
                 {this.props.message.username}
             </Card.Link>
           </Card.Body>
-          <Card.Text className="p-3">
+          <Card.Footer>
             <small className="text-muted">
               <TimeAgo
                 date={this.props.message.date}
                 minPeriod={30}
               /> within {distance}
             </small>  
-          </Card.Text>
+          </Card.Footer>
         </Card>
     </article>
     )

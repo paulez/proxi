@@ -35,7 +35,13 @@ class Header extends Component {
   render () {
     var formValue = this.formValue();
     return (
-      <Navbar bg="dark" collapseOnSelect expand="lg" variant="dark">
+      <Navbar
+        bg="dark"
+        collapseOnSelect
+        expand="lg"
+        variant="dark"
+        className="mb-4"
+      >
         <Navbar.Brand>
           <LinkContainer to='/'>
             <Nav.Link>Proxi</Nav.Link>
