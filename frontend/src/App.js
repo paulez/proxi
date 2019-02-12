@@ -31,22 +31,23 @@ class ProxyMessage extends Component {
     var distance = this.formatDistance(this.props.message.distance);
     return (
       <article>
-        <Card bsSize="small">
-          <section className="message-text">
+        <Card bg="light">
+          <Card.Body>
+            <Card.Text>
               <p>{this.props.message.message}</p>
-          </section>
-          <section className="message-info">
-              <span className="message-author">
-                  By <a onClick={this.handleClick}>{this.props.message.username}</a>
-                  &nbsp;within {distance}
-              </span>
-              <span className="message-date">
-                  <TimeAgo
-                    date={this.props.message.date}
-                    minPeriod={30}
-                  />
-              </span>
-          </section>
+            </Card.Text>
+            <Card.Link href="#" onClick={this.handleClick}>
+                {this.props.message.username}
+            </Card.Link>
+          </Card.Body>
+          <Card.Text className="p-3">
+            <small className="text-muted">
+              <TimeAgo
+                date={this.props.message.date}
+                minPeriod={30}
+              /> within {distance}
+            </small>  
+          </Card.Text>
         </Card>
     </article>
     )
