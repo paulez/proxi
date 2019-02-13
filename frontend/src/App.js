@@ -138,16 +138,13 @@ class App extends Component {
     if(search === undefined) {
       search = this.state.search;
     }
-    console.log("fetching messages");
     api.get("api/messages/", {
       params: {
         search: search,
       }
     })
     .then(results => {
-      console.log("data", results.data)
       let messages = results.data.map((message) => {
-        console.log("message", message)
         return(
           <ProxyMessage
             key={message.uuid}
@@ -159,7 +156,6 @@ class App extends Component {
       this.setState({
         messages: messages,
       });
-      console.log("state", this.state.messages);
     })
     .catch(err => console.log("fetch error", err))
   }
