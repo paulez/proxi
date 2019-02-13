@@ -106,6 +106,7 @@ class App extends Component {
             key={message.uuid}
             message={message}
             setSearch={this.setSearch}
+            updateMessages = {this.updateMessages}
           />
         )
       })

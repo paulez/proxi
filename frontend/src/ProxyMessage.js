@@ -16,11 +16,10 @@ class ProxyMessage extends Component {
   }
   
   deleteClick() {
-    this.delete();
-  }
-
-  delete() {
     api.delete("api/message/" + this.props.message.uuid)
+    .then(data => {
+      this.props.updateMessages();
+    })
   }
 
   formatDistance(distance) {
@@ -45,7 +44,7 @@ class ProxyMessage extends Component {
             </Card.Body>
             <Card.Footer>
               <small>
-                By <a href="#" onClick={this.handleClick}>{this.props.message.username}</a>
+                From <a href="#" onClick={this.handleClick}>{this.props.message.username}</a>
                 &nbsp;within {distance}
               </small>
               <small className="message-date">
@@ -65,14 +64,19 @@ class ProxyMessage extends Component {
             <Card.Body>
               <Card.Text>
                 {this.props.message.message}
+                <Button
+                  className="delete-button"
+                  size="sm"
+                  variant="danger"
+                  onClick={this.deleteClick}
+                >
+                  Delete
+                </Button>
               </Card.Text>
-              <Button variant="danger" onClick={this.deleteClick}>
-                Delete
-              </Button>
             </Card.Body>
             <Card.Footer>
               <small className="text-white">
-                By <a href="#" onClick={this.handleClick}>{this.props.message.username}</a>
+                From <a href="#" className="text-white" onClick={this.handleClick}>{this.props.message.username}</a>
                 &nbsp;within {distance}
               </small>
               <small className="text-white message-date">
