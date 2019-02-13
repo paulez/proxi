@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Card, Jumbotron, Button, CardColumns } from 'react-bootstrap';
+import { Card, Jumbotron, Button } from 'react-bootstrap';
 import { Row, Col, Container } from 'react-bootstrap';
 import { LinkContainer } from 'react-router-bootstrap';
 import './App.css';

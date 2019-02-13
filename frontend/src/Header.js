@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
-import { Nav, Navbar, Form, FormControl, FormGroup, NavItem } from 'react-bootstrap';
-import { NavLink } from 'react-router-dom'
+import { Nav, Navbar, Form, FormControl } from 'react-bootstrap';
 import { LinkContainer } from 'react-router-bootstrap'
 
 class Header extends Component {
