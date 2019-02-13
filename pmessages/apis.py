@@ -37,7 +37,7 @@ def messages(request):
     return Response(serializer.data)
 
 @api_view(['POST', 'DELETE'])
-def message(request):
+def message(request, message_uuid=None):
     """API to post a message. Location should have already been set in
     session.
     """
@@ -63,13 +63,27 @@ def message(request):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     elif request.method == 'DELETE':
+        if not message_uuid:
+            msg = "No uuid provided in message delete request"
+            error(msg)
+            return Response(msg, status=status.HTTP_400_BAD_REQUEST)
         db_user = ProxyUser.objects.get(pk=user.id)
-        serializer = ProxyMessageIdSerializer(data=request.data)
+        serializer = ProxyMessageIdSerializer(
+                data={
+                    "uuid": message_uuid
+                })
         if not serializer.is_valid():
+            error("Message delete serializer is not valid: %s", serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         debug("Delete message validated data: %s", serializer.validated_data)
         message_uuid = serializer.validated_data['uuid']
-        message = ProxyMessage.objects.get(uuid=message_uuid)
+        try:
+            message = ProxyMessage.objects.get(uuid=message_uuid)
+        except ProxyMessage.DoesNotExist:
+            # We still return OK if the message does not exist as
+            # it is deleted for sure
+            warning("Message with uuid %s does not exist", message_uuid)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         if message.user != db_user:
             warning("User %s cannot delete message %s", db_user, message)
             raise HttpResponseForbidden("User cannot delete this message.")

@@ -146,10 +146,20 @@ class MessageTestsWithLoginAndPosition(APITestCase):
         response = self.client.get(messages_url)
         message_uuid = response.data[0]["uuid"]
         response = self.client.delete(
-            message_url,
-            {
-                'uuid': message_uuid
-            },
+            "{url}/{uuid}".format(
+                url=message_url,
+                uuid=message_uuid
+            ),
+            format="json"
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # deleting the same message twice shouldn't cause an error
+        response = self.client.delete(
+            "{url}/{uuid}".format(
+                url=message_url,
+                uuid=message_uuid
+            ),
             format="json"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)

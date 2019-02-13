@@ -20,9 +20,7 @@ class ProxyMessage extends Component {
   }
 
   delete() {
-    api.delete("api/message", {
-      uuid: this.props.message.uuid,
-    })
+    api.delete("api/message/" + this.props.message.uuid)
   }
 
   formatDistance(distance) {
