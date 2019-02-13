@@ -1,15 +1,28 @@
 import React, { Component } from 'react';
+import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
 import TimeAgo from 'react-timeago';
+import api from './api.js';
 
 class ProxyMessage extends Component {
   constructor(props) {
     super(props);
     this.handleClick = this.handleClick.bind(this);
+    this.deleteClick = this.deleteClick.bind(this);
   }
 
   handleClick() {
     this.props.setSearch(this.props.message.username);
+  }
+  
+  deleteClick() {
+    this.delete();
+  }
+
+  delete() {
+    api.delete("api/message", {
+      uuid: this.props.message.uuid,
+    })
   }
 
   formatDistance(distance) {
@@ -34,7 +47,7 @@ class ProxyMessage extends Component {
             </Card.Body>
             <Card.Footer>
               <small>
-                By <a onClick={this.handleClick}>{this.props.message.username}</a>
+                By <a href="#" onClick={this.handleClick}>{this.props.message.username}</a>
                 &nbsp;within {distance}
               </small>
               <small className="message-date">
@@ -55,10 +68,13 @@ class ProxyMessage extends Component {
               <Card.Text>
                 {this.props.message.message}
               </Card.Text>
+              <Button variant="danger" onClick={this.deleteClick}>
+                Delete
+              </Button>
             </Card.Body>
             <Card.Footer>
               <small className="text-white">
-                By <a onClick={this.handleClick}>{this.props.message.username}</a>
+                By <a href="#" onClick={this.handleClick}>{this.props.message.username}</a>
                 &nbsp;within {distance}
               </small>
               <small className="text-white message-date">
