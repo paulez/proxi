@@ -27,30 +27,56 @@ class ProxyMessage extends Component {
       return `${distance} km`
     }
   }
+
   render () {
     var distance = this.formatDistance(this.props.message.distance);
-    return (
-      <article>
-        <Card bg="light" className="mb-1">
-          <Card.Body>
-            <Card.Text>
-              <p>{this.props.message.message}</p>
-            </Card.Text>
-            <Card.Link href="#" onClick={this.handleClick}>
-                {this.props.message.username}
-            </Card.Link>
-          </Card.Body>
-          <Card.Footer>
-            <small className="text-muted">
-              <TimeAgo
-                date={this.props.message.date}
-                minPeriod={30}
-              /> within {distance}
-            </small>  
-          </Card.Footer>
-        </Card>
-    </article>
-    )
+    if (this.props.message.current_user) {
+      return (
+        <article>
+          <Card bg="light" className="mb-1">
+            <Card.Body>
+              <Card.Text>
+                {this.props.message.message}
+              </Card.Text>
+              <Card.Link href="#" onClick={this.handleClick}>
+                  {this.props.message.username}
+              </Card.Link>
+            </Card.Body>
+            <Card.Footer>
+              <small className="text-white">
+                <TimeAgo
+                  date={this.props.message.date}
+                  minPeriod={30}
+                /> within {distance}
+              </small>  
+            </Card.Footer>
+          </Card>
+      </article>
+      )
+    } else {
+      return (
+        <article>
+          <Card bg="primary" text="white" className="mb-1">
+            <Card.Body>
+              <Card.Text>
+                {this.props.message.message}
+              </Card.Text>
+              <Card.Link href="#" onClick={this.handleClick}>
+                  {this.props.message.username}
+              </Card.Link>
+            </Card.Body>
+            <Card.Footer>
+              <small className="text-white">
+                <TimeAgo
+                  date={this.props.message.date}
+                  minPeriod={30}
+                /> within {distance}
+              </small>  
+            </Card.Footer>
+          </Card>
+      </article>
+      )
+    }
   }
 }
 
