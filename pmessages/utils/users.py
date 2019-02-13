@@ -60,6 +60,8 @@ def get_user_from_request(request):
     except UserDoesNotExist:
         do_logout(request, session_user.id, delete=False)
         return None
+    if user.expiration != session_user.expiration:
+        save_user(request, user.name, user.id)
     return user
 
 def get_user(session_user):
@@ -74,8 +76,8 @@ def get_user(session_user):
         elif delta > expiration_interval:
             try:
                 db_user = ProxyUser.objects.get(pk=session_user.id)
-            except ObjectDoesNotExist:
-                msg = "User {session_user.name} with id {session_user.id} doesn't exist".format(
+            except ProxyUser.DoesNotExist:
+                msg = "User {} with id {} doesn't exist".format(
                     session_user.name, session_user.id)
                 error(msg)
                 raise UserDoesNotExist(msg)
@@ -107,6 +109,7 @@ def get_user_id(request):
 def save_user(request, username, user_id):
     """Save user information in session storage.
     """
+    debug("Saving user %s", username)
     request.session[SUSERNAME] = username
     request.session[SUSER_ID] = user_id
     request.session[SUSER_EXPIRATION] = timezone.now()
