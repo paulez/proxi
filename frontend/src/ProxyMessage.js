@@ -31,17 +31,18 @@ class ProxyMessage extends Component {
               <Card.Text>
                 {this.props.message.message}
               </Card.Text>
-              <Card.Link href="#" onClick={this.handleClick}>
-                  {this.props.message.username}
-              </Card.Link>
             </Card.Body>
             <Card.Footer>
               <small>
+                By <a onClick={this.handleClick}>{this.props.message.username}</a>
+                &nbsp;within {distance}
+              </small>
+              <small className="message-date">
                 <TimeAgo
                   date={this.props.message.date}
                   minPeriod={30}
-                /> within {distance}
-              </small>  
+                />
+            </small>
             </Card.Footer>
           </Card>
       </article>
@@ -54,17 +55,18 @@ class ProxyMessage extends Component {
               <Card.Text>
                 {this.props.message.message}
               </Card.Text>
-              <Card.Link href="#" onClick={this.handleClick}>
-                  {this.props.message.username}
-              </Card.Link>
             </Card.Body>
             <Card.Footer>
               <small className="text-white">
+                By <a onClick={this.handleClick}>{this.props.message.username}</a>
+                &nbsp;within {distance}
+              </small>
+              <small className="text-white message-date">
                 <TimeAgo
                   date={this.props.message.date}
                   minPeriod={30}
-                /> within {distance}
-              </small>  
+                />
+              </small>
             </Card.Footer>
           </Card>
       </article>
