@@ -49,6 +49,7 @@ def get_user_from_request(request):
         id=request.session.get(SUSER_ID, None),
         expiration=request.session.get(SUSER_EXPIRATION, None)
     )
+    debug("Session user: %s", session_user)
     if session_user.name is None:
         return None
     try:
@@ -68,7 +69,7 @@ def get_user(session_user):
         expiration_max = timedelta(minutes=settings.PROXY_USER_EXPIRATION)
         delta = timezone.now() - session_user.expiration
         if delta > expiration_max:
-            debug('expired user %s', session_user.id)
+            debug('expired user %s with expiration %s', session_user.id, session_user.expiration)
             raise ExpiredUser()
         elif delta > expiration_interval:
             try:
@@ -79,13 +80,24 @@ def get_user(session_user):
                 error(msg)
                 raise UserDoesNotExist(msg)
             else:
-                db_user.last_use = timezone.now()
+                # TODO: also update expiration time in session
+                now = timezone.now()
+                db_user.last_use = now
+                session_user.expiration = now
                 db_user.save()
-    return SessionUser(
-        session_user.id,
-        session_user.name,
-        session_user.expiration
-    )
+        return SessionUser(
+            session_user.id,
+            session_user.name,
+            session_user.expiration
+        )
+    elif not session_user.id:
+        msg = "User {} has undefined id".format(session_user)
+        error(msg)
+        raise UserDoesNotExist(msg)
+    else:
+        msg = "User {} has undefined expiration".format(session_user)
+        error(msg)
+        raise ExpiredUser(msg)
 
 def get_user_id(request):
     """Returns user id from session information.

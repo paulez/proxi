@@ -90,6 +90,8 @@ class MessageUtilsTest(TestCase):
         self.request.session = {
             session.SLOCATION: self.pos1,
             session.SUSERNAME: self.username,
+            session.SUSER_ID: 42,
+            session.SUSER_EXPIRATION: timezone.now()
         }
         test_messages = messages.get_messages_for_request(self.request)
         self.assertFalse(not test_messages)
@@ -106,7 +108,8 @@ class MessageUtilsTest(TestCase):
         self.request.session = {
             session.SLOCATION: self.pos2,
             session.SUSERNAME: self.username,
-            session.SUSER_ID: self.user_id
+            session.SUSER_ID: self.user_id,
+            session.SUSER_EXPIRATION: timezone.now()
         }
         test_messages = messages.get_messages_for_request(self.request)
         for message in test_messages:
