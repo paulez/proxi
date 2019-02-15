@@ -5,7 +5,7 @@ const ProxyFooter = () => (
   <footer>
     <Container>
       <Row>
-        <Col md={{ span: 3, offset: 5}}>
+        <Col md={{ span: 3, offset: 5}} className="mt-4">
         <p>
           Proxi, talk to people around you.
         </p>
