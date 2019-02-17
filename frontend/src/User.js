@@ -134,7 +134,7 @@ class ProxyUser extends Component {
 
   componentDidMount() {
     this.getUserState();
-    this.positionInterval = setInterval(this.getUserState, 10 * 60 * 1000);
+    this.positionInterval = setInterval(this.getUserState, 1 * 60 * 1000);
   }
 
   componentWillUnmount() {
@@ -150,7 +150,7 @@ class ProxyUser extends Component {
       if (error.response) {
         if(error.response.status === 404) {
           console.log("user logged out");
-          this.props.setUser(null);
+          this.setUser(null);
         }
       }
       console.log("user fetch error", error);
