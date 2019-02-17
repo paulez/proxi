@@ -146,7 +146,15 @@ class ProxyUser extends Component {
     .then(results => {
       this.setState({username: results.data.username});
     })
-    .catch(err => console.log("user fetch error", err))
+    .catch(error => {
+      if (error.response) {
+        if(error.response.status === 404) {
+          console.log("user logged out");
+          this.props.setUser(null);
+        }
+      }
+      console.log("user fetch error", error);
+    })
   }
 
   setUser(username) {
