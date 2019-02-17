@@ -28,7 +28,7 @@ class UserTests(APITestCase):
 
         response = self.client.get(user_url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-        
+
         data = {"username": "toto"}
         response = self.client.post(
             login_url, data, format="json")
@@ -58,7 +58,7 @@ class UserTests(APITestCase):
         data = {"username": "toto"}
         response = self.client.post(
             login_url, data, format="json")
-        
+
         response = self.client.get(user_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -67,7 +67,7 @@ class UserTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 class MessageTests(APITestCase):
-    
+
     def setUp(self):
         self.message_data = {"message": "plop le monde"}
 
@@ -94,7 +94,7 @@ class MessageTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         response = self.client.get(messages_url, REMOTE_ADDR=self.test_ip)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-    
+
     def test_get_messages_change_position(self):
         self.client.get(messages_url, REMOTE_ADDR=self.test_ip)
         data = {"latitude": self.pos2.y, "longitude": self.pos2.x}
@@ -124,11 +124,11 @@ class MessageTestsWithLoginAndPosition(APITestCase):
         self.msg2 = ProxyMessage(username="tutu", message="bloh",
             address="127.0.0.1", location=self.pos2)
         self.msg2.save()
-        
+
     def tearDown(self):
         self.client.post(logout_url)
 
-    def test_post_message_success(self): 
+    def test_post_message_success(self):
         response = self.client.post(
             message_url, self.message_data, format="json"
         )
@@ -173,3 +173,17 @@ class MessageTestsWithLoginAndPosition(APITestCase):
         expected_messages = sorted([str(self.msg1.uuid), str(self.msg2.uuid)])
         self.assertEqual(response_messages, expected_messages)
         self.assertEqual(len(response.data), 2)
+
+    def test_get_messages_logout(self):
+        """
+        Ensure messages are not deleted after user logout.
+        """
+        response = self.client.post(message_url, self.message_data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        response = self.client.post(logout_url)
+        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
+
+        response = self.client.get(messages_url)
+        self.assertEqual(len(response.data), 2)
+

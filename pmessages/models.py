@@ -32,15 +32,15 @@ class ProxyMessage(models.Model):
     location = models.PointField()
     objects = models.GeoManager()
     # Reference to a parent message, NULL if no parent
-    ref = models.ForeignKey('self', null=True)
+    ref = models.ForeignKey('self', null=True, on_delete=models.CASCADE)
     # message priority
     priority = models.PositiveSmallIntegerField(default=0)
     # user who created the message
-    user = models.ForeignKey('ProxyUser', null=True)
-    
+    user = models.ForeignKey('ProxyUser', null=True, on_delete=models.SET_NULL)
+
     def __unicode__(self):
         return self.message
-    
+
     def __str__(self):
         return "{}: {}: {}".format(self.uuid, self.username, self.message)
 
@@ -79,16 +79,16 @@ class ProxyMessage(models.Model):
         while compare(radius, thresholds, pos) and radius > radius_min:
             radius = radius / 2
         return radius * 2
-        
+
 class ProxyIndex(models.Model):
     location = models.PointField()
     update = models.DateTimeField()
     radius = models.IntegerField()
     objects = models.GeoManager()
-    
+
     def __unicode__(self):
         return "Index at %s." % self.location
-    
+
     @staticmethod
     def create_index(pos, radius):
         """Create an index at location pos.
@@ -130,13 +130,13 @@ class ProxyIndex(models.Model):
             else:
                 radius = nearest_index.radius
         return radius
-        
+
 class ProxyUser(models.Model):
     location = models.PointField()
     last_use = models.DateTimeField()
     username = models.CharField(max_length=20, db_index=True)
     objects = models.GeoManager()
-    
+
     def __unicode__(self):
         return self.username
 
@@ -145,10 +145,10 @@ class ProxyUser(models.Model):
 
     def __str__(self):
         return self.username
-    
+
     @staticmethod
     def register_user(username, pos):
-        """Register user with its location and a creation date. 
+        """Register user with its location and a creation date.
         If a non expired user already exists in the effect area around location,
         return False."""
         radius = ProxyIndex.indexed_radius(pos, username)
