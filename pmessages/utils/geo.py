@@ -3,7 +3,7 @@
 
 import logging
 
-from django.contrib.gis.geoip import GeoIP
+from django.contrib.gis.geoip2 import GeoIP2
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -14,7 +14,7 @@ error = logger.error
 def get_point_from_ip(request_ip):
     """Return geo point corresponding to request ip
     """
-    return GeoIP().geos(request_ip)
+    return GeoIP2().geos(request_ip)
 
 def get_user_location_address(request):
     """get user possible ip address list and return first associated
@@ -29,7 +29,7 @@ def get_user_location_address(request):
     error('Cannot locate user from adress %s, last address is %s',
           address, last_address)
     return (None, last_address)
-    
+
 def _get_user_address_list(request):
     """get a list of possible user ip address from request
     """
