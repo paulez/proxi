@@ -30,7 +30,7 @@ class ProxyMessage(models.Model):
     address = models.GenericIPAddressField()
     # location of the message sender
     location = models.PointField()
-    objects = models.GeoManager()
+    objects = models.Manager()
     # Reference to a parent message, NULL if no parent
     ref = models.ForeignKey('self', null=True, on_delete=models.CASCADE)
     # message priority
@@ -84,7 +84,7 @@ class ProxyIndex(models.Model):
     location = models.PointField()
     update = models.DateTimeField()
     radius = models.IntegerField()
-    objects = models.GeoManager()
+    objects = models.Manager()
 
     def __unicode__(self):
         return "Index at %s." % self.location
@@ -135,7 +135,7 @@ class ProxyUser(models.Model):
     location = models.PointField()
     last_use = models.DateTimeField()
     username = models.CharField(max_length=20, db_index=True)
-    objects = models.GeoManager()
+    objects = models.Manager()
 
     def __unicode__(self):
         return self.username
