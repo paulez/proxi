@@ -4,17 +4,23 @@
 import logging
 
 from django.contrib.gis.geoip2 import GeoIP2
+from geoip2.errors import AddressNotFoundError
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
 debug = logger.debug
 info = logger.info
+warning = logger.warning
 error = logger.error
 
 def get_point_from_ip(request_ip):
     """Return geo point corresponding to request ip
     """
-    return GeoIP2().geos(request_ip)
+    try:
+        return GeoIP2().geos(request_ip)
+    except AddressNotFoundError:
+        warning("Address %s not found by GeoIP.", request_ip)
+        return None
 
 def get_user_location_address(request):
     """get user possible ip address list and return first associated

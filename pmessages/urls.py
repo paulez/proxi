@@ -9,7 +9,7 @@ admin.autodiscover()
 app_name = 'pmessages'
 
 urlpatterns = [
-    url(r'^admin/', include(admin.site.urls)),
+    url(r'^admin/', admin.site.urls),
     url(r'^api/messages', apis.messages, name="api-messages"),
     url(r'^api/message$', apis.message, name="api-message"),
     url(r'^api/message/(?P<message_uuid>.+)$', apis.message, name="api-message"),

@@ -45,6 +45,7 @@ def messages(request, search_request=None):
     location, address = get_location(request)
     debug('user location is %s', location)
     user = get_user_from_request(request)
+    username = None
     # Display user form
     user_form = UserForm()
     # Display message form
@@ -60,7 +61,9 @@ def messages(request, search_request=None):
     else:
         search_form = SearchForm()
     if location:
-        radius = D(m=ProxyIndex.indexed_radius(location, user.name))
+        if user:
+            username = user.name
+        radius = D(m=ProxyIndex.indexed_radius(location, username))
         all_messages = get_messages(location, radius, search_request)
     else:
         radius = 0
@@ -69,7 +72,7 @@ def messages(request, search_request=None):
     return render(request, 'pmessages/index.html',
                   {'all_messages': all_messages, 'message_form': message_form,
                   'user_form': user_form, 'search_form': search_form,
-                  'username': user.name, 'location': location, 'radius': radius})
+                  'username': username, 'location': location, 'radius': radius})
 
 def ajax_messages(request, search_request=None):
     location, address = get_location(request)
@@ -82,7 +85,7 @@ def ajax_messages(request, search_request=None):
         radius = 0
         all_messages = None
     return render(request, 'pmessages/messages.html',
-                  {'all_messages': all_messages, 'location': location, 
+                  {'all_messages': all_messages, 'location': location,
                    'radius': radius})
 
 def set_position(request):
@@ -167,7 +170,7 @@ def message(request):
                         {'message_form': message_form, 'location': location,
                          'username': user.name})
     else:
-        message_form = MessageForm() 
+        message_form = MessageForm()
     radius = D(m=ProxyIndex.indexed_radius(location, user.name))
     return render(request, 'pmessages/message.html',
             {'message_form': message_form, 'location': location,

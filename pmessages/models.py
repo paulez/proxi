@@ -29,7 +29,7 @@ class ProxyMessage(models.Model):
     # ip address of the message sender
     address = models.GenericIPAddressField()
     # location of the message sender
-    location = models.PointField()
+    location = models.PointField(srid=4326)
     objects = models.Manager()
     # Reference to a parent message, NULL if no parent
     ref = models.ForeignKey('self', null=True, on_delete=models.CASCADE)
@@ -81,7 +81,7 @@ class ProxyMessage(models.Model):
         return radius * 2
 
 class ProxyIndex(models.Model):
-    location = models.PointField()
+    location = models.PointField(srid=4326)
     update = models.DateTimeField()
     radius = models.IntegerField()
     objects = models.Manager()
@@ -105,17 +105,16 @@ class ProxyIndex(models.Model):
             update_interval = timedelta(minutes=settings.PROXY_INDEX_EXPIRATION)
         else:
             update_interval = interval
-        try:
-            nearest_index = ProxyIndex.objects.distance(pos).order_by('distance')[0]
-        except IndexError:
+        nearest_index = ProxyIndex.objects.annotate(
+            distance=Distance('location', pos)
+        ).order_by('distance').first()
+        if not nearest_index:
             # No index found, we need to create one
             debug('no index found, creating a new one')
             radius = ProxyMessage.near_radius(pos, username)
             ProxyIndex.create_index(pos, radius)
         else:
-            if (ProxyIndex.objects.filter(
-                pk=nearest_index.id).distance(
-                    pos)[0].distance > D(m=nearest_index.radius)):
+            if nearest_index.distance > D(m=nearest_index.radius):
                 # The distance to the index is higher than its radius, we
                 # need to create a new index
                 radius = ProxyMessage.near_radius(pos, username)
@@ -132,7 +131,7 @@ class ProxyIndex(models.Model):
         return radius
 
 class ProxyUser(models.Model):
-    location = models.PointField()
+    location = models.PointField(srid=4326)
     last_use = models.DateTimeField()
     username = models.CharField(max_length=20, db_index=True)
     objects = models.Manager()
@@ -152,10 +151,15 @@ class ProxyUser(models.Model):
         If a non expired user already exists in the effect area around location,
         return False."""
         radius = ProxyIndex.indexed_radius(pos, username)
-        try:
-            user = ProxyUser.objects.filter(location__distance_lte=(pos, D(m=radius)), username = username).distance(pos).order_by('distance')[0]
-        except IndexError:
-            new_user = ProxyUser(location = pos, last_use = timezone.now(), username = username)
+
+        user = ProxyUser.objects.filter(
+            location__distance_lte=(pos,
+                                    D(m=radius)),
+            username=username).annotate(
+            distance=Distance('location', pos)
+        ).order_by('distance').first()
+        if not user:
+            new_user = ProxyUser(location=pos, last_use=timezone.now(), username=username)
             new_user.save()
             return new_user.id
         age = timezone.now() - user.last_use
