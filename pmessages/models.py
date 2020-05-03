@@ -49,7 +49,7 @@ class ProxyMessage(models.Model):
         return "{}: {}: {}".format(self.uuid, self.username, self.message)
 
     @staticmethod
-    def near_radius(pos, username):
+    def near_radius(pos: Point, username: str) -> int:
         """Return radius in which there are less than threshold messages
         posted in one day."""
         thresholds = settings.PROXY_THRESHOLDS
@@ -94,7 +94,7 @@ class ProxyIndex(models.Model):
         return "Index at %s." % self.location
 
     @staticmethod
-    def create_index(pos, radius):
+    def create_index(pos: Point, radius: int):
         """Create an index at location pos.
         """
         debug('creating a new index')
@@ -102,7 +102,7 @@ class ProxyIndex(models.Model):
         new_index.save()
 
     @staticmethod
-    def indexed_radius(pos: Point, username: str, interval: Optional[int] = None) -> int:
+    def indexed_radius(pos: Point, username: str, interval: Optional[timedelta] = None) -> int:
         """Return index radius for pos location."""
         debug('Getting index for %s', pos)
         if not interval:
@@ -150,7 +150,7 @@ class ProxyUser(models.Model):
         return self.username
 
     @staticmethod
-    def register_user(username, pos):
+    def register_user(username: str, pos: Point) -> int:
         """Register user with its location and a creation date.
         If a non expired user already exists in the effect area around location,
         return False."""
