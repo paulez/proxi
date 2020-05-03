@@ -75,12 +75,27 @@ class LoginForm extends Component {
     })
     .catch(error => {
       this.props.setUser(null);
-      this.setState({
-        form_valid: "error",
-        form_error: "Pseudo already in use, please choose another one!",
-      })
+      if (error.response && error.response.status) {
+	const status = error.response.status;
+	if (status === 409) {
+	  this.setState({
+            form_valid: "error",
+            form_error: "Pseudo already in use, please choose another one!",
+	  });
+	} else if (status === 404) {
+	  this.setState({
+	    form_valid: "error",
+	    form_error: "Cannot find your location, please allow sharing your location!",
+	  });
+	}
+      } else {
+	this.setState({
+	  form_valid: "error",
+	  form_error: "Login error, please retry.",
+	});
+      }
       console.log("cannot login", error);
-    })
+    });
     this.props.updateMessages();
     event.preventDefault();
   }
@@ -115,7 +130,7 @@ class LoginForm extends Component {
           ref={ref => { this.usernameInput = ref; }}
           />
 	  <FormControl.Feedback type="invalid">
-	    {this.state.form_valid}
+	    {this.state.form_error}
 	  </FormControl.Feedback>
         </FormGroup>
         <Button type="submit" variant="primary">Use</Button>
