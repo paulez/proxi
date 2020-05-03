@@ -74,9 +74,11 @@ class App extends Component {
 
   updatePosition() {
     if ('geolocation' in window.navigator) {
-      window.navigator.geolocation.getCurrentPosition((position) => {
-        this.setPosition(position);
-      })
+      window.navigator.geolocation.getCurrentPosition(
+        position => this.setPosition(position),
+        error => this.positionError(error));
+    } else {
+      console.log("Location not available from browser");
     }
   }
 
@@ -89,6 +91,12 @@ class App extends Component {
       this.updateMessages();
     })
   }
+
+positionError(error) {
+  console.log("error setting location", error);
+}
+
+
 
   updateMessages(search) {
     if(search === undefined) {
