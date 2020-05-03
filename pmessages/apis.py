@@ -127,7 +127,7 @@ def login(request):
         location = get_location(request)[0]
         if not location:
             debug("Cannot login, no location known: %s", serializer.errors)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.errors, status=status.HTTP_404_NOT_FOUND)
         user_id = ProxyUser.register_user(username, location)
         if user_id:
             save_user(request, username, user_id)

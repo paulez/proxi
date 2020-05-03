@@ -21,7 +21,7 @@ class UserTests(APITestCase):
     def test_login_without_position(self):
         data = {"username": "toto"}
         response = self.client.post(login_url, data, format="json")
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_login_logout(self):
         data = {"latitude": 42, "longitude": 127}
