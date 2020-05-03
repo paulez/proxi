@@ -63,7 +63,7 @@ def messages(request, search_request=None):
     if location:
         if user:
             username = user.name
-        radius = D(m=ProxyIndex.indexed_radius(location, username))
+        radius = D(m=ProxyIndex.indexed_radius(location, user))
         all_messages = get_messages(location, radius, search_request)
     else:
         radius = 0
@@ -79,7 +79,7 @@ def ajax_messages(request, search_request=None):
     user = get_user_from_request(request)
 
     if location:
-        radius = D(m=ProxyIndex.indexed_radius(location, user.name))
+        radius = D(m=ProxyIndex.indexed_radius(location, user))
         all_messages = get_messages(location, radius, search_request)
     else:
         radius = 0
@@ -171,7 +171,7 @@ def message(request):
                          'username': user.name})
     else:
         message_form = MessageForm()
-    radius = D(m=ProxyIndex.indexed_radius(location, user.name))
+    radius = D(m=ProxyIndex.indexed_radius(location, user))
     return render(request, 'pmessages/message.html',
             {'message_form': message_form, 'location': location,
              'username': user.name, 'radius': radius})

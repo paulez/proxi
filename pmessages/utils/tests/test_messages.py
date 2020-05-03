@@ -16,14 +16,16 @@ messages_url = reverse("pmessages:api-messages")
 logger = logging.getLogger(__name__)
 debug = logger.debug
 
+SRID=4326
+
 class MessageUtilsTest(TestCase):
     def setUp(self):
         self.request = RequestFactory().get(messages_url)
         self.request.session = {}
         self.request.query_params = {}
 
-        self.pos1 = Point(-127, 42)
-        self.pos2 = Point(127, 42)
+        self.pos1 = Point(-127, 42, srid=SRID)
+        self.pos2 = Point(127, 42, srid=SRID)
 
         self.username = "toto"
         self.address = "127.0.0.1"
@@ -32,7 +34,7 @@ class MessageUtilsTest(TestCase):
         )
         self.user = ProxyUser.objects.get(pk=self.user_id)
 
-        
+
         self.messages_1 = set()
         self.messages_2 = set()
 
@@ -59,7 +61,7 @@ class MessageUtilsTest(TestCase):
             address=self.address, location=self.pos1)
         old_message.date = old_date
         old_message.save()
-        
+
     def test_get_messages(self):
         distance = D(km=1)
         test_messages = messages.get_messages(self.pos1, distance)
@@ -70,18 +72,18 @@ class MessageUtilsTest(TestCase):
 
     def test_search_messages(self):
         distance = D(km=10000)
-        test_messages = messages.get_messages(self.pos1, distance, 
+        test_messages = messages.get_messages(self.pos1, distance,
                 search_request="bl")
         self.assertEqual(
             set(test_messages),
             self.messages_2.union(self.messages_1))
 
-        test_messages = messages.get_messages(self.pos1, distance, 
+        test_messages = messages.get_messages(self.pos1, distance,
                 search_request="bloh")
         self.assertEqual(
             set(test_messages),
             self.messages_2)
-    
+
     def test_get_messages_for_request_empty_session(self):
         with self.assertRaises(Http404):
             messages.get_messages_for_request(self.request)
@@ -101,7 +103,7 @@ class MessageUtilsTest(TestCase):
                 message.current_user
             )
             self.assertFalse(message.current_user)
-        
+
         # Get messages from a location for which messages had a user set.
         self.request.session = {
             session.SLOCATION: self.pos2,
@@ -111,7 +113,7 @@ class MessageUtilsTest(TestCase):
         test_messages = messages.get_messages_for_request(self.request)
         for message in test_messages:
             self.assertTrue(message.current_user)
-        
+
         # Get messages from location for which messages didn't have
         # a user set.
         self.request.session[session.SLOCATION] = self.pos1
@@ -120,4 +122,3 @@ class MessageUtilsTest(TestCase):
         test_messages = messages.get_messages_for_request(self.request)
         for message in test_messages:
             self.assertFalse(message.current_user)
-        

@@ -8,10 +8,12 @@ from pmessages.utils import users
 from pmessages.utils.users import SessionUser, ExpiredUser, UserDoesNotExist
 from pmessages.models import ProxyUser
 
+SRID=4326
+
 class UserUtilsTest(TestCase):
 
     def setUp(self):
-        self.pos1 = Point(-127, 42)
+        self.pos1 = Point(-127, 42, srid=SRID)
         self.name1 = "toto"
         ProxyUser.register_user(username=self.name1, pos=self.pos1)
 

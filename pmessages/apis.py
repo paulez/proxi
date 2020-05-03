@@ -42,7 +42,7 @@ def message(request, message_uuid=None):
     session.
     """
     location, address = get_location(request)
-    
+
     user = get_user_from_request(request)
     if not location:
         debug("No location provided for request %s", request)
@@ -59,9 +59,9 @@ def message(request, message_uuid=None):
             message = ProxyMessage(username=user.name, message=message_text,
                     address=address, location=location, ref=ref, user=db_user)
             message.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)                        
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+
     elif request.method == 'DELETE':
         if not message_uuid:
             msg = "No uuid provided in message delete request"
@@ -100,7 +100,7 @@ def position(request):
         if serializer.is_valid():
             longitude = serializer.validated_data['longitude']
             latitude = serializer.validated_data['latitude']
-            position = Point(longitude, latitude)
+            position = Point(longitude, latitude, srid=4326)
             save_position(request, position)
             return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -147,7 +147,7 @@ def user(request):
         serializer = ProxyUserSerializer(user)
         return Response(serializer.data)
     else:
-        raise Http404('Not logged in.') 
+        raise Http404('Not logged in.')
 
 @api_view(['POST'])
 def logout(request):
@@ -167,7 +167,7 @@ def radius(request):
     location = get_location(request)[0]
     user = get_user_from_request(request)
     if location:
-        radius = D(m=ProxyIndex.indexed_radius(location, user.name))
+        radius = D(m=ProxyIndex.indexed_radius(location, user))
     else:
         raise Http404('No location provided.')
     serializer = ProxyRadiusSerializer({'radius': radius})

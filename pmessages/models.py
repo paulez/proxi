@@ -1,9 +1,11 @@
 from datetime import timedelta
+from typing import Optional
 import uuid
 
 from django.contrib.gis.db import models
 from django.contrib.gis.measure import D
 from django.contrib.gis.db.models.functions import Distance
+from django.contrib.gis.geos import Point
 from django.utils import timezone
 from django.conf import settings
 
@@ -14,6 +16,8 @@ logger = logging.getLogger(__name__)
 debug = logger.debug
 info = logger.info
 error = logger.error
+
+SRID=4326
 
 class ProxyMessage(models.Model):
     """A ProxyMessage is a simple text message with location information, username, originated ip and date.
@@ -29,7 +33,7 @@ class ProxyMessage(models.Model):
     # ip address of the message sender
     address = models.GenericIPAddressField()
     # location of the message sender
-    location = models.PointField(srid=4326)
+    location = models.PointField(srid=SRID)
     objects = models.Manager()
     # Reference to a parent message, NULL if no parent
     ref = models.ForeignKey('self', null=True, on_delete=models.CASCADE)
@@ -81,7 +85,7 @@ class ProxyMessage(models.Model):
         return radius * 2
 
 class ProxyIndex(models.Model):
-    location = models.PointField(srid=4326)
+    location = models.PointField(srid=SRID)
     update = models.DateTimeField()
     radius = models.IntegerField()
     objects = models.Manager()
@@ -98,7 +102,7 @@ class ProxyIndex(models.Model):
         new_index.save()
 
     @staticmethod
-    def indexed_radius(pos, username, interval=None):
+    def indexed_radius(pos: Point, username: str, interval: Optional[int] = None) -> int:
         """Return index radius for pos location."""
         debug('Getting index for %s', pos)
         if not interval:
@@ -131,7 +135,7 @@ class ProxyIndex(models.Model):
         return radius
 
 class ProxyUser(models.Model):
-    location = models.PointField(srid=4326)
+    location = models.PointField(srid=SRID)
     last_use = models.DateTimeField()
     username = models.CharField(max_length=20, db_index=True)
     objects = models.Manager()

@@ -60,16 +60,12 @@ def get_messages_for_request(request):
     location = get_location(request)[0]
     debug('messages: user location is %s', location)
     user = get_user_from_request(request)
-    if user:
-        username = user.name
-    else:
-        username = None
     search = request.query_params.get('search', None)
     history = get_message_history(request)
     debug("Message history: %s", history)
     if not location:
         raise Http404('No location provided.')
-    radius = D(m=ProxyIndex.indexed_radius(location, username))
+    radius = D(m=ProxyIndex.indexed_radius(location, user))
     all_messages = get_messages(location, radius,
         search_request=search, extra_messages=history)
     add_history = [msg.uuid for msg in all_messages if msg.uuid not in history]

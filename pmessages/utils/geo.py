@@ -17,10 +17,12 @@ def get_point_from_ip(request_ip):
     """Return geo point corresponding to request ip
     """
     try:
-        return GeoIP2().geos(request_ip)
+        point = GeoIP2().geos(request_ip)
+        debug("Point from GeoIP: %s", point)
     except AddressNotFoundError:
         warning("Address %s not found by GeoIP.", request_ip)
-        return None
+        point = None
+    return point
 
 def get_user_location_address(request):
     """get user possible ip address list and return first associated

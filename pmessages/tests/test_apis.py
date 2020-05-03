@@ -12,6 +12,9 @@ message_url = reverse("pmessages:api-message")
 messages_url = reverse("pmessages:api-messages")
 position_url = reverse("pmessages:api-position")
 user_url = reverse("pmessages:api-user")
+radius_url = reverse("pmessages:api-radius")
+
+SRID = 4326
 
 class UserTests(APITestCase):
 
@@ -73,7 +76,7 @@ class MessageTests(APITestCase):
 
         self.test_ip = "68.141.147.38"
         self.pos1 = get_point_from_ip(self.test_ip)
-        self.pos2 = Point(42, 127)
+        self.pos2 = Point(42, 127, srid=SRID)
 
         self.msg1 = ProxyMessage(username="titi", message="blah",
             address="127.0.0.1", location=self.pos1)
@@ -108,10 +111,10 @@ class MessageTests(APITestCase):
 class MessageTestsWithLoginAndPosition(APITestCase):
     def setUp(self):
         self.message_data = {"message": "plop le monde"}
-        self.pos1 = Point(127, 42)
+        self.pos1 = Point(127, 42, srid=SRID)
         data = {"latitude": self.pos1.y, "longitude": self.pos1.x}
 
-        self.pos2 = Point(42, 127)
+        self.pos2 = Point(42, 127, srid=SRID)
         self.client.post(position_url, data, format="json")
 
         data = {"username": "toto"}
@@ -187,3 +190,15 @@ class MessageTestsWithLoginAndPosition(APITestCase):
         response = self.client.get(messages_url)
         self.assertEqual(len(response.data), 2)
 
+class RadiusTests(APITestCase):
+
+    def setUp(self):
+        self.test_ip = "68.141.147.38"
+
+    def test_get_radius_no_session(self):
+        response = self.client.get(radius_url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_get_radius_with_ip(self):
+        response = self.client.get(radius_url, REMOTE_ADDR=self.test_ip)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
