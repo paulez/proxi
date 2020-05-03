@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
 import TimeAgo from 'react-timeago';
-import api from './api.js';
+import api from './api';
 
 class ProxyMessage extends Component {
   constructor(props) {

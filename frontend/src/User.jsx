@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-import api from './api.js';
+import api from './api';
 import { Button, FormGroup, FormControl, FormLabel } from 'react-bootstrap';
-import ProxyMessageForm from './MessageForm.js';
+import ProxyMessageForm from './MessageForm';
 
 class LogoutForm extends Component {
   constructor(props) {
@@ -108,11 +108,15 @@ class LoginForm extends Component {
         <FormControl
           type="text"
           name="username"
-          value={this.state.form_username}
+	  value={this.state.form_username}
+	  isInvalid={this.state.form_valid}
           placeholder="Choose your pseudo!"
           onChange={this.handleChange}
           ref={ref => { this.usernameInput = ref; }}
-        />
+          />
+	  <FormControl.Feedback type="invalid">
+	    {this.state.form_valid}
+	  </FormControl.Feedback>
         </FormGroup>
         <Button type="submit" variant="primary">Use</Button>
       </form>

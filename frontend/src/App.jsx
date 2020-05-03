@@ -3,11 +3,11 @@ import { Jumbotron, Button } from 'react-bootstrap';
 import { Row, Col, Container } from 'react-bootstrap';
 import { LinkContainer } from 'react-router-bootstrap';
 import './App.css';
-import Header from './Header.js';
-import ProxyFooter from './Footer.js';
-import ProxyMessage from './ProxyMessage.js';
-import ProxyUser from './User.js';
-import api from './api.js';
+import Header from './Header';
+import ProxyFooter from './Footer';
+import ProxyMessage from './ProxyMessage';
+import ProxyUser from './User';
+import api from './api';
 
 
 class MessageList extends Component {

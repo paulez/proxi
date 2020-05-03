@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import api from './api.js';
+import api from './api';
 import { Button, FormLabel, FormGroup, FormControl } from 'react-bootstrap';
 
 class ProxyMessageForm extends Component {

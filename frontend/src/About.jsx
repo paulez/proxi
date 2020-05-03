@@ -1,8 +1,8 @@
 import React from 'react';
 import { Jumbotron, Container, Row, Col } from 'react-bootstrap';
 import { NavLink } from 'react-router-dom'
-import Header from './Header.js';
-import ProxyFooter from './Footer.js';
+import Header from './Header';
+import ProxyFooter from './Footer';
 
 
 const ProxyAbout = () => (

@@ -1,5 +1,5 @@
 const dev = {
-  api: "https://localhost:8000/",
+  api: "https://gen3:8000/",
 };
 
 const prod = {
