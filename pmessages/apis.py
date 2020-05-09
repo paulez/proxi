@@ -118,6 +118,7 @@ def login(request):
                 user = ProxyUser(username=current_user.name)
                 response_serializer = serializer = ProxyUserSerializer(user)
                 if current_user.name == username:
+                    debug("User %s already logged in.", username)
                     return Response(response_serializer.data, status=status.HTTP_202_ACCEPTED)
                 else:
                     return Response(response_serializer.data, status=status.HTTP_400_BAD_REQUEST)

@@ -46,6 +46,7 @@ def get_user_from_request(request: HttpRequest) -> Optional[SessionUser]:
     """Get user session information.
     Returns username, user id and user expiration.
     """
+    debug("Getting user from request %s.", request)
     # initialising session variables
     session_user = SessionUser(
         name=request.session.get(SUSERNAME, None),
@@ -53,13 +54,16 @@ def get_user_from_request(request: HttpRequest) -> Optional[SessionUser]:
         expiration=request.session.get(SUSER_EXPIRATION, None)
     )
     if session_user.name is None:
+        debug("No user in session %s", session_user)
         return None
     try:
         user = get_user(session_user)
     except ExpiredUser:
+        debug("Expired user %s, logging out.", session_user)
         do_logout(request, session_user.id, delete=False)
         return None
     except UserDoesNotExist:
+        debug("User %s doesn't exist, logging out.", session_user)
         do_logout(request, session_user.id, delete=False)
         return None
     return user
@@ -82,6 +86,7 @@ def get_user(session_user: SessionUser) -> SessionUser:
                 error(msg)
                 raise UserDoesNotExist(msg)
             else:
+                debug("Saving user %s last use.", session_user.name)
                 db_user.last_use = timezone.now()
                 db_user.save()
     return SessionUser(
@@ -98,6 +103,8 @@ def get_user_id(request: HttpRequest) -> int:
 def save_user(request: HttpRequest, username: str, user_id: int):
     """Save user information in session storage.
     """
+    debug("Saving username %s with id %s to session.",
+          username, user_id)
     request.session[SUSERNAME] = username
     request.session[SUSER_ID] = user_id
     request.session[SUSER_EXPIRATION] = timezone.now()
@@ -131,6 +138,7 @@ def do_logout(request: HttpRequest, user_id: int, delete: bool = True):
     debug('logging out %s', user_id)
     if delete:
         user = ProxyUser.objects.get(pk=user_id)
+        debug('Deleting user %s.', user)
         user.delete()
     del request.session[SUSERNAME]
     del request.session[SUSER_ID]

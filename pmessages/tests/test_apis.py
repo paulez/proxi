@@ -1,7 +1,7 @@
 from django.contrib.gis.geos import Point
 from django.urls import reverse
 from rest_framework import status
-from rest_framework.test import APITestCase
+from rest_framework.test import APITestCase, APIClient
 
 from pmessages.models import ProxyMessage
 from ..utils.geo import get_point_from_ip
@@ -53,6 +53,77 @@ class UserTests(APITestCase):
         # can't logout twice
         response = self.client.post(logout_url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_login_logout_login(self):
+        data = {"latitude": 42, "longitude": 127}
+        response = self.client.post(
+            position_url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
+
+        # first login
+        data = {"username": "toto"}
+        response = self.client.post(
+            login_url, data, format="json")
+        self.assertEqual(response.data, data)
+        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
+
+        response = self.client.get(messages_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
+        response = self.client.get(radius_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+
+        # login out
+        response = self.client.post(logout_url)
+        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
+        
+        # login back
+        response = self.client.post(
+            login_url, data, format="json")
+        self.assertEqual(response.data, data)
+        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
+
+    def test_login_conflict(self):
+        position_data = {"latitude": 42, "longitude": 127}
+        response = self.client.post(
+            position_url, position_data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
+
+        response = self.client.get(user_url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+        login_data = {"username": "toto"}
+        response = self.client.post(
+            login_url, login_data, format="json")
+        self.assertEqual(response.data, login_data)
+        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
+
+        # second client
+
+        client2 = APIClient()
+
+        # login twice
+        response = client2.post(
+            login_url, login_data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        
+        response = client2.post(
+            position_url, position_data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
+
+        response = client2.post(
+            login_url, login_data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
+
+        login_data2 = {"username": "toto2"}
+        response = client2.post(
+            login_url, login_data2, format="json")
+        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
+
+        # login out
+        response = client2.post(logout_url)
+        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
 
     def test_expired_user(self):
         data = {"latitude": 42, "longitude": 127}

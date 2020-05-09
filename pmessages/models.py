@@ -154,6 +154,7 @@ class ProxyUser(models.Model):
         """Register user with its location and a creation date.
         If a non expired user already exists in the effect area around location,
         return False."""
+        debug("Registering user %s.", username)
         radius = ProxyIndex.indexed_radius(pos, username)
 
         user = ProxyUser.objects.filter(
@@ -163,13 +164,16 @@ class ProxyUser(models.Model):
             distance=Distance('location', pos)
         ).order_by('distance').first()
         if not user:
+            debug("Creating new user %s.", username)
             new_user = ProxyUser(location=pos, last_use=timezone.now(), username=username)
             new_user.save()
             return new_user.id
         age = timezone.now() - user.last_use
         if age > timedelta(minutes=settings.PROXY_USER_EXPIRATION):
+            debug("Updating user %s last use.", user)
             user.last_use = timezone.now()
             user.save()
             return user.id
         else:
+            debug("User %s already exists.", username)
             return False
