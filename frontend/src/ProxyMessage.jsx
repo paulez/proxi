@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
 import TimeAgo from 'react-timeago';
+import Linkify from 'react-linkify';
 import api from './api';
 
 class ProxyMessage extends Component {
@@ -24,12 +25,33 @@ class ProxyMessage extends Component {
 
   formatDistance(distance) {
     if(distance < 1000) {
-      return `${distance} m`
+      return `${distance} m`;
     } else {
-      distance = distance / 1000
-      return `${distance} km`
+      distance = distance / 1000;
+      return `${distance} km`;
     }
   }
+
+  whiteLinkDecorator = (href, text, key) => (
+    <a
+      href={href}
+      key={key}
+      target="_blank"
+      style= {{color: 'white'}}
+      >
+      {text}
+    </a>
+  );
+
+  blankLinkDecorator = (href, text, key) => (
+    <a
+      href={href}
+      key={key}
+      target="_blank"
+      >
+      {text}
+    </a>
+  );
 
   render () {
     var distance = this.formatDistance(this.props.message.distance);
@@ -39,7 +61,11 @@ class ProxyMessage extends Component {
           <Card bg="light" className="mb-1">
             <Card.Body>
               <Card.Text>
-                {this.props.message.message}
+		<Linkify
+		  componentDecorator={this.blankLinkDecorator}
+		  >
+                  {this.props.message.message}
+		</Linkify>
               </Card.Text>
             </Card.Body>
             <Card.Footer>
@@ -56,14 +82,18 @@ class ProxyMessage extends Component {
             </Card.Footer>
           </Card>
       </article>
-      )
+      );
     } else {
       return (
         <article>
           <Card bg="primary" text="white" className="mb-1">
             <Card.Body>
               <Card.Text>
-                {this.props.message.message}
+		<Linkify
+		  componentDecorator={this.whiteLinkDecorator}
+		  >
+                  {this.props.message.message}
+		</Linkify>
                 <Button
                   className="delete-button"
                   size="sm"
@@ -88,7 +118,7 @@ class ProxyMessage extends Component {
             </Card.Footer>
           </Card>
       </article>
-      )
+      );
     }
   }
 }
