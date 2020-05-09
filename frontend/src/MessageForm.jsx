@@ -10,7 +10,11 @@ class ProxyMessageForm extends Component {
       form_valid: null,
       form_error: "",
       radius: null,
-    }
+    };
+    this.handleSubmit = this.handleSubmit.bind(this);
+    this.handleChange = this.handleChange.bind(this);
+    this.onEnterPress = this.onEnterPress.bind(this);
+    this.updateRadius = this.updateRadius.bind(this);
   }
 
   componentDidMount() {
@@ -23,12 +27,11 @@ class ProxyMessageForm extends Component {
     clearInterval(this.radiusInterval);
   }
 
-  formatDistance(distance) {
-    if(distance < 1000) {
-      return `${distance} m`
+  formatRadius() {
+    if(this.state.radius < 1000) {
+      return `${this.state.radius} m`;
     } else {
-      distance = distance / 1000
-      return `${distance} km`
+      return `${this.state.radius / 1000} km`;
     }
   }
 
@@ -36,10 +39,10 @@ class ProxyMessageForm extends Component {
     api.get("api/radius")
     .then(data => {
       this.setState({radius: data.data.radius});
-    })
+    });
   }
 
-  handleSubmit = (event) => {
+  handleSubmit(event) {
     api.post("api/message", {
       message: this.state.form_message,
     })
@@ -52,18 +55,18 @@ class ProxyMessageForm extends Component {
         form_valid: "error",
         form_error: "Cannot post message!",
         form_message: this.state.form_message,
-      })
+      });
       console.log("cannot post message", error);
-    })
+    });
     event.preventDefault();
   }
 
-  handleChange = (event) => {
+  handleChange(event) {
     this.setState({ form_message: event.target.value});
     event.preventDefault();
   }
 
-  onEnterPress = (event) => {
+  onEnterPress(event) {
     if(event.keyCode === 13 && event.shiftKey === false) {
       event.preventDefault();
       this.handleSubmit(event);
@@ -72,13 +75,12 @@ class ProxyMessageForm extends Component {
   
 
   render () {
-    var radius = this.formatDistance(this.state.radius);
     return (
       <form onSubmit={this.handleSubmit}>
         <FormGroup
           controlId="messageForm"
         >
-          <FormLabel>Post a new Proxi message within {radius}</FormLabel>
+          <FormLabel>Post a new Proxi message within {this.formatRadius}</FormLabel>
           <FormControl
             as="textarea"
             placeholder="Your message..."
@@ -90,7 +92,7 @@ class ProxyMessageForm extends Component {
           <Button type="submit" variant="primary">Post</Button>
         </FormGroup>
       </form>
-    )
+    );
   }
 }
 
