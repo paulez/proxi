@@ -87,6 +87,11 @@ class LoginForm extends Component {
 	    form_valid: "error",
 	    form_error: "Cannot find your location, please allow sharing your location!",
 	  });
+        } else {
+          this.setState({
+            form_valid: "error",
+            form_error: "Login error, please retry."
+          });
 	}
       } else {
 	this.setState({
