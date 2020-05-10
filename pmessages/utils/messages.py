@@ -51,13 +51,13 @@ def get_messages(location, radius, search_request=None, extra_messages=None):
     debug("Found %s messages", len(all_messages))
     return all_messages.annotate(distance=Distance('location', location))
 
-def get_messages_for_request(request):
+def get_messages_for_request(request, serializer):
     """Returns message for a specific request.
 
     We keed an history of displayed messages in the session. In case the user
     radius is reduced we don't want already displayed messages to disappear.
     """
-    location = get_location(request)[0]
+    location = get_location(request, serializer)
     debug('messages: user location is %s', location)
     user = get_user_from_request(request)
     search = request.query_params.get('search', None)

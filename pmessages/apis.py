@@ -10,6 +10,7 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rest_framework.authtoken.models import Token
 
 from .models import ProxyIndex, ProxyMessage, ProxyUser
 from .serializers import ProxyMessageSerializer, ProxySimpleMessageSerializer
@@ -33,7 +34,10 @@ def messages(request):
     """API which returns list of nearby messages based on the
     location set in the session.
     """
-    all_messages = get_messages_for_request(request)
+    serializer = ProxyLocationSerializer(data=request.data)
+    if not serializer.is_valid():
+        raise Http404('No location provided.')
+    all_messages = get_messages_for_request(request, serializer)
     serializer = ProxyMessageSerializer(all_messages, many=True)
     return Response(serializer.data)
 
@@ -150,6 +154,10 @@ def register(request):
         return Response(serializer.errors, status=status.HTTP_404_NOT_FOUND)
     username = serializer.validated_data['username']
     token = ProxyUser.register_user(username, location)
+    return Response({
+        'token': token.key,
+        'user_id': user.pk,
+    })
 
 
 @api_view(['GET'])

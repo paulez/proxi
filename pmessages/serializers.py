@@ -8,6 +8,9 @@ class DistanceField(serializers.IntegerField):
         rounded = rounded_distance(obj)
         return super(DistanceField, self).to_representation(rounded)
 
+class ProxyLocationSerializer(serializers.Serializer):
+    longitude = serializers.FloatField()
+    latitude = serializers.FloatField()
 
 class ProxyMessageSerializer(serializers.HyperlinkedModelSerializer):
     distance = DistanceField()
@@ -19,17 +22,13 @@ class ProxyMessageSerializer(serializers.HyperlinkedModelSerializer):
             'date', 'distance', 'current_user'
         )
 
-class ProxySimpleMessageSerializer(serializers.HyperlinkedModelSerializer):
+class ProxySimpleMessageSerializer(ProxyLocationSerializer):
     class Meta:
         model = ProxyMessage
         fields = ('message',)
 
 class ProxyMessageIdSerializer(serializers.Serializer):
     uuid = serializers.UUIDField(format='hex_verbose')
-
-class ProxyLocationSerializer(serializers.Serializer):
-    longitude = serializers.FloatField()
-    latitude = serializers.FloatField()
 
 class ProxyUserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
