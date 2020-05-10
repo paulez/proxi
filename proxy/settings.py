@@ -116,6 +116,8 @@ MIDDLEWARE = [
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+AUTH_USER_MODEL = 'pmessages.ProxyUser'
+
 ROOT_URLCONF = 'proxy.urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
@@ -138,6 +140,7 @@ INSTALLED_APPS = (
     'storages',
     'corsheaders',
     'rest_framework',
+    'rest_framework.authtoken',
     'sslserver',
     'django_generate_secret_key',
     'coverage',

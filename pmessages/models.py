@@ -2,12 +2,14 @@ from datetime import timedelta
 from typing import Optional
 import uuid
 
+from django.contrib.auth.models import AbstractUser
 from django.contrib.gis.db import models
 from django.contrib.gis.measure import D
 from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.geos import Point
 from django.utils import timezone
 from django.conf import settings
+from django.utils.translation import ugettext_lazy as _
 
 import logging
 
@@ -134,11 +136,15 @@ class ProxyIndex(models.Model):
                 radius = nearest_index.radius
         return radius
 
-class ProxyUser(models.Model):
+class ProxyUser(AbstractUser):
     location = models.PointField(srid=SRID)
     last_use = models.DateTimeField()
     username = models.CharField(max_length=20, db_index=True)
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    password = models.CharField(_('password'), max_length=128, blank=True)
     objects = models.Manager()
+
+    USERNAME_FIELD = 'uuid'
 
     def __unicode__(self):
         return self.username
