@@ -16,6 +16,7 @@ from .serializers import ProxyMessageSerializer, ProxySimpleMessageSerializer
 from .serializers import ProxyMessageIdSerializer
 from .serializers import ProxyLocationSerializer, ProxyUserSerializer
 from .serializers import ProxyRadiusSerializer
+from .serializers import ProxyRegisterUserSerializer
 from .utils.location import get_location
 from .utils.messages import get_messages_for_request
 from .utils.users import do_logout, get_user_from_request, save_position, save_user
@@ -135,6 +136,21 @@ def login(request):
             return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
         else:
             return Response(serializer.errors, status=status.HTTP_409_CONFLICT)
+
+@api_view(['POST'])
+def register(request):
+    serializer = ProxyRegisterUserSerializer(data=request.data)
+    if not serializer.is_valid():
+        debug("Invalid register request: %s", serializer.errors)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    location = get_location(request, serializer)
+    if not location:
+        debug("Cannot register, no location known: %s", serializer.errors)
+        return Response(serializer.errors, status=status.HTTP_404_NOT_FOUND)
+    username = serializer.validated_data['username']
+    token = ProxyUser.register_user(username, location)
+
 
 @api_view(['GET'])
 @ensure_csrf_cookie

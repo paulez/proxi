@@ -38,3 +38,9 @@ class ProxyUserSerializer(serializers.HyperlinkedModelSerializer):
 
 class ProxyRadiusSerializer(serializers.Serializer):
     radius = DistanceField()
+
+class ProxyRegisterUserSerializer(ProxyLocationSerializer):
+    username = serializers.CharField()
+
+class ProxyLoginUserSerializer(ProxyLocationSerializer):
+    pass

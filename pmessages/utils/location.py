@@ -3,8 +3,9 @@
 
 import logging
 
-from .geo import get_user_location_address
-from .session import SLOCATION, SLOCATION_ACCURATE, SADDRESS
+from django.contrib.gis.geos import Point
+from rest_framework.request import Request
+from ..serializers import ProxyLocationSerializer
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -13,25 +14,13 @@ info = logger.info
 error = logger.error
 
 
-def get_location(request):
+def get_location(request: Request, serializer: ProxyLocationSerializer) -> Point:
     """get user location information.
     returns a tuple of location and ip address which
     was located.
     """
-    # get location and address from session
-    location = request.session.get(SLOCATION, None)
-    debug('get_location: session user location is %s', location)
-    address = request.session.get(SADDRESS, None)
-    debug('get_location: session user adress is %s', address)
-    # if the session doesn't contain session and address
-    # get it from geotils (so from the ip)
-    if not address:
-        address = get_user_location_address(request)[1]
-        request.session[SADDRESS] = address
-        debug('get_location: address from geoip set to %s', address)
-    if not location:
-        location = get_user_location_address(request)[0]
-        request.session[SLOCATION] = location
-        request.session[SLOCATION_ACCURATE] = False
-        debug('get_location from geoip set to %s', location)
-    return location, address
+
+    latitude = serializer.validated_data['latitude']
+    longitude = serializer.validated_data['longitude']
+
+    return Point(longitude, latitude, srid=4326)

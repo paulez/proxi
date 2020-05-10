@@ -12,7 +12,7 @@ from django.utils.translation import ugettext as _
 from django.contrib.auth.validators import UnicodeUsernameValidator
 
 from .models import ProxyMessage, ProxyUser, ProxyIndex
-from .utils.location import get_location, SLOCATION
+from .utils.location import get_location
 from .utils.messages import get_messages
 from .utils.users import get_user_from_request, do_logout, get_user_id, save_user
 from .utils.users import save_position
