@@ -18,9 +18,13 @@ from .serializers import ProxyMessageIdSerializer
 from .serializers import ProxyLocationSerializer, ProxyUserSerializer
 from .serializers import ProxyRadiusSerializer
 from .serializers import ProxyRegisterUserSerializer
-from .utils.location import get_location
+from .utils.location import (
+    get_location_from_request, get_location_from_coordinates
+)
 from .utils.messages import get_messages_for_request
-from .utils.users import do_logout, get_user_from_request, save_position, save_user
+from .utils.users import (
+    do_logout, get_user_from_request, save_position, save_user
+)
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -46,7 +50,7 @@ def message(request, message_uuid=None):
     """API to post a message. Location should have already been set in
     session.
     """
-    location, address = get_location(request)
+    location, address = get_location_from_request(request)
 
     user = get_user_from_request(request)
     if not location:
@@ -59,6 +63,17 @@ def message(request, message_uuid=None):
         serializer = ProxySimpleMessageSerializer(data=request.data)
         if serializer.is_valid():
             message_text = serializer.validated_data['message']
+            try:
+                latitude = serializer.validated_data['latitude']
+                longitude = serializer.validated_data['longitude']
+            except KeyError:
+                warning("Position not set in request")
+                latitude, longitude = None, None
+            if latitude and longitude:
+                request_location = get_location_from_coordinates(latitude,
+                                                                 longitude)
+                # TODO: compare both locations and check they are coherent
+                location = request_location
             ref = None
             db_user = ProxyUser.objects.get(pk=user.id)
             message = ProxyMessage(username=user.name, message=message_text,
@@ -130,7 +145,7 @@ def login(request):
         else:
             debug("Invalid login request: %s", serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        location = get_location(request)[0]
+        location = get_location_from_request(request)[0]
         if not location:
             debug("Cannot login, no location known: %s", serializer.errors)
             return Response(serializer.errors, status=status.HTTP_404_NOT_FOUND)
@@ -148,7 +163,7 @@ def register(request):
         debug("Invalid register request: %s", serializer.errors)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    location = get_location(request, serializer)
+    location = get_location_from_request(request, serializer)
     if not location:
         debug("Cannot register, no location known: %s", serializer.errors)
         return Response(serializer.errors, status=status.HTTP_404_NOT_FOUND)
@@ -189,7 +204,7 @@ def logout(request):
 def radius(request):
     """API which returns current message radius.
     """
-    location = get_location(request)[0]
+    location = get_location_from_request(request)[0]
     user = get_user_from_request(request)
     if location:
         radius = D(m=ProxyIndex.indexed_radius(location, user))

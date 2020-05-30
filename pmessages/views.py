@@ -12,7 +12,7 @@ from django.utils.translation import ugettext as _
 from django.contrib.auth.validators import UnicodeUsernameValidator
 
 from .models import ProxyMessage, ProxyUser, ProxyIndex
-from .utils.location import get_location
+from .utils.location import get_location_from_request
 from .utils.messages import get_messages
 from .utils.users import get_user_from_request, do_logout, get_user_id, save_user
 from .utils.users import save_position
@@ -42,7 +42,7 @@ class SearchForm(Form):
 
 
 def messages(request, search_request=None):
-    location, address = get_location(request)
+    location, address = get_location_from_request(request)
     debug('user location is %s', location)
     user = get_user_from_request(request)
     username = None
@@ -75,7 +75,7 @@ def messages(request, search_request=None):
                   'username': username, 'location': location, 'radius': radius})
 
 def ajax_messages(request, search_request=None):
-    location, address = get_location(request)
+    location, address = get_location_from_request(request)
     user = get_user_from_request(request)
 
     if location:
@@ -121,7 +121,7 @@ def login(request):
     """
     Process login POST requests.
     """
-    location = get_location(request)[0]
+    location = get_location_from_request(request)[0]
     user = get_user_from_request(request)
     if user:
         return redirect('pmessages:messages')
@@ -148,7 +148,7 @@ def message(request):
     """
     Process message POST requests.
     """
-    location, address = get_location(request)
+    location, address = get_location_from_request(request)
     user = get_user_from_request(request)
 
     if request.method == 'POST':

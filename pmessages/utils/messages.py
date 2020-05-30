@@ -13,7 +13,7 @@ from django.db.models import Q, Case, Value, When, BooleanField
 from django.utils import timezone
 
 from ..models import ProxyMessage, ProxyIndex
-from .location import get_location
+from .location import get_location_from_request
 from .users import get_user_from_request
 from .session import get_message_history, add_messages_to_history
 
@@ -51,13 +51,13 @@ def get_messages(location, radius, search_request=None, extra_messages=None):
     debug("Found %s messages", len(all_messages))
     return all_messages.annotate(distance=Distance('location', location))
 
-def get_messages_for_request(request, serializer):
+def get_messages_for_request(request):
     """Returns message for a specific request.
 
     We keed an history of displayed messages in the session. In case the user
     radius is reduced we don't want already displayed messages to disappear.
     """
-    location = get_location(request, serializer)
+    location = get_location_from_request(request)[0]
     debug('messages: user location is %s', location)
     user = get_user_from_request(request)
     search = request.query_params.get('search', None)
