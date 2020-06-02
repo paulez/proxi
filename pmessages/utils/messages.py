@@ -15,7 +15,6 @@ from django.utils import timezone
 from ..models import ProxyMessage, ProxyIndex
 from .location import get_location_from_request
 from .users import get_user_from_request
-from .session import get_message_history, add_messages_to_history
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -23,18 +22,15 @@ debug = logger.debug
 info = logger.info
 error = logger.error
 
-def get_messages(location, radius, search_request=None, extra_messages=None):
+def get_messages(location, radius, search_request=None):
     """Returns messages close to location within a circle of a
     defined radius.
     """
     # Getting messages near location
     debug("Getting messages in radius %s of %s", radius, location)
-    if not extra_messages:
-        extra_messages = []
-    debug("Extra messages: %s", extra_messages)
     near_messages = ProxyMessage.objects.filter(
-        Q(location__distance_lte=(location, radius)) |
-        Q(uuid__in=extra_messages))
+        location__distance_lte=(location, radius)
+    )
     near_messages = near_messages.filter(
         date__gt=timezone.now() - timedelta(days=settings.PROXY_MAX_DAYS))
     if search_request:
@@ -61,16 +57,12 @@ def get_messages_for_request(request):
     debug('messages: user location is %s', location)
     user = get_user_from_request(request)
     search = request.query_params.get('search', None)
-    history = get_message_history(request)
-    debug("Message history: %s", history)
     if not location:
         raise Http404('No location provided.')
     radius = D(m=ProxyIndex.indexed_radius(location, user))
-    all_messages = get_messages(location, radius,
-        search_request=search, extra_messages=history)
-    add_history = [msg.uuid for msg in all_messages if msg.uuid not in history]
-    debug("Adding messages to history: %s", add_history)
-    add_messages_to_history(request, add_history)
+    all_messages = get_messages(
+        location, radius, search_request=search
+    )
     if user:
         debug("User for messages is: %s", user)
         all_messages = all_messages.annotate(

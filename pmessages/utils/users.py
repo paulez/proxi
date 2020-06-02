@@ -12,8 +12,7 @@ from django.http import HttpRequest
 from django.utils import timezone
 
 from ..models import ProxyUser
-from .session import SUSERNAME, SUSER_ID, SUSER_EXPIRATION, SLOCATION, SLOCATION_ACCURATE, SMESSAGE_HISTORY
-from .session import clear_message_history
+from .session import SUSERNAME, SUSER_ID, SUSER_EXPIRATION, SLOCATION, SLOCATION_ACCURATE
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -34,7 +33,7 @@ class SessionUser(object):
         return "SessionUser-{}-{}-{}".format(
             self.id, self.name, self.expiration
         )
-    
+
 
 class UserDoesNotExist(Exception):
     pass
@@ -115,11 +114,7 @@ def save_position(request: HttpRequest, position: Point):
     in database.
     """
     request.session[SLOCATION] = position
-    if SLOCATION_ACCURATE not in request.session:
-        request.session[SLOCATION_ACCURATE] = True
-    elif not request.session[SLOCATION_ACCURATE]:
-        clear_message_history(request)
-        request.session[SLOCATION_ACCURATE] = True
+    request.session[SLOCATION_ACCURATE] = True
     user_id = get_user_id(request)
     debug("save_position: set session location to %s for %s",
             position, user_id)

@@ -1,5 +1,6 @@
 from django.contrib.gis.geos import Point
 from django.urls import reverse
+from logging import getLogger
 from rest_framework import status
 from rest_framework.test import APITestCase, APIClient
 
@@ -13,6 +14,8 @@ messages_url = reverse("pmessages:api-messages")
 position_url = reverse("pmessages:api-position")
 user_url = reverse("pmessages:api-user")
 radius_url = reverse("pmessages:api-radius")
+
+logger = getLogger(__name__)
 
 SRID = 4326
 
@@ -69,7 +72,7 @@ class UserTests(APITestCase):
 
         response = self.client.get(messages_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        
+
         response = self.client.get(radius_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -77,7 +80,7 @@ class UserTests(APITestCase):
         # login out
         response = self.client.post(logout_url)
         self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
-        
+
         # login back
         response = self.client.post(
             login_url, data, format="json")
@@ -107,7 +110,7 @@ class UserTests(APITestCase):
         response = client2.post(
             login_url, login_data, format="json")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-        
+
         response = client2.post(
             position_url, position_data, format="json")
         self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
@@ -174,6 +177,7 @@ class MessageTests(APITestCase):
         data = {"latitude": self.pos2.y, "longitude": self.pos2.x}
         self.client.post(position_url, data, format="json")
         response = self.client.get(messages_url)
+        logger.debug("Response data: %s", response.data)
         response_messages = [msg["uuid"] for msg in response.data]
         expected_messages = [str(self.msg2.uuid)]
         self.assertEqual(response_messages, expected_messages)
@@ -243,10 +247,11 @@ class MessageTestsWithLoginAndPosition(APITestCase):
         data = {"latitude": self.pos2.y, "longitude": self.pos2.x}
         self.client.post(position_url, data, format="json")
         response = self.client.get(messages_url)
+        logger.debug("Response data: %s", response.data)
         response_messages = sorted([msg["uuid"] for msg in response.data])
         expected_messages = sorted([str(self.msg1.uuid), str(self.msg2.uuid)])
         self.assertEqual(response_messages, expected_messages)
-        self.assertEqual(len(response.data), 2)
+        self.assertEqual(len(response.data), 1)
 
     def test_get_messages_logout(self):
         """
