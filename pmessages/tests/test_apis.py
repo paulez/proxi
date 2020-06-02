@@ -176,7 +176,8 @@ class MessageTests(APITestCase):
         self.client.get(messages_url, REMOTE_ADDR=self.test_ip)
         data = {"latitude": self.pos2.y, "longitude": self.pos2.x}
         self.client.post(position_url, data, format="json")
-        response = self.client.get(messages_url)
+        response = self.client.get(messages_url, longitude=self.pos2.x,
+                                   latitude=self.pos2.y)
         logger.debug("Response data: %s", response.data)
         response_messages = [msg["uuid"] for msg in response.data]
         expected_messages = [str(self.msg2.uuid)]

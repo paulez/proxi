@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 def get_location_from_request(
-        request: Request, serializer_data: dict) -> Tuple[Point, str]:
+        request: Request) -> Tuple[Point, str]:
     """
     Returns a tuple of Point object from request location
     and the IP address which matches the location.
@@ -21,11 +21,13 @@ def get_location_from_request(
     location, address = get_user_location_address(request)
     logger.debug('get_location from geoip set to %s with address %s',
                  location, address)
-    longitude = serializer_data.get("longitude")
-    latitude = serializer_data.get("latitude")
+
+    longitude = request.query_params.get('longitude')
+    latitude= request.query_params.get('latitude')
     if longitude and latitude:
         location = get_location_from_coordinates(float(longitude),
                                                  float(latitude))
+
     return location, address
 
 
