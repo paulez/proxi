@@ -27,6 +27,9 @@ def get_location_from_request(
     if longitude and latitude:
         location = get_location_from_coordinates(float(longitude),
                                                  float(latitude))
+        logger.debug("Location set from request parameters: %s", location)
+    else:
+        logger.debug("No location set from request parameters.")
 
     return location, address
 

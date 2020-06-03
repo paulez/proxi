@@ -15,7 +15,8 @@ from rest_framework.authtoken.models import Token
 from .models import ProxyIndex, ProxyMessage, ProxyUser
 from .serializers import ProxyMessageSerializer, ProxySimpleMessageSerializer
 from .serializers import ProxyMessageIdSerializer
-from .serializers import ProxyLocationSerializer, ProxyUserSerializer
+from .serializers import ProxyLocationSerializer
+from .serializers import ProxyUserSerializer, ProxyLoginUserSerializer
 from .serializers import ProxyRadiusSerializer
 from .serializers import ProxyRegisterUserSerializer
 from .utils.location import (
@@ -38,7 +39,7 @@ def messages(request):
     """API which returns list of nearby messages based on the
     location set in the session.
     """
-    location = get_location_from_request(request)
+    location = get_location_from_request(request)[0]
     if not location:
         raise Http404('No location provided.')
     all_messages = get_messages_for_request(request, location)
@@ -135,7 +136,7 @@ def login(request):
     """
     if request.method == 'POST':
         current_user = get_user_from_request(request)
-        serializer = ProxyUserSerializer(data=request.data)
+        serializer = ProxyLoginUserSerializer(data=request.data)
         if serializer.is_valid():
             username = serializer.validated_data['username']
             if current_user:
@@ -155,7 +156,8 @@ def login(request):
         if latitude and longitude:
             location = get_location_from_coordinates(latitude, longitude)
         else:
-            debug("Cannot login, no location known: %s", serializer.errors)
+            debug("Cannot login, no location provided in request data %s",
+                  request.data)
             return Response(serializer.errors, status=status.HTTP_404_NOT_FOUND)
         user_id = ProxyUser.register_user(username, location)
         if user_id:
@@ -207,8 +209,8 @@ def logout(request):
         user = get_user_from_request(request)
         debug('user %s has called logout', user)
         if user:
-                do_logout(request, user.id)
-                return Response(status=status.HTTP_202_ACCEPTED)
+            do_logout(request, user.id)
+            return Response(status=status.HTTP_202_ACCEPTED)
         else:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -216,7 +218,7 @@ def logout(request):
 def radius(request):
     """API which returns current message radius.
     """
-    location = get_location_from_request(request)
+    location = get_location_from_request(request)[0]
     if not location:
         raise Http404('No location provided.')
     user = get_user_from_request(request)

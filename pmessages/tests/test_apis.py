@@ -21,21 +21,29 @@ SRID = 4326
 
 class UserTests(APITestCase):
 
+    def setUp(self):
+        self.pos_data = {
+            "location": {
+                "latitude": 42,
+                "longitude": 127
+            }
+        }
+
     def test_login_without_position(self):
-        data = {"username": "toto"}
+        data = {"username": "toto", **self.pos_data}
         response = self.client.post(login_url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_login_logout(self):
-        data = {"latitude": 42, "longitude": 127}
         response = self.client.post(
-            position_url, data, format="json")
+            position_url, self.pos_data, format="json"
+        )
         self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
 
         response = self.client.get(user_url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
-        data = {"username": "toto"}
+        data = {"username": "toto", **self.pos_data}
         response = self.client.post(
             login_url, data, format="json")
         self.assertEqual(response.data, data)
@@ -58,22 +66,22 @@ class UserTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_login_logout_login(self):
-        data = {"latitude": 42, "longitude": 127}
         response = self.client.post(
-            position_url, data, format="json")
+            position_url, self.pos_data, format="json"
+        )
         self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
 
         # first login
-        data = {"username": "toto"}
+        data = {"username": "toto", **self.pos_data}
         response = self.client.post(
             login_url, data, format="json")
-        self.assertEqual(response.data, data)
         self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
+        self.assertEqual(response.data, data)
 
-        response = self.client.get(messages_url)
+        response = self.client.get(messages_url, self.pos_data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        response = self.client.get(radius_url)
+        response = self.client.get(radius_url, self.pos_data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
 
@@ -88,15 +96,14 @@ class UserTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
 
     def test_login_conflict(self):
-        position_data = {"latitude": 42, "longitude": 127}
         response = self.client.post(
-            position_url, position_data, format="json")
+            position_url, self.pos_data, format="json")
         self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
 
         response = self.client.get(user_url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
-        login_data = {"username": "toto"}
+        login_data = {"username": "toto", **self.pos_data}
         response = self.client.post(
             login_url, login_data, format="json")
         self.assertEqual(response.data, login_data)
@@ -112,14 +119,14 @@ class UserTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
         response = client2.post(
-            position_url, position_data, format="json")
+            position_url, self.pos_data, format="json")
         self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
 
         response = client2.post(
             login_url, login_data, format="json")
         self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
 
-        login_data2 = {"username": "toto2"}
+        login_data2 = {"username": "toto2", **self.pos_data}
         response = client2.post(
             login_url, login_data2, format="json")
         self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
@@ -129,10 +136,9 @@ class UserTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
 
     def test_expired_user(self):
-        data = {"latitude": 42, "longitude": 127}
         response = self.client.post(
-            position_url, data, format="json")
-        data = {"username": "toto"}
+            position_url, self.pos_data, format="json")
+        data = {"username": "toto", **self.pos_data}
         response = self.client.post(
             login_url, data, format="json")
 
@@ -176,8 +182,11 @@ class MessageTests(APITestCase):
         self.client.get(messages_url, REMOTE_ADDR=self.test_ip)
         data = {"latitude": self.pos2.y, "longitude": self.pos2.x}
         self.client.post(position_url, data, format="json")
-        response = self.client.get(messages_url, longitude=self.pos2.x,
-                                   latitude=self.pos2.y)
+        response = self.client.get(
+            messages_url,
+            {"longitude": self.pos2.x,
+             "latitude": self.pos2.y}
+        )
         logger.debug("Response data: %s", response.data)
         response_messages = [msg["uuid"] for msg in response.data]
         expected_messages = [str(self.msg2.uuid)]
@@ -188,10 +197,10 @@ class MessageTestsWithLoginAndPosition(APITestCase):
     def setUp(self):
         self.message_data = {"message": "plop le monde"}
         self.pos1 = Point(127, 42, srid=SRID)
-        data = {"latitude": self.pos1.y, "longitude": self.pos1.x}
+        self.pos1_data = {"latitude": self.pos1.y, "longitude": self.pos1.x}
 
         self.pos2 = Point(42, 127, srid=SRID)
-        self.client.post(position_url, data, format="json")
+        self.client.post(position_url, self.pos1_data, format="json")
 
         data = {"username": "toto"}
         self.client.post(login_url, data, format="json")
@@ -214,7 +223,7 @@ class MessageTestsWithLoginAndPosition(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_get_messages_success(self):
-        response = self.client.get(messages_url)
+        response = self.client.get(messages_url, self.pos1_data)
         self.assertEqual(response.data[0]["uuid"], str(self.msg1.uuid))
         self.assertEqual(len(response.data), 1)
 
@@ -247,10 +256,10 @@ class MessageTestsWithLoginAndPosition(APITestCase):
         self.client.get(messages_url)
         data = {"latitude": self.pos2.y, "longitude": self.pos2.x}
         self.client.post(position_url, data, format="json")
-        response = self.client.get(messages_url)
+        response = self.client.get(messages_url, data)
         logger.debug("Response data: %s", response.data)
         response_messages = sorted([msg["uuid"] for msg in response.data])
-        expected_messages = sorted([str(self.msg1.uuid), str(self.msg2.uuid)])
+        expected_messages = sorted([str(self.msg2.uuid)])
         self.assertEqual(response_messages, expected_messages)
         self.assertEqual(len(response.data), 1)
 

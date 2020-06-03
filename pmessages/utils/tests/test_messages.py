@@ -16,7 +16,8 @@ messages_url = reverse("pmessages:api-messages")
 logger = logging.getLogger(__name__)
 debug = logger.debug
 
-SRID=4326
+SRID = 4326
+
 
 class MessageUtilsTest(TestCase):
     def setUp(self):
@@ -34,19 +35,19 @@ class MessageUtilsTest(TestCase):
         )
         self.user = ProxyUser.objects.get(pk=self.user_id)
 
-
         self.messages_1 = set()
         self.messages_2 = set()
 
         for __ in range(5):
             message = ProxyMessage(username=self.username, message="blah",
-                address=self.address, location=self.pos1)
+                                   address=self.address, location=self.pos1)
             message.save()
             self.messages_1.add(message)
 
         for __ in range(10):
             message = ProxyMessage(username=self.username, message="bloh",
-                address=self.address, location=self.pos2, user=self.user)
+                                   address=self.address, location=self.pos2,
+                                   user=self.user)
             message.save()
             self.messages_2.add(message)
 
@@ -73,27 +74,27 @@ class MessageUtilsTest(TestCase):
     def test_search_messages(self):
         distance = D(km=10000)
         test_messages = messages.get_messages(self.pos1, distance,
-                search_request="bl")
+                                              search_request="bl")
         self.assertEqual(
             set(test_messages),
             self.messages_2.union(self.messages_1))
 
         test_messages = messages.get_messages(self.pos1, distance,
-                search_request="bloh")
+                                              search_request="bloh")
         self.assertEqual(
             set(test_messages),
             self.messages_2)
 
     def test_get_messages_for_request_empty_session(self):
         with self.assertRaises(Http404):
-            messages.get_messages_for_request(self.request)
+            messages.get_messages_for_request(self.request, None)
 
     def test_get_messages_for_request_with_session(self):
         self.request.session = {
-            session.SLOCATION: self.pos1,
             session.SUSERNAME: self.username,
         }
-        test_messages = messages.get_messages_for_request(self.request)
+        test_messages = messages.get_messages_for_request(self.request,
+                                                          self.pos1)
         self.assertFalse(not test_messages)
         for message in test_messages:
             debug(
@@ -106,19 +107,19 @@ class MessageUtilsTest(TestCase):
 
         # Get messages from a location for which messages had a user set.
         self.request.session = {
-            session.SLOCATION: self.pos2,
             session.SUSERNAME: self.username,
             session.SUSER_ID: self.user_id
         }
-        test_messages = messages.get_messages_for_request(self.request)
+        test_messages = messages.get_messages_for_request(self.request,
+                                                          self.pos2)
         for message in test_messages:
             self.assertTrue(message.current_user)
 
         # Get messages from location for which messages didn't have
         # a user set.
-        self.request.session[session.SLOCATION] = self.pos1
         # Clear message history
         self.request.session[session.SMESSAGE_HISTORY] = []
-        test_messages = messages.get_messages_for_request(self.request)
+        test_messages = messages.get_messages_for_request(self.request,
+                                                          self.pos1)
         for message in test_messages:
             self.assertFalse(message.current_user)
