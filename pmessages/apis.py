@@ -150,15 +150,16 @@ def login(request):
         else:
             debug("Invalid login request: %s", serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        latitude = serializer.validated_data.get('latitude')
-        longitude = serializer.validated_data.get('longitude')
+        #latitude = serializer.validated_data.get('latitude')
+        #longitude = serializer.validated_data.get('longitude')
+        location = serializer.validated_data['location']
 
-        if latitude and longitude:
-            location = get_location_from_coordinates(latitude, longitude)
-        else:
-            debug("Cannot login, no location provided in request data %s",
-                  request.data)
-            return Response(serializer.errors, status=status.HTTP_404_NOT_FOUND)
+        #if latitude and longitude:
+        #    location = get_location_from_coordinates(latitude, longitude)
+        #else:
+        #    debug("Cannot login, no location provided in request data %s",
+        #          request.data)
+        #    return Response(serializer.errors, status=status.HTTP_404_NOT_FOUND)
         user_id = ProxyUser.register_user(username, location)
         if user_id:
             save_user(request, username, user_id)

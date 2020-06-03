@@ -160,7 +160,7 @@ class ProxyUser(AbstractUser):
         """Register user with its location and a creation date.
         If a non expired user already exists in the effect area around location,
         return False."""
-        debug("Registering user %s.", username)
+        debug("Registering user %s with position %s.", username, pos)
         radius = ProxyIndex.indexed_radius(pos, username)
 
         user = ProxyUser.objects.filter(
