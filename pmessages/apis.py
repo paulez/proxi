@@ -5,7 +5,7 @@ import logging
 
 from django.contrib.gis.measure import D
 from django.contrib.gis.geos import Point
-from django.http import Http404, HttpResponseForbidden, HttpResponseBadRequest
+from django.http import HttpResponseForbidden, HttpResponseBadRequest
 from django.views.decorators.csrf import ensure_csrf_cookie
 from rest_framework import status
 from rest_framework.decorators import api_view
@@ -41,7 +41,8 @@ def messages(request):
     """
     location = get_location_from_request(request)[0]
     if not location:
-        raise Http404('No location provided.')
+        error = {"error": "No location provided."}
+        return Response(error, status=status.HTTP_404_NOT_FOUND)
     all_messages = get_messages_for_request(request, location)
     serializer = ProxyMessageSerializer(all_messages, many=True)
     return Response(serializer.data)
@@ -56,27 +57,17 @@ def message(request, message_uuid=None):
 
     if not user:
         debug("No user logged in for request %s", request)
-        raise Http404('Not logged in.')
+        error = {"error": "Not logged in."}
+        return Response(error, status=status.HTTP_404_NOT_FOUND)
     if request.method == 'POST':
         serializer = ProxySimpleMessageSerializer(data=request.data)
         if serializer.is_valid():
             message_text = serializer.validated_data['message']
-            latitude = serializer.validated_data.get('latitude')
-            longitude = serializer.validated_data.get('longitude')
-
-            if latitude and longitude:
-                request_location = get_location_from_coordinates(latitude,
-                                                                 longitude)
-                # TODO: compare both locations and check they are coherent
-                location = request_location
-            else:
-                warning("No location provided for request %s", request)
-                raise Http404('No location provided.')
-            ref = None
+            location = serializer.validated_data['location']
             db_user = ProxyUser.objects.get(pk=user.id)
             message = ProxyMessage(username=user.name, message=message_text,
                                    address=address, location=location,
-                                   ref=ref, user=db_user)
+                                   ref=None, user=db_user)
             message.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -117,15 +108,7 @@ def position(request):
     if request.method == 'POST':
         serializer = ProxyLocationSerializer(data=request.data)
         if serializer.is_valid():
-            latitude = serializer.validated_data.get('latitude')
-            longitude = serializer.validated_data.get('longitude')
-
-            if latitude and longitude:
-                location = get_location_from_coordinates(latitude, longitude)
-            else:
-                warning("No location provided for request %s", request)
-                raise Http404('No location provided.')
-
+            location = serializer.validated_data['location']
             save_position(request, location)
             return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -150,16 +133,7 @@ def login(request):
         else:
             debug("Invalid login request: %s", serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        #latitude = serializer.validated_data.get('latitude')
-        #longitude = serializer.validated_data.get('longitude')
         location = serializer.validated_data['location']
-
-        #if latitude and longitude:
-        #    location = get_location_from_coordinates(latitude, longitude)
-        #else:
-        #    debug("Cannot login, no location provided in request data %s",
-        #          request.data)
-        #    return Response(serializer.errors, status=status.HTTP_404_NOT_FOUND)
         user_id = ProxyUser.register_user(username, location)
         if user_id:
             save_user(request, username, user_id)
@@ -174,15 +148,9 @@ def register(request):
         debug("Invalid register request: %s", serializer.errors)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    latitude = serializer.validated_data.get('latitude')
-    longitude = serializer.validated_data.get('longitude')
-
-    if latitude and longitude:
-        location = get_location_from_coordinates(latitude, longitude)
-    else:
-        debug("Cannot register, no location known: %s", serializer.errors)
-        return Response(serializer.errors, status=status.HTTP_404_NOT_FOUND)
+    location = serializer.validated_data['location']
     username = serializer.validated_data['username']
+
     token = ProxyUser.register_user(username, location)
     return Response({
         'token': token.key,
@@ -202,7 +170,8 @@ def user(request):
         serializer = ProxyUserSerializer(user)
         return Response(serializer.data)
     else:
-        raise Http404('Not logged in.')
+        error = {"error": "Not logged in."}
+        return Response(error, status=status.HTTP_404_NOT_FOUND)
 
 @api_view(['POST'])
 def logout(request):
@@ -221,7 +190,8 @@ def radius(request):
     """
     location = get_location_from_request(request)[0]
     if not location:
-        raise Http404('No location provided.')
+        error = {"error": "No location provided."}
+        return Response(error, status=status.HTTP_404_NOT_FOUND)
     user = get_user_from_request(request)
     radius = D(m=ProxyIndex.indexed_radius(location, user))
     serializer = ProxyRadiusSerializer({'radius': radius})

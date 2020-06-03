@@ -4,6 +4,8 @@ from drf_extra_fields.geo_fields import PointField
 from pmessages.models import ProxyMessage, ProxyUser
 from pmessages.utils.distance import rounded_distance
 
+SRID = 4326
+
 
 class DistanceField(serializers.IntegerField):
     def to_representation(self, obj):
@@ -11,7 +13,7 @@ class DistanceField(serializers.IntegerField):
         return super(DistanceField, self).to_representation(rounded)
 
 class ProxyLocationSerializer(serializers.Serializer):
-    location = PointField()
+    location = PointField(srid=SRID)
 
 class ProxyMessageSerializer(serializers.HyperlinkedModelSerializer):
     distance = DistanceField()
@@ -43,7 +45,7 @@ class ProxyRegisterUserSerializer(ProxyLocationSerializer):
     username = serializers.CharField()
 
 class ProxyLoginUserSerializer(serializers.HyperlinkedModelSerializer):
-    location = PointField()
+    location = PointField(srid=SRID)
 
     class Meta:
         model = ProxyUser
