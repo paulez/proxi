@@ -14,6 +14,7 @@ messages_url = reverse("pmessages:api-messages")
 position_url = reverse("pmessages:api-position")
 user_url = reverse("pmessages:api-user")
 radius_url = reverse("pmessages:api-radius")
+register_url = reverse("pmessages:api-register")
 
 logger = getLogger(__name__)
 
@@ -296,3 +297,42 @@ class RadiusTests(APITestCase):
     def test_get_radius_with_ip(self):
         response = self.client.get(radius_url, REMOTE_ADDR=self.test_ip)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+
+class RegisterTest(APITestCase):
+
+    def setUp(self):
+        self.pos_data = {
+            "location": {
+                "latitude": 42,
+                "longitude": 127
+            }
+        }
+        self.pos_param = self.pos_data["location"]
+
+    def test_register_invalid(self):
+        data = {"username": "toto"}
+        response = self.client.post(register_url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        response = self.client.post(register_url, self.pos_data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_register(self):
+        data = {"username": "toto", **self.pos_data}
+        response = self.client.post(
+            register_url, data, format="json"
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertContains(response, "token")
+        self.assertContains(response, "user_id")
+
+    def test_register_duplicate(self):
+        data = {"username": "toto", **self.pos_data}
+        self.client.post(
+            register_url, data, format="json"
+        )
+        response = self.client.post(
+            register_url, data, format="json"
+        )
+        self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
