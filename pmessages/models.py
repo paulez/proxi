@@ -152,16 +152,18 @@ class ProxyUser(AbstractUser):
         return self.username
 
     def __repr__(self):
-        return '{}-{}'.format(self.username, self.location)
+        return '{}-{}-{}'.format(self.uuid, self.username, self.location)
 
     def __str__(self):
         return self.username
 
     @staticmethod
-    def register_user(username: str, pos: Point) -> int:
+    def register_user(username: str, pos: Point) -> 'ProxyUser':
         """Register user with its location and a creation date.
         If a non expired user already exists in the effect area around location,
-        return False."""
+        raise an exception.
+        If an expired user already exists, expire this user and create a new
+        one."""
         debug("Registering user %s with position %s.", username, pos)
         radius = ProxyIndex.indexed_radius(pos, username)
 
@@ -171,17 +173,14 @@ class ProxyUser(AbstractUser):
             username=username).annotate(
             distance=Distance('location', pos)
         ).order_by('distance').first()
-        if not user:
-            debug("Creating new user %s.", username)
-            new_user = ProxyUser(location=pos, last_use=timezone.now(), username=username)
-            new_user.save()
-            return new_user.id
-        age = timezone.now() - user.last_use
-        if age > timedelta(minutes=settings.PROXY_USER_EXPIRATION):
-            debug("Updating user %s last use.", user)
-            user.last_use = timezone.now()
+        if user:
+            age = timezone.now() - user.last_use
+            if age <= timedelta(minutes=settings.PROXY_USER_EXPIRATION):
+                raise Exception("User already exists")
+            debug("Marking user %s as expired.", user)
+            user.expired = True
             user.save()
-            return user.id
-        else:
-            debug("User %s already exists.", username)
-            return False
+        debug("Creating new user %s.", username)
+        new_user = ProxyUser(location=pos, last_use=timezone.now(), username=username)
+        new_user.save()
+        return new_user
