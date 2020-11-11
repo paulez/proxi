@@ -113,33 +113,6 @@ def position(request):
             return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(['POST'])
-def login(request):
-    """API to login with a username and the current session.
-    """
-    if request.method == 'POST':
-        current_user = get_user_from_request(request)
-        serializer = ProxyLoginUserSerializer(data=request.data)
-        if serializer.is_valid():
-            username = serializer.validated_data['username']
-            if current_user:
-                user = ProxyUser(username=current_user.name)
-                response_serializer = serializer = ProxyUserSerializer(user)
-                if current_user.name == username:
-                    debug("User %s already logged in.", username)
-                    return Response(response_serializer.data, status=status.HTTP_202_ACCEPTED)
-                else:
-                    return Response(response_serializer.data, status=status.HTTP_400_BAD_REQUEST)
-        else:
-            debug("Invalid login request: %s", serializer.errors)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        location = serializer.validated_data['location']
-        user_id = ProxyUser.register_user(username, location)
-        if user_id:
-            save_user(request, username, user_id)
-            return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
-        else:
-            return Response(serializer.errors, status=status.HTTP_409_CONFLICT)
 
 @api_view(['POST'])
 def register(request):
@@ -165,7 +138,6 @@ def register(request):
         'user_id': new_user.uuid,
     })
 
-
 @api_view(['GET'])
 @ensure_csrf_cookie
 def user(request):
@@ -180,17 +152,6 @@ def user(request):
     else:
         error = {"error": "Not logged in."}
         return Response(error, status=status.HTTP_404_NOT_FOUND)
-
-@api_view(['POST'])
-def logout(request):
-    if request.method == 'POST':
-        user = get_user_from_request(request)
-        debug('user %s has called logout', user)
-        if user:
-            do_logout(request, user.id)
-            return Response(status=status.HTTP_202_ACCEPTED)
-        else:
-            return Response(status=status.HTTP_404_NOT_FOUND)
 
 @api_view(['GET'])
 def radius(request):

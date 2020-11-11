@@ -25,5 +25,6 @@ Use DRF Token authentication instead of session. User registers a username, and 
 
 ## TODO
 
-* Return token to login call
-* Use token to auth
+* Fix tests
+* Use token auth in all existing APIs
+* deprecate previous login/logout APIs

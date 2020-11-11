@@ -7,8 +7,6 @@ from rest_framework.test import APITestCase, APIClient
 from pmessages.models import ProxyMessage
 from ..utils.geo import get_point_from_ip
 
-login_url = reverse("pmessages:api-login")
-logout_url = reverse("pmessages:api-logout")
 message_url = reverse("pmessages:api-message")
 messages_url = reverse("pmessages:api-messages")
 position_url = reverse("pmessages:api-position")
@@ -31,121 +29,11 @@ class UserTests(APITestCase):
         }
         self.pos_param = self.pos_data["location"]
 
-    def test_login_without_position(self):
-        data = {"username": "toto"}
-        response = self.client.post(login_url, data, format="json")
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
-    def test_login_logout(self):
-        response = self.client.post(
-            position_url, self.pos_data, format="json"
-        )
-        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
+    def test_get_user(self):
 
         response = self.client.get(user_url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
-        data = {"username": "toto", **self.pos_data}
-        response = self.client.post(
-            login_url, data, format="json")
-        self.assertEqual(response.data, data)
-        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
-
-        # login twice
-        response = self.client.post(
-            login_url, data, format="json")
-        self.assertEqual(response.data, {"username": "toto"})
-        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
-
-        response = self.client.get(user_url)
-        self.assertEqual(response.data, {"username": "toto"})
-
-        response = self.client.post(logout_url)
-        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
-
-        # can't logout twice
-        response = self.client.post(logout_url)
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-
-    def test_login_logout_login(self):
-        response = self.client.post(
-            position_url, self.pos_data, format="json"
-        )
-        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
-
-        # first login
-        data = {"username": "toto", **self.pos_data}
-        response = self.client.post(
-            login_url, data, format="json")
-        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
-        self.assertEqual(response.data, data)
-
-        response = self.client.get(messages_url, self.pos_param)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        response = self.client.get(radius_url, self.pos_param)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-
-        # login out
-        response = self.client.post(logout_url)
-        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
-
-        # login back
-        response = self.client.post(
-            login_url, data, format="json")
-        self.assertEqual(response.data, data)
-        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
-
-    def test_login_conflict(self):
-        response = self.client.post(
-            position_url, self.pos_data, format="json")
-        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
-
-        response = self.client.get(user_url)
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-
-        login_data = {"username": "toto", **self.pos_data}
-        response = self.client.post(
-            login_url, login_data, format="json")
-        self.assertEqual(response.data, login_data)
-        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
-
-        # second client
-
-        client2 = APIClient()
-
-        # login twice
-        response = client2.post(
-            position_url, self.pos_data, format="json")
-        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
-
-        response = client2.post(
-            login_url, login_data, format="json")
-        self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
-
-        login_data2 = {"username": "toto2", **self.pos_data}
-        response = client2.post(
-            login_url, login_data2, format="json")
-        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
-
-        # login out
-        response = client2.post(logout_url)
-        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
-
-    def test_expired_user(self):
-        response = self.client.post(
-            position_url, self.pos_data, format="json")
-        data = {"username": "toto", **self.pos_data}
-        response = self.client.post(
-            login_url, data, format="json")
-
-        response = self.client.get(user_url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        with self.settings(PROXY_USER_EXPIRATION=0):
-            response = self.client.get(user_url)
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 class MessageTests(APITestCase):
 
