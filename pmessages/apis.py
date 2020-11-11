@@ -143,6 +143,9 @@ def login(request):
 
 @api_view(['POST'])
 def register(request):
+    """
+    Register a user from a given username and location.
+    """
     serializer = ProxyRegisterUserSerializer(data=request.data)
     if not serializer.is_valid():
         debug("Invalid register request: %s", serializer.errors)
@@ -151,11 +154,15 @@ def register(request):
     location = serializer.validated_data['location']
     username = serializer.validated_data['username']
 
-    user = ProxyUser.register_user(username, location)
-    token = create_token(user)
+    try:
+        new_user = ProxyUser.register_user(username, location)
+    except ValueError:
+        result = {"error": "User {} already exists in this area.".format(username)}
+        return Response(result, status=status.HTTP_409_CONFLICT)
+    token = create_token(new_user)
     return Response({
         'token': token,
-        'user_id': user.uuid,
+        'user_id': new_user.uuid,
     })
 
 

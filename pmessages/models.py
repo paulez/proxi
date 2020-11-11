@@ -176,7 +176,7 @@ class ProxyUser(AbstractUser):
         if user:
             age = timezone.now() - user.last_use
             if age <= timedelta(minutes=settings.PROXY_USER_EXPIRATION):
-                raise Exception("User already exists")
+                raise ValueError("User %s already exists in this area")
             debug("Marking user %s as expired.", user)
             user.expired = True
             user.save()
