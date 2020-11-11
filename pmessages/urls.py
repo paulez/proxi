@@ -18,6 +18,7 @@ urlpatterns = [
     url(r'^api/logout', apis.logout, name="api-logout"),
     url(r'^api/user', apis.user, name="api-user"),
     url(r'^api/radius', apis.radius, name="api-radius"),
+    url(r'^api/register', apis.register, name="api-register"),
     url(r'^about/', views.about, name='about'),
     url(r'^login/', views.login, name='login'),
     url(r'^logout/', views.logout, name='logout'),

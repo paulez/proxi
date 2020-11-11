@@ -24,7 +24,7 @@ from .utils.location import (
 )
 from .utils.messages import get_messages_for_request
 from .utils.users import (
-    do_logout, get_user_from_request, save_position, save_user
+    do_logout, get_user_from_request, save_position, save_user, create_token
 )
 
 # Get an instance of a logger
@@ -151,10 +151,11 @@ def register(request):
     location = serializer.validated_data['location']
     username = serializer.validated_data['username']
 
-    token = ProxyUser.register_user(username, location)
+    user = ProxyUser.register_user(username, location)
+    token = create_token(user)
     return Response({
-        'token': token.key,
-        'user_id': user.pk,
+        'token': token,
+        'user_id': user.uuid,
     })
 
 
