@@ -137,11 +137,13 @@ class ProxyIndex(models.Model):
         return radius
 
 class ProxyUser(AbstractUser):
-    location = models.PointField(srid=SRID)
+    expired = models.BooleanField(default=False)
     last_use = models.DateTimeField()
+    location = models.PointField(srid=SRID)
+    password = models.CharField(_('password'), max_length=128, blank=True)
     username = models.CharField(max_length=20, db_index=True)
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
-    password = models.CharField(_('password'), max_length=128, blank=True)
+    
     objects = models.Manager()
 
     USERNAME_FIELD = 'uuid'
