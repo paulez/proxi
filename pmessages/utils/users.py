@@ -10,6 +10,7 @@ from django.contrib.gis.geos import Point
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpRequest
 from django.utils import timezone
+from rest_framework.authtoken.models import Token
 
 from ..models import ProxyUser
 from .session import SUSERNAME, SUSER_ID, SUSER_EXPIRATION, SLOCATION, SLOCATION_ACCURATE
@@ -138,3 +139,8 @@ def do_logout(request: HttpRequest, user_id: int, delete: bool = True):
     del request.session[SUSERNAME]
     del request.session[SUSER_ID]
     del request.session[SUSER_EXPIRATION]
+
+
+def create_token(user: ProxyUser) -> str:
+    logger
+    return Token.objects.create(user=user).key
