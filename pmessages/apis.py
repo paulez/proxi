@@ -54,22 +54,22 @@ def message(request, message_uuid=None):
     """API to post a message. Location should have already been set in
     session.
     """
-    location, address = get_location_from_request(request)
-    user = get_user_from_request(request)
+    _, address = get_location_from_request(request)
+    user = request.user
 
     if not user:
         debug("No user logged in for request %s", request)
-        error = {"error": "Not logged in."}
-        return Response(error, status=status.HTTP_404_NOT_FOUND)
+        error_message = {"error": "Not logged in."}
+        return Response(error_message, status=status.HTTP_404_NOT_FOUND)
     if request.method == 'POST':
         serializer = ProxySimpleMessageSerializer(data=request.data)
         if serializer.is_valid():
             message_text = serializer.validated_data['message']
             location = serializer.validated_data['location']
-            db_user = ProxyUser.objects.get(pk=user.id)
-            message = ProxyMessage(username=user.name, message=message_text,
+            debug("message location %s", location)
+            message = ProxyMessage(username=user.username, message=message_text,
                                    address=address, location=location,
-                                   ref=None, user=db_user)
+                                   ref=None, user=user)
             message.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -79,7 +79,6 @@ def message(request, message_uuid=None):
             msg = "No uuid provided in message delete request"
             error(msg)
             return Response(msg, status=status.HTTP_400_BAD_REQUEST)
-        db_user = ProxyUser.objects.get(pk=user.id)
         serializer = ProxyMessageIdSerializer(
                 data={
                     "uuid": message_uuid
@@ -96,8 +95,8 @@ def message(request, message_uuid=None):
             # it is deleted for sure
             warning("Message with uuid %s does not exist", message_uuid)
             return Response(serializer.data, status=status.HTTP_200_OK)
-        if message.user != db_user:
-            warning("User %s cannot delete message %s", db_user, message)
+        if message.user != user:
+            warning("User %s cannot delete message %s", user, message)
             raise HttpResponseForbidden("User cannot delete this message.")
         else:
             message.delete()

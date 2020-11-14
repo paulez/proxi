@@ -26,6 +26,8 @@ class ProxyMessageSerializer(serializers.HyperlinkedModelSerializer):
         )
 
 class ProxySimpleMessageSerializer(serializers.HyperlinkedModelSerializer):
+    location = PointField(srid=SRID)
+
     class Meta:
         model = ProxyMessage
         fields = ('message', 'location')

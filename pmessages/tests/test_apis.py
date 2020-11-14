@@ -118,7 +118,16 @@ class MessageTestsWithLoginAndPosition(APITestCase):
             self.message_data,
             format="json",
         )
-        self.assertEqual(response.data, {"message": "plop le monde"})
+        self.assertEqual(
+            response.data,
+            {
+                "message": "plop le monde",
+                "location": {
+                    "latitude": self.pos1.y,
+                    "longitude": self.pos1.x,
+                },
+            }
+        )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
 
