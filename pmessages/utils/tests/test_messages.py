@@ -30,10 +30,9 @@ class MessageUtilsTest(TestCase):
 
         self.username = "toto"
         self.address = "127.0.0.1"
-        self.user_id = ProxyUser.register_user(
+        self.user = ProxyUser.register_user(
             self.username, self.pos2
         )
-        self.user = ProxyUser.objects.get(pk=self.user_id)
 
         self.messages_1 = set()
         self.messages_2 = set()
@@ -108,7 +107,7 @@ class MessageUtilsTest(TestCase):
         # Get messages from a location for which messages had a user set.
         self.request.session = {
             session.SUSERNAME: self.username,
-            session.SUSER_ID: self.user_id
+            session.SUSER_ID: self.user.uuid
         }
         test_messages = messages.get_messages_for_request(self.request,
                                                           self.pos2)

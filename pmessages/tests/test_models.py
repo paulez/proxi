@@ -26,8 +26,8 @@ class ProxyUserTests(ProxyModelTests):
         Test that a single user cannot be registered twice.
         """
         ProxyUser.register_user(self.username, self.position)
-        second_user = ProxyUser.register_user(self.username, self.position)
-        self.assertFalse(second_user)
+        with self.assertRaises(ValueError):
+            ProxyUser.register_user(self.username, self.position)
 
 class ProxyMessageTests(ProxyModelTests):
     def test_create_message(self):

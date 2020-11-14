@@ -90,8 +90,10 @@ class MessageTestsWithLoginAndPosition(APITestCase):
         self.pos2 = Point(42, 127, srid=SRID)
         self.client.post(position_url, self.pos1_data, format="json")
 
-        data = {"username": "toto"}
-        self.client.post(login_url, data, format="json")
+        data = {"username": "toto", **self.pos1_data}
+        response = self.client.post(register_url, data, format="json")
+        print(response.json())
+        self.token = response.json()["token"]
 
         self.msg1 = ProxyMessage(username="titi", message="blah",
             address="127.0.0.1", location=self.pos1)
