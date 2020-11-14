@@ -47,26 +47,7 @@ def get_user_from_request(request: HttpRequest) -> Optional[SessionUser]:
     Returns username, user id and user expiration.
     """
     debug("Getting user from request %s.", request)
-    # initialising session variables
-    session_user = SessionUser(
-        name=request.session.get(SUSERNAME, None),
-        id=request.session.get(SUSER_ID, None),
-        expiration=request.session.get(SUSER_EXPIRATION, None)
-    )
-    if session_user.name is None:
-        debug("No user in session %s", session_user)
-        return None
-    try:
-        user = get_user(session_user)
-    except ExpiredUser:
-        debug("Expired user %s, logging out.", session_user)
-        do_logout(request, session_user.id, delete=False)
-        return None
-    except UserDoesNotExist:
-        debug("User %s doesn't exist, logging out.", session_user)
-        do_logout(request, session_user.id, delete=False)
-        return None
-    return user
+    return request.user
 
 def get_user(session_user: SessionUser) -> SessionUser:
     # refresh user expiration info
