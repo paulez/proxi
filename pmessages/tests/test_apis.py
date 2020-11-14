@@ -56,7 +56,7 @@ class MessageTests(APITestCase):
         response = self.client.post(
             message_url, self.message_data, format="json"
         )
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_get_messages_no_position(self):
         response = self.client.get(messages_url)
@@ -90,10 +90,11 @@ class MessageTestsWithLoginAndPosition(APITestCase):
         self.pos2 = Point(42, 127, srid=SRID)
         self.client.post(position_url, self.pos1_data, format="json")
 
+        # register user and set credentials
         data = {"username": "toto", **self.pos1_data}
         response = self.client.post(register_url, data, format="json")
-        print(response.json())
-        self.token = response.json()["token"]
+        token = response.json()["token"]
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token)
 
         self.msg1 = ProxyMessage(username="titi", message="blah",
             address="127.0.0.1", location=self.pos1)
@@ -103,18 +104,19 @@ class MessageTestsWithLoginAndPosition(APITestCase):
             address="127.0.0.1", location=self.pos2)
         self.msg2.save()
 
-    def tearDown(self):
-        self.client.post(logout_url)
-
     def test_post_message_without_location(self):
         response = self.client.post(
-            message_url, self.message_content, format="json"
+            message_url,
+            self.message_content,
+            format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_post_message_success(self):
         response = self.client.post(
-            message_url, self.message_data, format="json"
+            message_url,
+            self.message_data,
+            format="json",
         )
         self.assertEqual(response.data, {"message": "plop le monde"})
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -127,7 +129,9 @@ class MessageTestsWithLoginAndPosition(APITestCase):
 
     def test_delete_message(self):
         self.client.post(
-            message_url, self.message_data, format="json"
+            message_url,
+            self.message_data,
+            format="json",
         )
         response = self.client.get(messages_url, self.pos1_param)
         message_uuid = response.data[0]["uuid"]
@@ -136,7 +140,7 @@ class MessageTestsWithLoginAndPosition(APITestCase):
                 url=message_url,
                 uuid=message_uuid
             ),
-            format="json"
+            format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -169,7 +173,6 @@ class MessageTestsWithLoginAndPosition(APITestCase):
         response = self.client.post(message_url, self.message_data, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-        response = self.client.post(logout_url)
         self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
 
         response = self.client.get(messages_url)
