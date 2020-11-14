@@ -236,3 +236,10 @@ CSRF_TRUSTED_ORIGINS = config('ALLOWED_HOSTS', cast=Csv())
 CORS_ORIGIN_WHITELIST = config('CORS_HOSTS', cast=Csv())
 CORS_URLS_REGEX = r'^/api/.*$'
 CORS_ALLOW_CREDENTIALS = True
+
+# Django Rest Framework authentication configuration
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ]
+}
