@@ -46,7 +46,7 @@ To be able to run tests the database user needs to have super user permissions t
 sudo -u postgres psql -c "ALTER ROLE proxydb SUPERUSER";
 ```
 
-### Install dependencies
+#### Install dependencies
 
 ```
 cd proxi
@@ -54,7 +54,7 @@ sudo apt install build-essential python3-dev libgeoip-dev zlib1g-dev libmemcache
 pip install -r doc/pip_requirements.txt
 ```
 
-### Create the configuration file
+#### Create the configuration file
 
 Create a configuration file from the sample.
 
@@ -69,6 +69,11 @@ Run the django_secret_key script and use the output to set the SECRET_KEY parame
 ```
 ./utils/django_secret_key.py
 ```
+
+#### Download GeoIP data file
+
+You need to download the GeoLite2 City database into the proxy/data/geoip folder.
+You can download it from the [Maxmind website](https://dev.maxmind.com/geoip/geoip2/geolite2/).
 
 #### Install the database and run server
 
