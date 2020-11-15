@@ -102,37 +102,5 @@ def save_user(request: HttpRequest, username: str, user_id: int):
     request.session[SUSER_EXPIRATION] = timezone.now()
 
 
-def save_position(request: HttpRequest, position: Point):
-    """Save user position in session storage.
-    If user is logged in update last position
-    in database.
-    """
-    request.session[SLOCATION] = position
-    request.session[SLOCATION_ACCURATE] = True
-    user_id = get_user_id(request)
-    debug("save_position: set session location to %s for %s", position, user_id)
-    if not user_id:
-        debug("Unknown user.")
-    else:
-        user = ProxyUser.objects.get(pk=user_id)
-        user.location = position
-        user.save()
-        debug("User %s position %s saved", user_id, position)
-
-
-def do_logout(request: HttpRequest, user_id: int, delete: bool = True):
-    """Logout a user. Clears its session, and remove
-    user record from database if delete is set.
-    """
-    debug("logging out %s", user_id)
-    if delete:
-        user = ProxyUser.objects.get(pk=user_id)
-        debug("Deleting user %s.", user)
-        user.delete()
-    del request.session[SUSERNAME]
-    del request.session[SUSER_ID]
-    del request.session[SUSER_EXPIRATION]
-
-
 def create_token(user: ProxyUser) -> str:
     return Token.objects.create(user=user).key

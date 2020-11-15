@@ -23,9 +23,7 @@ from .serializers import ProxyRegisterUserSerializer
 from .utils.location import get_location_from_request, get_location_from_coordinates
 from .utils.messages import get_messages_for_request
 from .utils.users import (
-    do_logout,
     get_user_from_request,
-    save_position,
     save_user,
     create_token,
 )
@@ -109,18 +107,6 @@ def message(request, message_uuid=None):
         else:
             message.delete()
             return Response(serializer.data, status=status.HTTP_200_OK)
-
-
-@api_view(["POST"])
-def position(request):
-    """API to post position. Sends latitude and longitude."""
-    if request.method == "POST":
-        serializer = ProxyLocationSerializer(data=request.data)
-        if serializer.is_valid():
-            location = serializer.validated_data["location"]
-            save_position(request, location)
-            return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(["POST"])

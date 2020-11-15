@@ -10,7 +10,6 @@ from pmessages.utils.users import create_token
 
 message_url = reverse("pmessages:api-message")
 messages_url = reverse("pmessages:api-messages")
-position_url = reverse("pmessages:api-position")
 user_url = reverse("pmessages:api-user")
 radius_url = reverse("pmessages:api-radius")
 register_url = reverse("pmessages:api-register")
@@ -71,7 +70,6 @@ class MessageTests(APITestCase):
     def test_get_messages_change_position(self):
         self.client.get(messages_url, REMOTE_ADDR=self.test_ip)
         data = {"latitude": self.pos2.y, "longitude": self.pos2.x}
-        self.client.post(position_url, data, format="json")
         response = self.client.get(
             messages_url, {"longitude": self.pos2.x, "latitude": self.pos2.y}
         )
@@ -91,7 +89,6 @@ class MessageTestsWithLoginAndPosition(APITestCase):
         self.message_data = {**self.message_content, **self.pos1_data}
 
         self.pos2 = Point(42, 127, srid=SRID)
-        self.client.post(position_url, self.pos1_data, format="json")
 
         # register user and set credentials
         data = {"username": "toto", **self.pos1_data}
@@ -164,7 +161,6 @@ class MessageTestsWithLoginAndPosition(APITestCase):
         self.client.get(messages_url)
         pos_param = {"latitude": self.pos2.y, "longitude": self.pos2.x}
         pos_data = {"location": pos_param}
-        self.client.post(position_url, pos_data, format="json")
         response = self.client.get(messages_url, pos_param)
         logger.debug("Response data: %s", response.data)
         response_messages = sorted([msg["uuid"] for msg in response.data])

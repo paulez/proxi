@@ -14,8 +14,7 @@ from django.contrib.auth.validators import UnicodeUsernameValidator
 from .models import ProxyMessage, ProxyUser, ProxyIndex
 from .utils.location import get_location_from_request
 from .utils.messages import get_messages
-from .utils.users import get_user_from_request, do_logout, get_user_id, save_user
-from .utils.users import save_position
+from .utils.users import get_user_from_request, get_user_id, save_user
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -110,27 +109,6 @@ def ajax_messages(request, search_request=None):
         "pmessages/messages.html",
         {"all_messages": all_messages, "location": location, "radius": radius},
     )
-
-
-def set_position(request):
-    """
-    Process POST request containing position encoded in GeoJSON.
-    It will set the session position attribute to the position
-    given in the request.
-    """
-    # only accepts POST
-    if request.method != "POST":
-        debug("Non POST request")
-        return HttpResponseNotAllowed(["POST"])
-    # get position from POST Geojson data
-    try:
-        position = GEOSGeometry(request.body)
-    except ValueError:
-        error("Unknown data format.")
-        return HttpResponseBadRequest("Unknown data format.")
-    debug("The position is: %s", position)
-    save_position(request, position)
-    return HttpResponse("OK")
 
 
 @cache_page(60 * 60)
