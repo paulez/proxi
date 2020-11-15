@@ -5,6 +5,7 @@ import uuid
 from django.contrib.auth.models import AbstractUser
 from django.contrib.gis.db import models
 from django.contrib.gis.measure import D
+from django.db.models import Q
 from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.geos import Point
 from django.utils import timezone
@@ -85,6 +86,42 @@ class ProxyMessage(models.Model):
         while compare(radius, thresholds, pos) and radius > radius_min:
             radius = radius / 2
         return radius * 2
+
+    @staticmethod
+    def get_messages_within_radius(location, radius, search_request=None):
+        """Returns messages close to location within a circle of a
+        defined radius.
+        """
+        # Getting messages near location
+        debug("Getting messages in radius %s of %s", radius, location)
+        near_messages = ProxyMessage.objects.filter(
+            location__distance_lte=(location, radius)
+        )
+        near_messages = near_messages.filter(
+            date__gt=timezone.now() - timedelta(days=settings.PROXY_MAX_DAYS))
+        if search_request:
+            debug('search_request is set')
+            # Filter messages using search_request
+            all_messages = near_messages.filter(
+                Q(message__icontains=search_request) |
+                Q(username__icontains=search_request)
+                ).order_by('-date')[:30]
+        else:
+            all_messages = near_messages.order_by('-date')[:30]
+        debug("Message SQL request :%s", near_messages.query)
+        # compute distance to messages
+        debug("Found %s messages", len(all_messages))
+        return all_messages.annotate(distance=Distance('location', location))
+
+    @staticmethod
+    def get_messages_from_user_location(user, location, search=None):
+        radius = D(m=ProxyIndex.indexed_radius(location, user))
+        all_messages = ProxyMessage.get_messages_within_radius(
+            location, radius, search_request=search
+        )
+        debug("Returned messages: %s", all_messages)
+        return all_messages
+
 
 class ProxyIndex(models.Model):
     location = models.PointField(srid=SRID)

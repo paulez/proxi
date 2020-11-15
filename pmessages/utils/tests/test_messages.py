@@ -96,25 +96,26 @@ class MessageUtilsTest(TestCase):
         self.assertFalse(not test_messages)
         for message in test_messages:
             debug(
-                "Current user for message %s is %s for %s",
+                "Message %s user is %s",
                 message,
-                message.username,
-                message.current_user
+                message.user,
             )
-            self.assertFalse(message.current_user)
+            self.assertNotEqual(self.user, message.user)
 
         # Get messages from a location for which messages had a user set.
         force_authenticate(self.request, user=self.user)
-        test_messages = messages.get_messages_for_request(self.request,
-                                                          self.pos2)
+        test_messages = messages.get_messages_for_request(
+            self.request, self.pos2
+        )
         for message in test_messages:
-            self.assertTrue(message.current_user)
+            self.assertEqual(self.user, message.user)
 
         # Get messages from location for which messages didn't have
         # a user set.
         # Clear message history
         self.request.session[session.SMESSAGE_HISTORY] = []
-        test_messages = messages.get_messages_for_request(self.request,
-                                                          self.pos1)
+        test_messages = messages.get_messages_for_request(
+            self.request, self.pos1
+        )
         for message in test_messages:
-            self.assertFalse(message.current_user)
+            self.assertNotEqual(self.user, message.user)
