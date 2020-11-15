@@ -110,7 +110,7 @@ class MessageTestsWithLoginAndPosition(APITestCase):
             self.message_content,
             format="json",
         )
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_post_message_success(self):
         response = self.client.post(
@@ -182,9 +182,10 @@ class MessageTestsWithLoginAndPosition(APITestCase):
         response = self.client.post(message_url, self.message_data, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
-
-        response = self.client.get(messages_url)
+        response = self.client.get(
+            messages_url,
+            self.pos1_param
+        )
         self.assertEqual(len(response.data), 2)
 
 class RadiusTests(APITestCase):

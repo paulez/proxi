@@ -23,7 +23,7 @@ def get_location_from_request(
                  location, address)
 
     longitude = request.query_params.get('longitude')
-    latitude= request.query_params.get('latitude')
+    latitude = request.query_params.get('latitude')
     if longitude and latitude:
         location = get_location_from_coordinates(float(longitude),
                                                  float(latitude))
