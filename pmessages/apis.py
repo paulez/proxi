@@ -24,7 +24,6 @@ from .utils.location import get_location_from_request, get_location_from_coordin
 from .utils.messages import get_messages_for_request
 from .utils.users import (
     get_user_from_request,
-    save_user,
     create_token,
 )
 

@@ -203,7 +203,7 @@ class ProxyUser(AbstractUser):
         return "{}-{}-{}".format(self.uuid, self.username, self.location)
 
     def __str__(self):
-        return self.username
+        return "ProxUser {}".format(self.username)
 
     @staticmethod
     def register_user(username: str, pos: Point) -> "ProxyUser":

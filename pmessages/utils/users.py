@@ -13,13 +13,6 @@ from django.utils import timezone
 from rest_framework.authtoken.models import Token
 
 from ..models import ProxyUser
-from .session import (
-    SUSERNAME,
-    SUSER_ID,
-    SUSER_EXPIRATION,
-    SLOCATION,
-    SLOCATION_ACCURATE,
-)
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -27,20 +20,6 @@ debug = logger.debug
 info = logger.info
 warning = logger.warning
 error = logger.error
-
-
-class SessionUser(object):
-    """
-    User information stored in session.
-    """
-
-    def __init__(self, id: int, name: str, expiration: datetime):
-        self.id = id
-        self.name = name
-        self.expiration = expiration
-
-    def __str__(self):
-        return "SessionUser-{}-{}-{}".format(self.id, self.name, self.expiration)
 
 
 class UserDoesNotExist(Exception):
@@ -62,44 +41,6 @@ def get_user_from_request(request: HttpRequest) -> Optional[ProxyUser]:
         warning("No user in request %s", request)
         user = None
     return user
-
-
-def get_user(session_user: SessionUser) -> SessionUser:
-    # refresh user expiration info
-    if session_user.expiration and session_user.id:
-        expiration_interval = timedelta(minutes=settings.PROXY_USER_REFRESH)
-        expiration_max = timedelta(minutes=settings.PROXY_USER_EXPIRATION)
-        delta = timezone.now() - session_user.expiration
-        if delta > expiration_max:
-            debug("expired user %s", session_user.id)
-            raise ExpiredUser()
-        elif delta > expiration_interval:
-            try:
-                db_user = ProxyUser.objects.get(pk=session_user.id)
-            except ObjectDoesNotExist:
-                msg = "User {username} with id {userid} doesn't exist".format(
-                    username=session_user.name, userid=session_user.id
-                )
-                error(msg)
-                raise UserDoesNotExist(msg)
-            else:
-                debug("Saving user %s last use.", session_user.name)
-                db_user.last_use = timezone.now()
-                db_user.save()
-    return SessionUser(session_user.id, session_user.name, session_user.expiration)
-
-
-def get_user_id(request: HttpRequest) -> int:
-    """Returns user id from session information."""
-    return request.session.get(SUSER_ID, None)
-
-
-def save_user(request: HttpRequest, username: str, user_id: int):
-    """Save user information in session storage."""
-    debug("Saving username %s with id %s to session.", username, user_id)
-    request.session[SUSERNAME] = username
-    request.session[SUSER_ID] = user_id
-    request.session[SUSER_EXPIRATION] = timezone.now()
 
 
 def create_token(user: ProxyUser) -> str:
