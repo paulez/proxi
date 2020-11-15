@@ -19,6 +19,7 @@ from .session import SUSERNAME, SUSER_ID, SUSER_EXPIRATION, SLOCATION, SLOCATION
 logger = logging.getLogger(__name__)
 debug = logger.debug
 info = logger.info
+warning = logger.warning
 error = logger.error
 
 class SessionUser(object):
@@ -42,12 +43,17 @@ class UserDoesNotExist(Exception):
 class ExpiredUser(Exception):
     pass
 
-def get_user_from_request(request: HttpRequest) -> Optional[SessionUser]:
+def get_user_from_request(request: HttpRequest) -> Optional[ProxyUser]:
     """Get user session information.
     Returns username, user id and user expiration.
     """
     debug("Getting user from request %s.", request)
-    return request.user
+    try:
+        user = request.user
+    except AttributeError:
+        warning("No user in request %s", request)
+        user = None
+    return user
 
 def get_user(session_user: SessionUser) -> SessionUser:
     # refresh user expiration info
