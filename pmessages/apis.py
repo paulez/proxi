@@ -45,7 +45,9 @@ def messages(request):
         error = {"error": "No location provided."}
         return Response(error, status=status.HTTP_404_NOT_FOUND)
     all_messages = get_messages_for_request(request, location)
-    serializer = ProxyMessageSerializer(all_messages, many=True)
+    serializer = ProxyMessageSerializer(
+        all_messages, many=True, context={"request": request}
+    )
     return Response(serializer.data)
 
 @api_view(['POST', 'DELETE'])

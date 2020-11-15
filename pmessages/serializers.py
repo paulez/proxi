@@ -15,8 +15,14 @@ class DistanceField(serializers.IntegerField):
 class ProxyLocationSerializer(serializers.Serializer):
     location = PointField(srid=SRID)
 
+class ProxyUserSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = ProxyUser
+        fields = ('uuid', 'username')
+
 class ProxyMessageSerializer(serializers.HyperlinkedModelSerializer):
     distance = DistanceField()
+    user = ProxyUserSerializer()
     class Meta:
         model = ProxyMessage
         fields = (
@@ -33,11 +39,6 @@ class ProxySimpleMessageSerializer(serializers.HyperlinkedModelSerializer):
 
 class ProxyMessageIdSerializer(serializers.Serializer):
     uuid = serializers.UUIDField(format='hex_verbose')
-
-class ProxyUserSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = ProxyUser
-        fields = ('uuid', 'username')
 
 class ProxyRadiusSerializer(serializers.Serializer):
     radius = DistanceField()
