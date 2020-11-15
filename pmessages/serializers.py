@@ -26,7 +26,7 @@ class ProxyMessageSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = ProxyMessage
         fields = (
-            'uuid', 'username', 'message',
+            'uuid', 'message',
             'date', 'distance', 'user'
         )
 

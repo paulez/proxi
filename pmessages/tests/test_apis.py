@@ -4,8 +4,9 @@ from logging import getLogger
 from rest_framework import status
 from rest_framework.test import APITestCase, APIClient
 
-from pmessages.models import ProxyMessage
-from ..utils.geo import get_point_from_ip
+from pmessages.models import ProxyMessage, ProxyUser
+from pmessages.utils.geo import get_point_from_ip
+from pmessages.utils.users import create_token
 
 message_url = reverse("pmessages:api-message")
 messages_url = reverse("pmessages:api-messages")
@@ -29,10 +30,21 @@ class UserTests(APITestCase):
         }
         self.pos_param = self.pos_data["location"]
 
-    def test_get_user(self):
+        self.user = ProxyUser.register_user(
+            username="toto",
+            pos=Point(42, 127, srid=SRID)
+        )
+        self.token = create_token(self.user)
 
+    def test_get_user_success(self):
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token)
         response = self.client.get(user_url)
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_get_user_no_auth(self):
+        response = self.client.get(user_url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
 
 
 class MessageTests(APITestCase):

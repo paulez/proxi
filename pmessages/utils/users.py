@@ -129,5 +129,4 @@ def do_logout(request: HttpRequest, user_id: int, delete: bool = True):
 
 
 def create_token(user: ProxyUser) -> str:
-    logger
     return Token.objects.create(user=user).key

@@ -148,14 +148,9 @@ def user(request):
     """
     API to retrieve current user.
     """
-    session_user = get_user_from_request(request)
-    if session_user:
-        user = ProxyUser(username=session_user.name)
-        serializer = ProxyUserSerializer(user)
-        return Response(serializer.data)
-    else:
-        error = {"error": "Not logged in."}
-        return Response(error, status=status.HTTP_404_NOT_FOUND)
+    user = get_user_from_request(request)
+    serializer = ProxyUserSerializer(user)
+    return Response(serializer.data)
 
 @api_view(['GET'])
 def radius(request):
