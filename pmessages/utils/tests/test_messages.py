@@ -5,6 +5,7 @@ from django.http.response import Http404
 from django.utils import timezone
 from django.urls import reverse
 from datetime import timedelta
+from rest_framework.test import force_authenticate
 import logging
 
 from pmessages.utils import messages
@@ -89,9 +90,7 @@ class MessageUtilsTest(TestCase):
             messages.get_messages_for_request(self.request, None)
 
     def test_get_messages_for_request_with_session(self):
-        self.request.session = {
-            session.SUSERNAME: self.username,
-        }
+        force_authenticate(self.request, user=self.user)
         test_messages = messages.get_messages_for_request(self.request,
                                                           self.pos1)
         self.assertFalse(not test_messages)
@@ -105,10 +104,7 @@ class MessageUtilsTest(TestCase):
             self.assertFalse(message.current_user)
 
         # Get messages from a location for which messages had a user set.
-        self.request.session = {
-            session.SUSERNAME: self.username,
-            session.SUSER_ID: self.user.uuid
-        }
+        force_authenticate(self.request, user=self.user)
         test_messages = messages.get_messages_for_request(self.request,
                                                           self.pos2)
         for message in test_messages:

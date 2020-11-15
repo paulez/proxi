@@ -60,20 +60,22 @@ def get_messages_for_request(request, location):
         location, radius, search_request=search
     )
     if user:
-        debug("User for messages is: %s", user)
-        all_messages = all_messages.annotate(
-            current_user=Case(
-                When(
-                    user__pk=None, then=Value(False)
-                ),
-                When(
-                    user__pk=user.id,then=Value(True)
-                ),
-                default=Value(False),
-                output_field=BooleanField()
-            )
-        )
+        user_id = user.id
     else:
+        user_id = 0
         debug("No user for messages.")
+    debug("User for messages is: %s", user)
+    all_messages = all_messages.annotate(
+        current_user=Case(
+            When(
+                user__pk=None, then=Value(False)
+            ),
+            When(
+                user__pk=user_id, then=Value(True)
+            ),
+            default=Value(False),
+            output_field=BooleanField()
+        )
+    )
     debug("Returned messages: %s", all_messages)
     return all_messages
