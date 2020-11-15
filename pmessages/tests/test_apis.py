@@ -19,25 +19,19 @@ logger = getLogger(__name__)
 
 SRID = 4326
 
-class UserTests(APITestCase):
 
+class UserTests(APITestCase):
     def setUp(self):
-        self.pos_data = {
-            "location": {
-                "latitude": 42,
-                "longitude": 127
-            }
-        }
+        self.pos_data = {"location": {"latitude": 42, "longitude": 127}}
         self.pos_param = self.pos_data["location"]
 
         self.user = ProxyUser.register_user(
-            username="toto",
-            pos=Point(42, 127, srid=SRID)
+            username="toto", pos=Point(42, 127, srid=SRID)
         )
         self.token = create_token(self.user)
 
     def test_get_user_success(self):
-        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token)
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
         response = self.client.get(user_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -46,9 +40,7 @@ class UserTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
-
 class MessageTests(APITestCase):
-
     def setUp(self):
         self.message_data = {"message": "plop le monde"}
 
@@ -56,18 +48,18 @@ class MessageTests(APITestCase):
         self.pos1 = get_point_from_ip(self.test_ip)
         self.pos2 = Point(42, 127, srid=SRID)
 
-        self.msg1 = ProxyMessage(username="titi", message="blah",
-            address="127.0.0.1", location=self.pos1)
+        self.msg1 = ProxyMessage(
+            username="titi", message="blah", address="127.0.0.1", location=self.pos1
+        )
         self.msg1.save()
 
-        self.msg2 = ProxyMessage(username="tutu", message="bloh",
-            address="127.0.0.1", location=self.pos2)
+        self.msg2 = ProxyMessage(
+            username="tutu", message="bloh", address="127.0.0.1", location=self.pos2
+        )
         self.msg2.save()
 
     def test_post_message_without_login(self):
-        response = self.client.post(
-            message_url, self.message_data, format="json"
-        )
+        response = self.client.post(message_url, self.message_data, format="json")
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_get_messages_no_position(self):
@@ -81,15 +73,14 @@ class MessageTests(APITestCase):
         data = {"latitude": self.pos2.y, "longitude": self.pos2.x}
         self.client.post(position_url, data, format="json")
         response = self.client.get(
-            messages_url,
-            {"longitude": self.pos2.x,
-             "latitude": self.pos2.y}
+            messages_url, {"longitude": self.pos2.x, "latitude": self.pos2.y}
         )
         logger.debug("Response data: %s", response.data)
         response_messages = [msg["uuid"] for msg in response.data]
         expected_messages = [str(self.msg2.uuid)]
         self.assertEqual(response_messages, expected_messages)
         self.assertEqual(len(response.data), 1)
+
 
 class MessageTestsWithLoginAndPosition(APITestCase):
     def setUp(self):
@@ -106,14 +97,16 @@ class MessageTestsWithLoginAndPosition(APITestCase):
         data = {"username": "toto", **self.pos1_data}
         response = self.client.post(register_url, data, format="json")
         token = response.json()["token"]
-        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token)
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + token)
 
-        self.msg1 = ProxyMessage(username="titi", message="blah",
-            address="127.0.0.1", location=self.pos1)
+        self.msg1 = ProxyMessage(
+            username="titi", message="blah", address="127.0.0.1", location=self.pos1
+        )
         self.msg1.save()
 
-        self.msg2 = ProxyMessage(username="tutu", message="bloh",
-            address="127.0.0.1", location=self.pos2)
+        self.msg2 = ProxyMessage(
+            username="tutu", message="bloh", address="127.0.0.1", location=self.pos2
+        )
         self.msg2.save()
 
     def test_post_message_without_location(self):
@@ -138,10 +131,9 @@ class MessageTestsWithLoginAndPosition(APITestCase):
                     "latitude": self.pos1.y,
                     "longitude": self.pos1.x,
                 },
-            }
+            },
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-
 
     def test_get_messages_success(self):
         response = self.client.get(messages_url, self.pos1_param)
@@ -157,21 +149,14 @@ class MessageTestsWithLoginAndPosition(APITestCase):
         response = self.client.get(messages_url, self.pos1_param)
         message_uuid = response.data[0]["uuid"]
         response = self.client.delete(
-            "{url}/{uuid}".format(
-                url=message_url,
-                uuid=message_uuid
-            ),
+            "{url}/{uuid}".format(url=message_url, uuid=message_uuid),
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # deleting the same message twice shouldn't cause an error
         response = self.client.delete(
-            "{url}/{uuid}".format(
-                url=message_url,
-                uuid=message_uuid
-            ),
-            format="json"
+            "{url}/{uuid}".format(url=message_url, uuid=message_uuid), format="json"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -194,14 +179,11 @@ class MessageTestsWithLoginAndPosition(APITestCase):
         response = self.client.post(message_url, self.message_data, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-        response = self.client.get(
-            messages_url,
-            self.pos1_param
-        )
+        response = self.client.get(messages_url, self.pos1_param)
         self.assertEqual(len(response.data), 2)
 
-class RadiusTests(APITestCase):
 
+class RadiusTests(APITestCase):
     def setUp(self):
         self.test_ip = "68.141.147.38"
 
@@ -215,14 +197,8 @@ class RadiusTests(APITestCase):
 
 
 class RegisterTest(APITestCase):
-
     def setUp(self):
-        self.pos_data = {
-            "location": {
-                "latitude": 42,
-                "longitude": 127
-            }
-        }
+        self.pos_data = {"location": {"latitude": 42, "longitude": 127}}
         self.pos_param = self.pos_data["location"]
 
     def test_register_invalid(self):
@@ -235,19 +211,13 @@ class RegisterTest(APITestCase):
 
     def test_register(self):
         data = {"username": "toto", **self.pos_data}
-        response = self.client.post(
-            register_url, data, format="json"
-        )
+        response = self.client.post(register_url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertContains(response, "token")
         self.assertContains(response, "user_id")
 
     def test_register_duplicate(self):
         data = {"username": "toto", **self.pos_data}
-        self.client.post(
-            register_url, data, format="json"
-        )
-        response = self.client.post(
-            register_url, data, format="json"
-        )
+        self.client.post(register_url, data, format="json")
+        response = self.client.post(register_url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)

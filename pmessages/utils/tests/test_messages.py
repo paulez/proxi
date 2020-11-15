@@ -31,35 +31,47 @@ class MessageUtilsTest(TestCase):
 
         self.username = "toto"
         self.address = "127.0.0.1"
-        self.user = ProxyUser.register_user(
-            self.username, self.pos2
-        )
+        self.user = ProxyUser.register_user(self.username, self.pos2)
 
         self.messages_1 = set()
         self.messages_2 = set()
 
         for __ in range(5):
-            message = ProxyMessage(username=self.username, message="blah",
-                                   address=self.address, location=self.pos1)
+            message = ProxyMessage(
+                username=self.username,
+                message="blah",
+                address=self.address,
+                location=self.pos1,
+            )
             message.save()
             self.messages_1.add(message)
 
         for __ in range(10):
-            message = ProxyMessage(username=self.username, message="bloh",
-                                   address=self.address, location=self.pos2,
-                                   user=self.user)
+            message = ProxyMessage(
+                username=self.username,
+                message="bloh",
+                address=self.address,
+                location=self.pos2,
+                user=self.user,
+            )
             message.save()
             self.messages_2.add(message)
 
         old_date = timezone.now() - timedelta(days=365)
         old_message = ProxyMessage(
-            username=self.username, message="vieux",
-            address=self.address, location=self.pos2)
+            username=self.username,
+            message="vieux",
+            address=self.address,
+            location=self.pos2,
+        )
         old_message.date = old_date
         old_message.save()
         ProxyMessage(
-            username=self.username, message="vieux",
-            address=self.address, location=self.pos1)
+            username=self.username,
+            message="vieux",
+            address=self.address,
+            location=self.pos1,
+        )
         old_message.date = old_date
         old_message.save()
 
@@ -73,17 +85,13 @@ class MessageUtilsTest(TestCase):
 
     def test_search_messages(self):
         distance = D(km=10000)
-        test_messages = messages.get_messages(self.pos1, distance,
-                                              search_request="bl")
-        self.assertEqual(
-            set(test_messages),
-            self.messages_2.union(self.messages_1))
+        test_messages = messages.get_messages(self.pos1, distance, search_request="bl")
+        self.assertEqual(set(test_messages), self.messages_2.union(self.messages_1))
 
-        test_messages = messages.get_messages(self.pos1, distance,
-                                              search_request="bloh")
-        self.assertEqual(
-            set(test_messages),
-            self.messages_2)
+        test_messages = messages.get_messages(
+            self.pos1, distance, search_request="bloh"
+        )
+        self.assertEqual(set(test_messages), self.messages_2)
 
     def test_get_messages_for_request_empty_session(self):
         with self.assertRaises(Http404):
@@ -91,8 +99,7 @@ class MessageUtilsTest(TestCase):
 
     def test_get_messages_for_request_with_session(self):
         force_authenticate(self.request, user=self.user)
-        test_messages = messages.get_messages_for_request(self.request,
-                                                          self.pos1)
+        test_messages = messages.get_messages_for_request(self.request, self.pos1)
         self.assertFalse(not test_messages)
         for message in test_messages:
             debug(
@@ -104,9 +111,7 @@ class MessageUtilsTest(TestCase):
 
         # Get messages from a location for which messages had a user set.
         force_authenticate(self.request, user=self.user)
-        test_messages = messages.get_messages_for_request(
-            self.request, self.pos2
-        )
+        test_messages = messages.get_messages_for_request(self.request, self.pos2)
         for message in test_messages:
             self.assertEqual(self.user, message.user)
 
@@ -114,8 +119,6 @@ class MessageUtilsTest(TestCase):
         # a user set.
         # Clear message history
         self.request.session[session.SMESSAGE_HISTORY] = []
-        test_messages = messages.get_messages_for_request(
-            self.request, self.pos1
-        )
+        test_messages = messages.get_messages_for_request(self.request, self.pos1)
         for message in test_messages:
             self.assertNotEqual(self.user, message.user)

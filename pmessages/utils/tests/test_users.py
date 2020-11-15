@@ -8,10 +8,10 @@ from pmessages.utils import users
 from pmessages.utils.users import SessionUser, ExpiredUser, UserDoesNotExist
 from pmessages.models import ProxyUser
 
-SRID=4326
+SRID = 4326
+
 
 class UserUtilsTest(TestCase):
-
     def setUp(self):
         self.pos1 = Point(-127, 42, srid=SRID)
         self.name1 = "toto"
@@ -24,16 +24,14 @@ class UserUtilsTest(TestCase):
 
     def test_expired_user(self):
         session_user = SessionUser(
-            id=42, name=self.name1,
-            expiration=timezone.now() - timedelta(days=100)
+            id=42, name=self.name1, expiration=timezone.now() - timedelta(days=100)
         )
         with self.assertRaises(ExpiredUser):
             users.get_user(session_user)
 
     def non_existing_user(self):
         session_user = SessionUser(
-            id=42, name=self.name1,
-            expiration=timezone.now() - timedelta(hours=1)
+            id=42, name=self.name1, expiration=timezone.now() - timedelta(hours=1)
         )
         with self.assertRaises(UserDoesNotExist):
             users.get_user(session_user)

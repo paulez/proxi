@@ -9,13 +9,17 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('pmessages', '0005_proxymessage_user'),
+        ("pmessages", "0005_proxymessage_user"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='proxymessage',
-            name='user',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='pmessages.ProxyUser'),
+            model_name="proxymessage",
+            name="user",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="pmessages.ProxyUser",
+            ),
         ),
     ]

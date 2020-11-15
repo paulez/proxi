@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('pmessages', '0009_auto_20201108_2304'),
+        ("pmessages", "0009_auto_20201108_2304"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='proxyuser',
-            name='expired',
+            model_name="proxyuser",
+            name="expired",
             field=models.BooleanField(default=False),
         ),
     ]

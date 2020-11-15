@@ -8,13 +8,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('pmessages', '0001_initial'),
+        ("pmessages", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='proxymessage',
-            name='message',
+            model_name="proxymessage",
+            name="message",
             field=models.CharField(max_length=500),
         ),
     ]

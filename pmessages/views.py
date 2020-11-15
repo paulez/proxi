@@ -25,25 +25,36 @@ error = logger.error
 
 
 class MessageForm(Form):
-    message = CharField(widget=Textarea(
-        attrs={'placeholder': 'Your message...',
-               'autofocus': 'autofocus', 'rows': '3'}),
-        max_length=500)
+    message = CharField(
+        widget=Textarea(
+            attrs={
+                "placeholder": "Your message...",
+                "autofocus": "autofocus",
+                "rows": "3",
+            }
+        ),
+        max_length=500,
+    )
+
 
 class UserForm(Form):
-    username = CharField(widget=TextInput(
-        attrs={'placeholder': 'Username', 'autofocus': 'autofocus'}),
-        max_length=20, validators=[UnicodeUsernameValidator()])
+    username = CharField(
+        widget=TextInput(attrs={"placeholder": "Username", "autofocus": "autofocus"}),
+        max_length=20,
+        validators=[UnicodeUsernameValidator()],
+    )
+
 
 class SearchForm(Form):
-    user_query = CharField(widget=TextInput(
-        attrs={'placeholder': 'Search', 'class': 'search-query'}),
-        max_length=100)
+    user_query = CharField(
+        widget=TextInput(attrs={"placeholder": "Search", "class": "search-query"}),
+        max_length=100,
+    )
 
 
 def messages(request, search_request=None):
     location, address = get_location_from_request(request)
-    debug('user location is %s', location)
+    debug("user location is %s", location)
     user = get_user_from_request(request)
     username = None
     # Display user form
@@ -53,11 +64,11 @@ def messages(request, search_request=None):
     # Display logout form
     logout_form = Form()
     # Search form processing
-    if request.method == 'POST':
-        debug('filtering messages by user')
+    if request.method == "POST":
+        debug("filtering messages by user")
         search_form = SearchForm(data=request.POST)
         if search_form.is_valid():
-            search_request = search_form.cleaned_data['user_query']
+            search_request = search_form.cleaned_data["user_query"]
     else:
         search_form = SearchForm()
     if location:
@@ -69,10 +80,20 @@ def messages(request, search_request=None):
         radius = 0
         all_messages = None
 
-    return render(request, 'pmessages/index.html',
-                  {'all_messages': all_messages, 'message_form': message_form,
-                  'user_form': user_form, 'search_form': search_form,
-                  'username': username, 'location': location, 'radius': radius})
+    return render(
+        request,
+        "pmessages/index.html",
+        {
+            "all_messages": all_messages,
+            "message_form": message_form,
+            "user_form": user_form,
+            "search_form": search_form,
+            "username": username,
+            "location": location,
+            "radius": radius,
+        },
+    )
+
 
 def ajax_messages(request, search_request=None):
     location, address = get_location_from_request(request)
@@ -84,9 +105,12 @@ def ajax_messages(request, search_request=None):
     else:
         radius = 0
         all_messages = None
-    return render(request, 'pmessages/messages.html',
-                  {'all_messages': all_messages, 'location': location,
-                   'radius': radius})
+    return render(
+        request,
+        "pmessages/messages.html",
+        {"all_messages": all_messages, "location": location, "radius": radius},
+    )
+
 
 def set_position(request):
     """
@@ -95,18 +119,19 @@ def set_position(request):
     given in the request.
     """
     # only accepts POST
-    if request.method != 'POST':
-        debug('Non POST request')
-        return HttpResponseNotAllowed(['POST'])
+    if request.method != "POST":
+        debug("Non POST request")
+        return HttpResponseNotAllowed(["POST"])
     # get position from POST Geojson data
     try:
         position = GEOSGeometry(request.body)
     except ValueError:
-        error('Unknown data format.')
-        return HttpResponseBadRequest('Unknown data format.')
-    debug('The position is: %s', position)
+        error("Unknown data format.")
+        return HttpResponseBadRequest("Unknown data format.")
+    debug("The position is: %s", position)
     save_position(request, position)
-    return HttpResponse('OK')
+    return HttpResponse("OK")
+
 
 @cache_page(60 * 60)
 def about(request):
@@ -114,8 +139,8 @@ def about(request):
     Displays about page.
     """
     search_form = SearchForm()
-    return render(request, 'pmessages/about.html',
-            {'search_form': search_form})
+    return render(request, "pmessages/about.html", {"search_form": search_form})
+
 
 def login(request):
     """
@@ -124,25 +149,28 @@ def login(request):
     location = get_location_from_request(request)[0]
     user = get_user_from_request(request)
     if user:
-        return redirect('pmessages:messages')
+        return redirect("pmessages:messages")
 
     # Handle POST
-    if request.method == 'POST':
+    if request.method == "POST":
         user_form = UserForm(data=request.POST)
         if user_form.is_valid():
-            username = user_form.cleaned_data['username']
+            username = user_form.cleaned_data["username"]
             user_id = ProxyUser.register_user(username, location)
             if user_id:
                 save_user(request, username, user_id)
-                return redirect('pmessages:messages')
+                return redirect("pmessages:messages")
             else:
                 user_form.full_clean()
-                user_form.add_error('username',
-                        _('Pseudo already in use, please choose another one.'))
+                user_form.add_error(
+                    "username", _("Pseudo already in use, please choose another one.")
+                )
     else:
         user_form = UserForm()
-    return render(request, 'pmessages/login.html',
-            {'user_form': user_form, 'location': location})
+    return render(
+        request, "pmessages/login.html", {"user_form": user_form, "location": location}
+    )
+
 
 def message(request):
     """
@@ -151,44 +179,64 @@ def message(request):
     location, address = get_location_from_request(request)
     user = get_user_from_request(request)
 
-    if request.method == 'POST':
+    if request.method == "POST":
         message_form = MessageForm(data=request.POST)
         if message_form.is_valid():
             if user:
-                message_text = message_form.cleaned_data['message']
+                message_text = message_form.cleaned_data["message"]
                 ref = None
                 db_user = ProxyUser.objects.get(pk=user.id)
-                message = ProxyMessage(username=user.name, message=message_text,
-                        address=address, location=location, ref=ref, user=db_user)
+                message = ProxyMessage(
+                    username=user.name,
+                    message=message_text,
+                    address=address,
+                    location=location,
+                    ref=ref,
+                    user=db_user,
+                )
                 message.save()
                 message_form = MessageForm()
-                return redirect('pmessages:messages')
+                return redirect("pmessages:messages")
             else:
-                login_msg = _('Please login before posting a message.')
-                message_form.add_error('message', login_msg)
-                return render(request, 'pmessages/message.html',
-                        {'message_form': message_form, 'location': location,
-                         'username': user.name})
+                login_msg = _("Please login before posting a message.")
+                message_form.add_error("message", login_msg)
+                return render(
+                    request,
+                    "pmessages/message.html",
+                    {
+                        "message_form": message_form,
+                        "location": location,
+                        "username": user.name,
+                    },
+                )
     else:
         message_form = MessageForm()
     radius = D(m=ProxyIndex.indexed_radius(location, user))
-    return render(request, 'pmessages/message.html',
-            {'message_form': message_form, 'location': location,
-             'username': user.name, 'radius': radius})
+    return render(
+        request,
+        "pmessages/message.html",
+        {
+            "message_form": message_form,
+            "location": location,
+            "username": user.name,
+            "radius": radius,
+        },
+    )
+
 
 def logout(request):
     """
     Process logout POST requests.
     """
     user = get_user_from_request(request)
-    debug('user %s has hit logout', user)
-    if request.method == 'POST':
+    debug("user %s has hit logout", user)
+    if request.method == "POST":
         logout_form = Form(data=request.POST)
         if logout_form.is_valid():
             if user:
                 do_logout(request, user.id)
         else:
-            debug('logout form is not valid')
-        return redirect('pmessages:messages')
+            debug("logout form is not valid")
+        return redirect("pmessages:messages")
     else:
-        return HttpResponseNotAllowed(['POST'])
+        return HttpResponseNotAllowed(["POST"])

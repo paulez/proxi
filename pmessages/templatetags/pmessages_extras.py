@@ -7,11 +7,12 @@ from pmessages.utils.distance import rounded_distance
 
 register = template.Library()
 
+
 @register.filter
 def readable_distance(distance):
     if isinstance(distance, Distance):
         dist = rounded_distance(distance)
         rounded = ceil(dist / 1000)
-        return '{} km'.format(rounded)
+        return "{} km".format(rounded)
     else:
         return distance

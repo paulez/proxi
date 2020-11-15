@@ -9,13 +9,13 @@ import uuid
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('pmessages', '0002_auto_20170910_0454'),
+        ("pmessages", "0002_auto_20170910_0454"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='proxymessage',
-            name='uuid',
+            model_name="proxymessage",
+            name="uuid",
             field=models.UUIDField(default=uuid.uuid4, editable=False),
         ),
     ]

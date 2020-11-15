@@ -8,23 +8,23 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('pmessages', '0003_proxymessage_uuid'),
+        ("pmessages", "0003_proxymessage_uuid"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='proxymessage',
-            name='date',
+            model_name="proxymessage",
+            name="date",
             field=models.DateTimeField(auto_now_add=True, db_index=True),
         ),
         migrations.AlterField(
-            model_name='proxymessage',
-            name='username',
+            model_name="proxymessage",
+            name="username",
             field=models.CharField(db_index=True, max_length=20),
         ),
         migrations.AlterField(
-            model_name='proxyuser',
-            name='username',
+            model_name="proxyuser",
+            name="username",
             field=models.CharField(db_index=True, max_length=20),
         ),
     ]

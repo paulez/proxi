@@ -11,39 +11,69 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='ProxyIndex',
+            name="ProxyIndex",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('location', django.contrib.gis.db.models.fields.PointField(srid=4326)),
-                ('update', models.DateTimeField()),
-                ('radius', models.IntegerField()),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("location", django.contrib.gis.db.models.fields.PointField(srid=4326)),
+                ("update", models.DateTimeField()),
+                ("radius", models.IntegerField()),
             ],
         ),
         migrations.CreateModel(
-            name='ProxyMessage',
+            name="ProxyMessage",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('username', models.CharField(max_length=20)),
-                ('message', models.TextField()),
-                ('date', models.DateTimeField(auto_now_add=True)),
-                ('address', models.GenericIPAddressField()),
-                ('location', django.contrib.gis.db.models.fields.PointField(srid=4326)),
-                ('priority', models.PositiveSmallIntegerField(default=0)),
-                ('ref', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='pmessages.ProxyMessage')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("username", models.CharField(max_length=20)),
+                ("message", models.TextField()),
+                ("date", models.DateTimeField(auto_now_add=True)),
+                ("address", models.GenericIPAddressField()),
+                ("location", django.contrib.gis.db.models.fields.PointField(srid=4326)),
+                ("priority", models.PositiveSmallIntegerField(default=0)),
+                (
+                    "ref",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="pmessages.ProxyMessage",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='ProxyUser',
+            name="ProxyUser",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('location', django.contrib.gis.db.models.fields.PointField(srid=4326)),
-                ('last_use', models.DateTimeField()),
-                ('username', models.CharField(max_length=20)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("location", django.contrib.gis.db.models.fields.PointField(srid=4326)),
+                ("last_use", models.DateTimeField()),
+                ("username", models.CharField(max_length=20)),
             ],
         ),
     ]

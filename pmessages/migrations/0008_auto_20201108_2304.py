@@ -3,16 +3,18 @@
 from django.db import migrations
 import uuid
 
+
 def gen_uuid(apps, schema_editor):
-    ProxyUser = apps.get_model('pmessages', 'ProxyUser')
+    ProxyUser = apps.get_model("pmessages", "ProxyUser")
     for row in ProxyUser.objects.all():
         row.uuid = uuid.uuid4()
-        row.save(update_fields=['uuid'])
+        row.save(update_fields=["uuid"])
+
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('pmessages', '0007_auto_20200510_2309'),
+        ("pmessages", "0007_auto_20200510_2309"),
     ]
 
     operations = [

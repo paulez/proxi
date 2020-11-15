@@ -20,13 +20,14 @@ import site
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "proxy.settings-prod")
 
 # Activate your virtual env
-activate_env=os.path.abspath("/var/proxy/bin/activate_this.py")
+activate_env = os.path.abspath("/var/proxy/bin/activate_this.py")
 execfile(activate_env, dict(__file__=activate_env))
 
 # This application object is used by any WSGI server configured to use this
 # file. This includes Django's development server, if the WSGI_APPLICATION
 # setting points here.
 from django.core.wsgi import get_wsgi_application
+
 application = get_wsgi_application()
 
 # Apply WSGI middleware here.

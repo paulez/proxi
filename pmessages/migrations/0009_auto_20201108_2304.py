@@ -7,13 +7,13 @@ import uuid
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('pmessages', '0008_auto_20201108_2304'),
+        ("pmessages", "0008_auto_20201108_2304"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='proxyuser',
-            name='uuid',
+            model_name="proxyuser",
+            name="uuid",
             field=models.UUIDField(default=uuid.uuid4, editable=False, unique=True),
         ),
     ]
