@@ -210,7 +210,7 @@ class RegisterTest(APITestCase):
         response = self.client.post(register_url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertContains(response, "token")
-        self.assertContains(response, "user_id")
+        self.assertContains(response, "uuid")
 
     def test_register_duplicate(self):
         data = {"username": "toto", **self.pos_data}

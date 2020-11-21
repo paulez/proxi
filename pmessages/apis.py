@@ -130,7 +130,7 @@ def register(request):
     return Response(
         {
             "token": token,
-            "user_id": new_user.uuid,
+            "uuid": new_user.uuid,
             "username": new_user.username,
         }
     )
