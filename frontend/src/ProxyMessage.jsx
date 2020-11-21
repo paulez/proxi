@@ -15,11 +15,18 @@ class ProxyMessage extends Component {
   handleClick() {
     this.props.setSearch(this.props.message.user.username);
   }
-  
+
   deleteClick() {
-    api.delete("api/message/" + this.props.message.uuid)
+    api.delete("api/message/" + this.props.message.uuid, {
+      headers: {
+        'Authorization': `token ${this.props.getToken()}`
+      }
+    })
     .then(data => {
       this.props.updateMessages();
+    })
+    .catch(error => {
+      console.log("error deleting message", error);
     })
   }
 
@@ -79,7 +86,7 @@ class ProxyMessage extends Component {
             </Card.Body>
             <Card.Footer>
               <small className="text-white">
-                From <a href="#" className="text-white" onClick={this.handleClick}>{this.props.message.username}</a>
+                From <a href="#" className="text-white" onClick={this.handleClick}>{this.props.message.user.username}</a>
                 &nbsp;within {distance}
               </small>
               <small className="text-white message-date">

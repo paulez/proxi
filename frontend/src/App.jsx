@@ -131,6 +131,7 @@ class App extends Component {
             setSearch={this.setSearch}
             updateMessages = {this.updateMessages}
             getUser = {this.getUser}
+            getToken = {this.getToken}
           />
         )
       })
