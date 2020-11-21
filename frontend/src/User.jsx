@@ -39,6 +39,8 @@ class LogoutForm extends Component {
       <div>
         <ProxyMessageForm
           updateMessages = {this.props.updateMessages}
+          location = {this.props.location}
+          token = {this.props.token}
         />
         <form onSubmit={this.handleLogout}>
           <FormGroup controlId="logoutForm">
@@ -71,8 +73,9 @@ class LoginForm extends Component {
       username: this.state.form_username,
       location: this.props.location,
     })
-    .then(data => {
-      this.props.setUser(data.data);
+    .then(results => {
+      this.props.setUser(results.data);
+      this.props.setToken(results.data.token);
     })
     .catch(error => {
       this.props.setUser(null);
@@ -196,6 +199,8 @@ class ProxyUser extends Component {
           setUser = {this.setUser}
           getUser = {this.getUser}
           updateMessages = {this.props.updateMessages}
+          location = {this.props.location}
+          token = {this.props.token}
         />
       )
     } else {
@@ -204,6 +209,7 @@ class ProxyUser extends Component {
           setUser = {this.setUser}
           updateMessages = {this.props.updateMessages}
           location = {this.props.location}
+          setToken = {this.props.setToken}
         />
       )
     }

@@ -48,10 +48,12 @@ class App extends Component {
       messages: [],
       search: "",
       location: null,
+      token: "",
     }
     this.updateMessages = this.updateMessages.bind(this);
     this.updatePosition = this.updatePosition.bind(this);
     this.setSearch = this.setSearch.bind(this);
+    this.setToken = this.setToken.bind(this);
   }
 
   setSearch(search) {
@@ -101,10 +103,20 @@ class App extends Component {
     if(search === undefined) {
       search = this.state.search;
     }
-    api.get("api/messages/", {
-      params: {
+    var message_params = {};
+    if(this.state.location) {
+      message_params = {
         search: search,
-      }
+        latitude: this.state.location.latitude,
+        longitude: this.state.location.longitude,
+      };
+    } else {
+      message_params = {
+        search: search,
+      };
+    }
+    api.get("api/messages/", {
+      params: message_params
     })
     .then(results => {
       let messages = results.data.map((message) => {
@@ -124,6 +136,10 @@ class App extends Component {
     .catch(err => console.log("fetch error", err))
   }
 
+  setToken(token) {
+    this.setState({token: token});
+  }
+
   render() {
     return (
       <React.Fragment>
@@ -137,6 +153,8 @@ class App extends Component {
             <ProxyUser
               updateMessages = {this.updateMessages}
               location = {this.state.location}
+              setToken = {this.setToken}
+              token = {this.state.token}
             />
           </Col>
           <Col md={6}>

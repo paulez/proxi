@@ -36,7 +36,9 @@ class ProxyMessageForm extends Component {
   }
 
   updateRadius() {
-    api.get("api/radius")
+    api.get("api/radius", {
+      params: this.props.location
+    })
     .then(data => {
       this.setState({radius: data.data.radius});
     })
@@ -46,6 +48,11 @@ class ProxyMessageForm extends Component {
   handleSubmit(event) {
     api.post("api/message", {
       message: this.state.form_message,
+      location: this.props.location,
+    }, {
+      headers: {
+        'Authorization': `token ${this.props.token}`
+      },
     })
     .then(data => {
       this.setState({ form_message: ""});
