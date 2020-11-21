@@ -53,6 +53,7 @@ class App extends Component {
     this.updateMessages = this.updateMessages.bind(this);
     this.updatePosition = this.updatePosition.bind(this);
     this.setSearch = this.setSearch.bind(this);
+    this.getToken = this.getToken.bind(this);
     this.setToken = this.setToken.bind(this);
   }
 
@@ -138,6 +139,20 @@ class App extends Component {
 
   setToken(token) {
     this.setState({token: token});
+    localStorage.setItem('token', token);
+  }
+
+  getToken() {
+    var token;
+    if(this.state.token){
+      token = this.state.token;
+    } else {
+      token = localStorage.getItem('token');
+      if(token) {
+        this.setState({token: token});
+      }
+    }
+    return token;
   }
 
   render() {
@@ -154,6 +169,7 @@ class App extends Component {
               updateMessages = {this.updateMessages}
               location = {this.state.location}
               setToken = {this.setToken}
+              getToken = {this.getToken}
               token = {this.state.token}
             />
           </Col>

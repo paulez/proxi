@@ -51,7 +51,7 @@ class ProxyMessageForm extends Component {
       location: this.props.location,
     }, {
       headers: {
-        'Authorization': `token ${this.props.token}`
+        'Authorization': `token ${this.props.getToken()}`
       },
     })
     .then(data => {

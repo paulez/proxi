@@ -13,20 +13,8 @@ class LogoutForm extends Component {
   }
 
   handleLogout = (event) => {
-    api.post("api/logout")
-    .then(data => {
-      this.props.setUser(null);
-    })
-    .catch(error => {
-      if (error.response) {
-        if(error.response.status === 404) {
-          console.log("already logged out");
-          this.props.setUser(null);
-        }
-      }
-      console.log("cannot logout", error);
-    })
-    event.preventDefault();
+    this.props.setUser(null);
+    this.props.setToken(null);
   }
 
   getValidationState() {
@@ -40,7 +28,7 @@ class LogoutForm extends Component {
         <ProxyMessageForm
           updateMessages = {this.props.updateMessages}
           location = {this.props.location}
-          token = {this.props.token}
+          getToken = {this.props.getToken}
         />
         <form onSubmit={this.handleLogout}>
           <FormGroup controlId="logoutForm">
@@ -161,6 +149,7 @@ class ProxyUser extends Component {
   }
 
   componentDidMount() {
+    this.getUserState();
     this.positionInterval = setInterval(this.getUserState, 1 * 60 * 1000);
   }
 
@@ -169,7 +158,12 @@ class ProxyUser extends Component {
   }
 
   getUserState() {
-    api.get("/api/user/")
+    var token = this.props.getToken();
+    api.get("/api/user/", {
+      headers: {
+        'Authorization': `token ${token}`
+      }
+    })
     .then(results => {
       this.setState({user: results.data});
     })
@@ -200,7 +194,8 @@ class ProxyUser extends Component {
           getUser = {this.getUser}
           updateMessages = {this.props.updateMessages}
           location = {this.props.location}
-          token = {this.props.token}
+          getToken = {this.props.getToken}
+          setToken = {this.props.setToken}
         />
       )
     } else {
