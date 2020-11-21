@@ -39,7 +39,8 @@ class ProxyMessageForm extends Component {
     api.get("api/radius")
     .then(data => {
       this.setState({radius: data.data.radius});
-    });
+    })
+    .catch(error => {console.log("Cannot get radius")});
   }
 
   handleSubmit(event) {

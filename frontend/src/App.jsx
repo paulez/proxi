@@ -47,6 +47,7 @@ class App extends Component {
     this.state = {
       messages: [],
       search: "",
+      location: null,
     }
     this.updateMessages = this.updateMessages.bind(this);
     this.updatePosition = this.updatePosition.bind(this);
@@ -83,20 +84,18 @@ class App extends Component {
   }
 
   setPosition(position) {
-    api.post("api/position", {
-      latitude: position.coords.latitude,
-      longitude: position.coords.longitude
-    })
-    .then(() => {
-      this.updateMessages();
-    })
+    this.setState({
+      location: {
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+      }
+    });
+    this.updateMessages();
   }
 
-positionError(error) {
-  console.log("error setting location", error);
-}
-
-
+  positionError(error) {
+    console.log("error setting location", error);
+  }
 
   updateMessages(search) {
     if(search === undefined) {
@@ -137,6 +136,7 @@ positionError(error) {
           <Col md={4}>
             <ProxyUser
               updateMessages = {this.updateMessages}
+              location = {this.state.location}
             />
           </Col>
           <Col md={6}>

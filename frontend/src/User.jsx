@@ -34,7 +34,7 @@ class LogoutForm extends Component {
   }
 
   render () {
-    var username = this.props.getUser()
+    var user = this.props.getUser()
     return (
       <div>
         <ProxyMessageForm
@@ -43,7 +43,7 @@ class LogoutForm extends Component {
         <form onSubmit={this.handleLogout}>
           <FormGroup controlId="logoutForm">
           <span>
-            <FormLabel>Currently known as <mark>{username}</mark></FormLabel>
+            <FormLabel>Currently known as <mark>{user.username}</mark></FormLabel>
           </span>
           { " " }
           <span>
@@ -67,11 +67,12 @@ class LoginForm extends Component {
   }
 
   handleSubmit = (event) => {
-    api.post("api/login", {
+    api.post("api/register", {
       username: this.state.form_username,
+      location: this.props.location,
     })
     .then(data => {
-      this.props.setUser(data.data.username);
+      this.props.setUser(data.data);
     })
     .catch(error => {
       this.props.setUser(null);
@@ -149,7 +150,7 @@ class ProxyUser extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      username: "",
+      user: null,
     }
     this.getUserState = this.getUserState.bind(this);
     this.setUser = this.setUser.bind(this);
@@ -157,7 +158,6 @@ class ProxyUser extends Component {
   }
 
   componentDidMount() {
-    this.getUserState();
     this.positionInterval = setInterval(this.getUserState, 1 * 60 * 1000);
   }
 
@@ -168,7 +168,7 @@ class ProxyUser extends Component {
   getUserState() {
     api.get("/api/user/")
     .then(results => {
-      this.setState({username: results.data.username});
+      this.setState({user: results.data});
     })
     .catch(error => {
       if (error.response) {
@@ -181,16 +181,16 @@ class ProxyUser extends Component {
     })
   }
 
-  setUser(username) {
-    this.setState({ username: username});
+  setUser(userData) {
+    this.setState({ user: userData});
   }
 
   getUser() {
-    return this.state.username;
+    return this.state.user;
   }
 
   render () {
-    if(this.state.username) {
+    if(this.state.user) {
       return (
         <LogoutForm
           setUser = {this.setUser}
@@ -203,6 +203,7 @@ class ProxyUser extends Component {
         <LoginForm
           setUser = {this.setUser}
           updateMessages = {this.props.updateMessages}
+          location = {this.props.location}
         />
       )
     }
