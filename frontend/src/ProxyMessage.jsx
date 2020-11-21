@@ -13,7 +13,7 @@ class ProxyMessage extends Component {
   }
 
   handleClick() {
-    this.props.setSearch(this.props.message.username);
+    this.props.setSearch(this.props.message.user.username);
   }
   
   deleteClick() {
@@ -55,35 +55,8 @@ class ProxyMessage extends Component {
 
   render () {
     var distance = this.formatDistance(this.props.message.distance);
-    if (!this.props.message.current_user) {
-      return (
-        <article>
-          <Card bg="light" className="mb-1">
-            <Card.Body>
-              <Card.Text>
-		<Linkify
-		  componentDecorator={this.blankLinkDecorator}
-		  >
-                  {this.props.message.message}
-		</Linkify>
-              </Card.Text>
-            </Card.Body>
-            <Card.Footer>
-              <small>
-                From <a href="#" onClick={this.handleClick}>{this.props.message.username}</a>
-                &nbsp;within {distance}
-              </small>
-              <small className="message-date">
-                <TimeAgo
-                  date={this.props.message.date}
-                  minPeriod={30}
-                />
-            </small>
-            </Card.Footer>
-          </Card>
-      </article>
-      );
-    } else {
+    let user = this.props.getUser();
+    if (user && this.props.message.user.uuid == user.uuid) {
       return (
         <article>
           <Card bg="primary" text="white" className="mb-1">
@@ -115,6 +88,34 @@ class ProxyMessage extends Component {
                   minPeriod={30}
                 />
               </small>
+            </Card.Footer>
+          </Card>
+      </article>
+      );
+    } else {
+      return (
+        <article>
+          <Card bg="light" className="mb-1">
+            <Card.Body>
+              <Card.Text>
+		<Linkify
+		  componentDecorator={this.blankLinkDecorator}
+		  >
+                  {this.props.message.message}
+		</Linkify>
+              </Card.Text>
+            </Card.Body>
+            <Card.Footer>
+              <small>
+                From <a href="#" onClick={this.handleClick}>{this.props.message.user.username}</a>
+                &nbsp;within {distance}
+              </small>
+              <small className="message-date">
+                <TimeAgo
+                  date={this.props.message.date}
+                  minPeriod={30}
+                />
+            </small>
             </Card.Footer>
           </Card>
       </article>

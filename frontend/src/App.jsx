@@ -49,12 +49,15 @@ class App extends Component {
       search: "",
       location: null,
       token: "",
+      user: null,
     }
     this.updateMessages = this.updateMessages.bind(this);
     this.updatePosition = this.updatePosition.bind(this);
     this.setSearch = this.setSearch.bind(this);
     this.getToken = this.getToken.bind(this);
     this.setToken = this.setToken.bind(this);
+    this.getUser = this.getUser.bind(this);
+    this.setUser = this.setUser.bind(this);
   }
 
   setSearch(search) {
@@ -127,6 +130,7 @@ class App extends Component {
             message={message}
             setSearch={this.setSearch}
             updateMessages = {this.updateMessages}
+            getUser = {this.getUser}
           />
         )
       })
@@ -155,6 +159,14 @@ class App extends Component {
     return token;
   }
 
+  setUser(userData) {
+    this.setState({ user: userData});
+  }
+
+  getUser() {
+    return this.state.user;
+  }
+
   render() {
     return (
       <React.Fragment>
@@ -170,7 +182,8 @@ class App extends Component {
               location = {this.state.location}
               setToken = {this.setToken}
               getToken = {this.getToken}
-              token = {this.state.token}
+              setUser = {this.setUser}
+              getUser = {this.getUser}
             />
           </Col>
           <Col md={6}>

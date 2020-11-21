@@ -22,7 +22,7 @@ class LogoutForm extends Component {
   }
 
   render () {
-    var user = this.props.getUser()
+    let user = this.props.getUser()
     return (
       <div>
         <ProxyMessageForm
@@ -144,8 +144,6 @@ class ProxyUser extends Component {
       user: null,
     }
     this.getUserState = this.getUserState.bind(this);
-    this.setUser = this.setUser.bind(this);
-    this.getUser = this.getUser.bind(this);
   }
 
   componentDidMount() {
@@ -165,7 +163,7 @@ class ProxyUser extends Component {
       }
     })
     .then(results => {
-      this.setState({user: results.data});
+      this.props.setUser(results.data);
     })
     .catch(error => {
       if (error.response) {
@@ -178,20 +176,13 @@ class ProxyUser extends Component {
     })
   }
 
-  setUser(userData) {
-    this.setState({ user: userData});
-  }
-
-  getUser() {
-    return this.state.user;
-  }
 
   render () {
-    if(this.state.user) {
+    if(this.props.getUser()) {
       return (
         <LogoutForm
-          setUser = {this.setUser}
-          getUser = {this.getUser}
+          setUser = {this.props.setUser}
+          getUser = {this.props.getUser}
           updateMessages = {this.props.updateMessages}
           location = {this.props.location}
           getToken = {this.props.getToken}
@@ -201,7 +192,7 @@ class ProxyUser extends Component {
     } else {
       return (
         <LoginForm
-          setUser = {this.setUser}
+          setUser = {this.props.setUser}
           updateMessages = {this.props.updateMessages}
           location = {this.props.location}
           setToken = {this.props.setToken}
