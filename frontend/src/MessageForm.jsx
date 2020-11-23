@@ -27,7 +27,16 @@ class ProxyMessageForm extends Component {
     clearInterval(this.radiusInterval);
   }
 
+  componentDidUpdate(prevProps, prevState) {
+    if(prevProps.location != this.props.location) {
+      this.updateRadius();
+    }
+  }
+
   formatRadius() {
+    if(this.state.radius == null) {
+      return "unknown distance";
+    }
     if(this.state.radius < 1000) {
       return `${this.state.radius} m`;
     } else {
@@ -36,13 +45,20 @@ class ProxyMessageForm extends Component {
   }
 
   updateRadius() {
-    api.get("api/radius", {
-      params: this.props.location
-    })
-    .then(data => {
-      this.setState({radius: data.data.radius});
-    })
-    .catch(error => {console.log("Cannot get radius")});
+    if(this.props.location) {
+      let message_params;
+      message_params = {
+        latitude: this.props.location.latitude,
+        longitude: this.props.location.longitude,
+      };
+      api.get("api/radius", {
+        params: message_params
+      })
+         .then(result => {
+           this.setState({radius: result.data.radius});
+         })
+         .catch(error => {console.log("Cannot get radius")});
+    }
   }
 
   handleSubmit(event) {
@@ -80,7 +96,7 @@ class ProxyMessageForm extends Component {
       this.handleSubmit(event);
     }
   }
-  
+
 
   render () {
     return (
@@ -88,7 +104,7 @@ class ProxyMessageForm extends Component {
         <FormGroup
           controlId="messageForm"
         >
-          <FormLabel>Post a new Proxi message within {this.formatRadius}</FormLabel>
+          <FormLabel>Post a new Proxi message within {this.formatRadius()}</FormLabel>
           <FormControl
             as="textarea"
             placeholder="Your message..."
